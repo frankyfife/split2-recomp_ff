@@ -1,3 +1,4 @@
 [submodule "xboxrecomp"]
 	path = xboxrecomp
-	url = https://github.com/phobos665/DirectXbox-Recomp.git
+	url = https://github.com/frankyfife/xboxrecomp_ff.git
+	branch = claude/lucid-edison-1jul46

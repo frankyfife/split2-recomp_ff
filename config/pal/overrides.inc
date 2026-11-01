@@ -262,3 +262,19 @@ const Ts2UiPlace k_ts2_ui_places[] = {
     { 0x000CCC20, TS2_UI_STRETCH }, { 0x000CCAEE, TS2_UI_STRETCH },
     { 0, TS2_UI_AUTO }
 };
+
+/* Native mouse aim (ts2_aim_frame in recomp_manual.c): where player 1's
+ * view angles live. Not found for this release yet, so every field is 0
+ * and the mouse turns the right stick; RECOMP_TS2_AIM_PROBE=1 finds them
+ * and RECOMP_TS2_AIM tries them without a rebuild (docs/mouse-aim.md).
+ * Fill this in once a value has been checked in more than one level. */
+const Ts2Aim k_ts2_aim = {
+    0,          /* base: address of the player pointer, or 0 */
+    0, 0,       /* yaw, pitch */
+    0, 0,       /* crosshair x, y */
+    0, 0,       /* active, active_is */
+    1, 1,       /* yaw_sign, pitch_sign */
+    1.0f,       /* units per radian */
+    0.0f,       /* wrap */
+    0.0f, 0.0f, /* pitch_min, pitch_max */
+};

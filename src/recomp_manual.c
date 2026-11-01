@@ -486,10 +486,13 @@ static float ts2_camera_widen(void)
 /* What the frame now being drawn has run, for the choice below. */
 static int g_ts2_frame_camera, g_ts2_frame_front_end;
 
+static void ts2_aim_note_fov(float fov_degrees);   /* the mouse aim, below */
+
 static void ts2_camera_setup(void (*camera_setup)(void))
 {
     float widen = ts2_camera_widen();
 
+    ts2_aim_note_fov(TS2_MEMF(g_esp + 0x10));   /* fov_degrees, for the scope */
     if (widen != 1.0f)
         TS2_MEMF(g_esp + 0x0C) *= widen;   /* [esp] is the return address */
     camera_setup();
@@ -549,6 +552,619 @@ static int ts2_menus_wide(void)
     return wide;
 }
 
+/* ── TimeSplitters 2: aiming with the mouse ───────────────── */
+
+/*
+ * On the Xbox, TimeSplitters 2 lays two motions over each other on the
+ * right stick. Without the aim button the stick turns the camera, and the
+ * crosshair and the gun lag a little behind the turn (hip fire). With the
+ * aim button held the camera stops and the stick moves the crosshair across
+ * the screen instead -- slow and imprecise, because a thumb is. Both exist
+ * because a stick says how fast, not where.
+ *
+ * A mouse says where. So the mouse does not go through the stick at all
+ * (xboxrecomp recomp_mouse_take: while this takes the motion, controller
+ * 1's right stick is left alone): its counts are added straight to the
+ * view angles, once a frame. The game sees a centred right stick, so the
+ * crosshair has nothing to lag behind and stays in the middle, and every
+ * shot goes where the view points. The aim button is then only needed
+ * where the game needs it -- a scope's zoom -- and there the mouse turns
+ * the view directly too, slower in proportion to the zoom (the field of
+ * view comes from camera_setup, below), so a pixel on screen is the same
+ * hand movement zoomed in and out.
+ *
+ * When this is not taking (the front end, loading screens, and while the
+ * addresses below are unknown), the toolkit's mouse look on the stick has
+ * the mouse instead, with nothing to switch.
+ *
+ * Where the angles live is per release and found by playing: see the probe
+ * below and docs/mouse-aim.md. Until a release's table has them, they can
+ * be given at run time without a rebuild:
+ *
+ *   RECOMP_TS2_AIM / ts2_aim = yaw=0x...,pitch=0x...[,base=0x...]
+ *        [,yaw_sign=1][,pitch_sign=1][,units=1][,wrap=6.283185]
+ *        [,pitch_min=-1.5][,pitch_max=1.5][,active=0x...][,active_is=1]
+ *        [,cross_x=0x...][,cross_y=0x...]
+ *
+ *   base      an address that holds a pointer (player 1); yaw, pitch,
+ *             cross_* and active are then offsets from what it points at
+ *   units     the angles' units per radian: 1 radians, 57.29578 degrees
+ *   wrap      yaw is kept in [-wrap/2, wrap/2) when non-zero
+ *   active    a 32-bit value that equals active_is while player 1 is in
+ *             control (not paused, not in a cutscene); unknown: always
+ *   cross_*   the crosshair's (and hip sway's) offsets, held at 0 while
+ *             the mouse aims
+ *
+ *   RECOMP_TS2_MOUSE_AIM / ts2_mouse_aim = native (the default) | stick
+ *             stick keeps the toolkit's mouse look on the stick everywhere
+ */
+#define TS2_MEM32_EARLY(a) (*(volatile uint32_t *)((uintptr_t)(uint32_t)(a) + g_xbox_mem_offset))
+
+extern int recomp_mouse_take(float *dx, float *dy);
+extern int recomp_mouse_sensitivity(void);
+extern int recomp_mouse_look(void);
+
+typedef struct Ts2Aim {
+    uint32_t base;                  /* 0: the fields below are addresses */
+    uint32_t yaw, pitch;            /* 0: not known, no native aim */
+    uint32_t cross_x, cross_y;      /* 0: not known */
+    uint32_t active;                /* 0: not known, always in control */
+    uint32_t active_is;
+    int      yaw_sign, pitch_sign;  /* +1 or -1: the stick's own sign */
+    float    units;                 /* per radian */
+    float    wrap;                  /* 0: no wrap */
+    float    pitch_min, pitch_max;  /* in the angles' units; equal: no clamp */
+} Ts2Aim;
+
+/* Each release's own, in config/<region>/overrides.inc. */
+extern const Ts2Aim k_ts2_aim;
+
+static Ts2Aim g_ts2_aim;
+static int    g_ts2_aim_ready, g_ts2_aim_on;
+static float  g_ts2_fov_now, g_ts2_fov_base;   /* degrees, from camera_setup */
+
+static void ts2_aim_parse(Ts2Aim *a, const char *s)
+{
+    char key[16];
+
+    while (s && *s) {
+        const char *eq = strchr(s, '='), *end = strchr(s, ',');
+        size_t n;
+
+        if (!eq || (end && end < eq))
+            break;
+        n = (size_t)(eq - s);
+        if (n >= sizeof key)
+            n = sizeof key - 1;
+        memcpy(key, s, n);
+        key[n] = 0;
+        eq++;
+        if      (!strcmp(key, "base"))       a->base      = (uint32_t)strtoul(eq, NULL, 0);
+        else if (!strcmp(key, "yaw"))        a->yaw       = (uint32_t)strtoul(eq, NULL, 0);
+        else if (!strcmp(key, "pitch"))      a->pitch     = (uint32_t)strtoul(eq, NULL, 0);
+        else if (!strcmp(key, "cross_x"))    a->cross_x   = (uint32_t)strtoul(eq, NULL, 0);
+        else if (!strcmp(key, "cross_y"))    a->cross_y   = (uint32_t)strtoul(eq, NULL, 0);
+        else if (!strcmp(key, "active"))     a->active    = (uint32_t)strtoul(eq, NULL, 0);
+        else if (!strcmp(key, "active_is"))  a->active_is = (uint32_t)strtoul(eq, NULL, 0);
+        else if (!strcmp(key, "yaw_sign"))   a->yaw_sign   = atoi(eq) < 0 ? -1 : 1;
+        else if (!strcmp(key, "pitch_sign")) a->pitch_sign = atoi(eq) < 0 ? -1 : 1;
+        else if (!strcmp(key, "units"))      a->units     = (float)atof(eq);
+        else if (!strcmp(key, "wrap"))       a->wrap      = (float)atof(eq);
+        else if (!strcmp(key, "pitch_min"))  a->pitch_min = (float)atof(eq);
+        else if (!strcmp(key, "pitch_max"))  a->pitch_max = (float)atof(eq);
+        else
+            fprintf(stderr, "[TS2-AIM] RECOMP_TS2_AIM: unknown key '%s'\n", key);
+        s = end ? end + 1 : NULL;
+    }
+}
+
+static void ts2_aim_init(void)
+{
+    const char *mode, *over;
+
+    if (g_ts2_aim_ready)
+        return;
+    g_ts2_aim_ready = 1;
+    g_ts2_aim = k_ts2_aim;
+    if (!g_ts2_aim.yaw_sign)   g_ts2_aim.yaw_sign = 1;
+    if (!g_ts2_aim.pitch_sign) g_ts2_aim.pitch_sign = 1;
+    if (g_ts2_aim.units == 0.0f) g_ts2_aim.units = 1.0f;
+    over = recomp_config_lookup("RECOMP_TS2_AIM", "ts2_aim");
+    if (over && *over)
+        ts2_aim_parse(&g_ts2_aim, over);
+    mode = recomp_config_lookup("RECOMP_TS2_MOUSE_AIM", "ts2_mouse_aim");
+    g_ts2_aim_on = !(mode && !strcmp(mode, "stick")) && recomp_mouse_look();
+    if (!recomp_mouse_look())
+        return;                                 /* no mouse in play: say nothing */
+    if (!g_ts2_aim_on)
+        fprintf(stderr, "[TS2-AIM] the mouse turns the right stick (ts2_mouse_aim = stick)\n");
+    else if (!g_ts2_aim.yaw || !g_ts2_aim.pitch)
+        fprintf(stderr, "[TS2-AIM] native mouse aim: this release's view angles are not "
+                        "known yet, so the mouse turns the right stick (docs/mouse-aim.md)\n");
+    else
+        fprintf(stderr, "[TS2-AIM] native mouse aim: yaw 0x%08X pitch 0x%08X%s%s, %g units "
+                        "a radian, pitch %g..%g\n",
+                g_ts2_aim.yaw, g_ts2_aim.pitch, g_ts2_aim.base ? " from *base " : "",
+                g_ts2_aim.cross_x ? ", crosshair held centred" : "",
+                (double)g_ts2_aim.units, (double)g_ts2_aim.pitch_min,
+                (double)g_ts2_aim.pitch_max);
+    fflush(stderr);
+}
+
+/* A field's guest address, through the player pointer when there is one;
+ * 0 when that pointer is not set (no level loaded). */
+static uint32_t ts2_aim_at(uint32_t field)
+{
+    uint32_t p;
+
+    if (!field)
+        return 0;
+    if (!g_ts2_aim.base)
+        return field;
+    p = TS2_MEM32_EARLY(g_ts2_aim.base);
+    return (p >= 0x10000u && p < 0x08000000u) ? p + field : 0;
+}
+
+/* Radians a count, before the zoom: at the default sensitivity (80) about
+ * 5,700 counts turn the view once round -- 18 cm on an 800 dpi mouse. */
+#define TS2_AIM_RAD_PER_COUNT_80 0.0011f
+
+/* Once a frame, after it is presented (ts2_present): the game's next frame
+ * reads the angles as if its own stick handling had put them there. */
+static void ts2_aim_frame(int in_level)
+{
+    float dx, dy, scale, yaw, pitch;
+    uint32_t ya, pa, aa;
+
+    ts2_aim_init();
+    if (!g_ts2_aim_on || !g_ts2_aim.yaw || !g_ts2_aim.pitch || !in_level)
+        return;                         /* not taking: the stick has the mouse */
+    ya = ts2_aim_at(g_ts2_aim.yaw);
+    pa = ts2_aim_at(g_ts2_aim.pitch);
+    if (!ya || !pa)
+        return;
+    aa = ts2_aim_at(g_ts2_aim.active);
+    if (aa && TS2_MEM32_EARLY(aa) != g_ts2_aim.active_is) {
+        recomp_mouse_take(NULL, NULL);  /* paused or in a cutscene: drop it */
+        return;
+    }
+    if (!recomp_mouse_take(&dx, &dy))
+        return;
+    scale = TS2_AIM_RAD_PER_COUNT_80 * (float)recomp_mouse_sensitivity() / 80.0f;
+    /* Zoomed in (a scope), the same hand movement covers the same part of
+     * the picture: scale by the narrower view. */
+    if (g_ts2_fov_now > 1.0f && g_ts2_fov_base > g_ts2_fov_now) {
+        float r = g_ts2_fov_now / g_ts2_fov_base;
+        scale *= r;
+    }
+    scale *= g_ts2_aim.units;
+    yaw   = TS2_MEMF(ya) + (float)g_ts2_aim.yaw_sign * dx * scale;
+    pitch = TS2_MEMF(pa) - (float)g_ts2_aim.pitch_sign * dy * scale;  /* screen y is down */
+    if (g_ts2_aim.wrap > 0.0f) {
+        float half = g_ts2_aim.wrap * 0.5f;
+        while (yaw >= half) yaw -= g_ts2_aim.wrap;
+        while (yaw < -half) yaw += g_ts2_aim.wrap;
+    }
+    if (g_ts2_aim.pitch_max > g_ts2_aim.pitch_min) {
+        if (pitch > g_ts2_aim.pitch_max) pitch = g_ts2_aim.pitch_max;
+        if (pitch < g_ts2_aim.pitch_min) pitch = g_ts2_aim.pitch_min;
+    }
+    TS2_MEMF(ya) = yaw;
+    TS2_MEMF(pa) = pitch;
+    /* The crosshair where the view points: hip sway and the aim mode's
+     * offset are the stick's, and the stick is not used for this. */
+    if ((aa = ts2_aim_at(g_ts2_aim.cross_x)) != 0) TS2_MEMF(aa) = 0.0f;
+    if ((aa = ts2_aim_at(g_ts2_aim.cross_y)) != 0) TS2_MEMF(aa) = 0.0f;
+}
+
+/* The in-game camera's field of view each frame (camera_setup's fourth
+ * argument), and the widest seen since the front end -- the unzoomed view. */
+static void ts2_aim_note_fov(float fov_degrees)
+{
+    if (!(fov_degrees > 1.0f && fov_degrees < 179.0f))
+        return;
+    g_ts2_fov_now = fov_degrees;
+    if (fov_degrees > g_ts2_fov_base)
+        g_ts2_fov_base = fov_degrees;
+}
+
+/* ── TimeSplitters 2: finding the view angles (the aim probe) ── */
+
+/*
+ * RECOMP_TS2_AIM_PROBE=1 watches guest RAM while you play and narrows it
+ * down to the values that behave like the view angles and the crosshair:
+ *
+ *   turn   changes every frame the right stick is held over, in the same
+ *          direction for the same direction of the stick, and not at all
+ *          while it rests or is held the other way (yaw: left/right; pitch:
+ *          up/down)
+ *   lean   is off its resting value, on the stick's side, while the stick
+ *          is held, and back at rest when it is let go (hip sway; held
+ *          aim mode's crosshair moves like "turn", so probe that with the
+ *          aim button held)
+ *
+ * It reads the sticks the game was given (xboxrecomp
+ * recomp_input_host_last_sticks), so a pad, bound keys or an input script
+ * (RECOMP_INPUT_SEQ ... rstick_left:3000 ...) all work -- but not the
+ * mouse: play the probe with mouse look off. Turn left and right, look up
+ * and down, rest in between, for half a minute. Every five seconds it
+ * prints what is left, and at the end a ready RECOMP_TS2_AIM line. Float
+ * values only; RECOMP_TS2_AIM_PROBE=int tests 32-bit integers instead.
+ * It reads 64 MB a frame until the field is small, so the game runs slowly
+ * meanwhile; that does not matter for what it measures.
+ */
+extern ptrdiff_t xbox_GetMemoryOffset(void);
+
+extern size_t    g_xbox_total_ram;
+extern int       recomp_input_host_last_sticks(short out[4]);
+
+enum { TS2P_TX = 1, TS2P_TY = 2, TS2P_LX = 4, TS2P_LY = 8 };
+enum { TS2P_IDLE, TS2P_X, TS2P_Y, TS2P_OTHER };
+#define TS2P_LIST_MAX 4096
+#define TS2P_SETTLE   30      /* frames of rest before still means still */
+
+typedef struct Ts2ProbeCand {
+    uint32_t addr, prev, rest;          /* raw words */
+    uint8_t  flags, sign;               /* sign: bit set = positive relation */
+    uint8_t  ev[4];                     /* evidence per category, saturating */
+    float    lo, hi, sum_d[2];
+    uint32_t n_d[2];
+} Ts2ProbeCand;
+
+static struct {
+    int       on, ints, failed;
+    uint32_t  first, words;             /* in 32-bit words */
+    uint32_t *prev, *rest;
+    uint8_t  *flags, *sign;
+    uint8_t  *ev;                       /* 4 per word, saturating */
+    Ts2ProbeCand *list;                 /* once few are left */
+    int       list_n;
+    int       state, held;              /* frames in this stick state */
+    int       sx, sy;                   /* the stick's sign in this state */
+    unsigned  frame, said_at;
+} g_ts2p;
+
+static double ts2p_val(uint32_t raw)
+{
+    if (g_ts2p.ints)
+        return (double)(int32_t)raw;
+    {
+        union { uint32_t u; float f; } c;
+        c.u = raw;
+        return (double)c.f;
+    }
+}
+
+static int ts2p_valid(uint32_t raw)
+{
+    if (g_ts2p.ints)
+        return 1;
+    {
+        uint32_t e = (raw >> 23) & 0xFF;
+        union { uint32_t u; float f; } c;
+        c.u = raw;
+        if (raw == 0 || raw == 0x80000000u)
+            return 1;
+        if (e == 0xFF || e == 0)            /* inf, NaN, denormal */
+            return 0;
+        return c.f > -1.0e5f && c.f < 1.0e5f;
+    }
+}
+
+/* The rules for one value this frame; returns its flags after. */
+static uint8_t ts2p_rules(uint8_t f, uint8_t *sign, uint8_t *ev, uint32_t raw,
+                          uint32_t prev, uint32_t *rest)
+{
+    double v, d;
+    int dir, cat;
+
+    if (!ts2p_valid(raw))
+        return 0;
+    v = ts2p_val(raw);
+    d = v - ts2p_val(prev);
+    switch (g_ts2p.state) {
+    case TS2P_IDLE:
+        /* Half a second for a sway to settle, then nothing may move. */
+        if (g_ts2p.held < TS2P_SETTLE)
+            break;
+        if (raw != prev)
+            f &= (uint8_t)~(TS2P_TX | TS2P_TY | TS2P_LX | TS2P_LY);
+        else if (g_ts2p.held == TS2P_SETTLE)
+            *rest = raw;                    /* resting value of this pause */
+        break;
+    case TS2P_X:
+    case TS2P_Y: {
+        int x = g_ts2p.state == TS2P_X;
+        uint8_t turn = x ? TS2P_TX : TS2P_TY, other = x ? TS2P_TY : TS2P_LY;
+        uint8_t lean = x ? TS2P_LX : TS2P_LY;
+        int s = x ? g_ts2p.sx : g_ts2p.sy;
+
+        if (g_ts2p.held < 6)
+            break;
+        /* The other axis's turn must not move while only this one is held;
+         * its lean may settle, so only the turn is strict. */
+        if (raw != prev)
+            f &= (uint8_t)~other;
+        if (f & turn) {
+            cat = x ? 0 : 1;
+            if (raw == prev) {
+                /* Still while the stick is held: not this, unless it has
+                 * already moved with the stick and is now at its limit (a
+                 * pitch looking all the way up). */
+                if (!ev[cat])
+                    f &= (uint8_t)~turn;
+            } else {
+                dir = (d > 0) == (s > 0);
+                if (!ev[cat]) {
+                    *sign = (uint8_t)((*sign & ~(1 << cat)) | (dir << cat));
+                    ev[cat] = 1;
+                } else if (((*sign >> cat) & 1) != dir) {
+                    /* The wrong way: a kill, unless it is a big jump, which is
+                     * an angle wrapping round (-pi..pi, 0..360). */
+                    if (g_ts2p.ints || (d < 3.0 && d > -3.0))
+                        f &= (uint8_t)~turn;
+                } else if (ev[cat] < 255) {
+                    ev[cat]++;
+                }
+            }
+        }
+        if (f & lean) {
+            double off = v - ts2p_val(*rest);
+            cat = x ? 2 : 3;
+            if (off == 0.0) {
+                /* At rest well into a held turn, and never off it: not a
+                 * lean. Once it has leant it may stop (aim mode). */
+                if (!ev[cat] && g_ts2p.held >= 10)
+                    f &= (uint8_t)~lean;
+            } else {
+                dir = (off > 0) == (s > 0);
+                if (!ev[cat])
+                    *sign = (uint8_t)((*sign & ~(1 << cat)) | (dir << cat));
+                else if (((*sign >> cat) & 1) != dir)
+                    f &= (uint8_t)~lean;
+                if ((f & lean) && ev[cat] < 255)
+                    ev[cat]++;
+            }
+        }
+        break;
+    }
+    default:
+        break;
+    }
+    return f;
+}
+
+static void ts2p_compact(void)
+{
+    uint32_t i;
+    int n = 0;
+
+    g_ts2p.list = (Ts2ProbeCand *)calloc(TS2P_LIST_MAX, sizeof *g_ts2p.list);
+    if (!g_ts2p.list) {
+        g_ts2p.failed = 1;
+        return;
+    }
+    for (i = 0; i < g_ts2p.words && n < TS2P_LIST_MAX; i++) {
+        Ts2ProbeCand *c;
+        if (!g_ts2p.flags[i])
+            continue;
+        c = &g_ts2p.list[n++];
+        c->addr = (g_ts2p.first + i) * 4;
+        c->flags = g_ts2p.flags[i];
+        c->sign = g_ts2p.sign[i];
+        c->ev[0] = g_ts2p.ev[i * 4];     c->ev[1] = g_ts2p.ev[i * 4 + 1];
+        c->ev[2] = g_ts2p.ev[i * 4 + 2]; c->ev[3] = g_ts2p.ev[i * 4 + 3];
+        c->prev = g_ts2p.prev[i];
+        c->rest = g_ts2p.rest[i];
+        c->lo = c->hi = (float)ts2p_val(c->prev);
+    }
+    g_ts2p.list_n = n;
+    free(g_ts2p.prev);  free(g_ts2p.rest);
+    free(g_ts2p.flags); free(g_ts2p.sign); free(g_ts2p.ev);
+    g_ts2p.prev = g_ts2p.rest = NULL;
+    g_ts2p.flags = g_ts2p.sign = g_ts2p.ev = NULL;
+    fprintf(stderr, "[TS2-PROBE] %d candidates left; following them one by one now\n", n);
+}
+
+static const char *const k_ts2p_cat[4] = { "yaw (turns with left/right)",
+                                           "pitch (turns with up/down)",
+                                           "sway x (leans with left/right)",
+                                           "sway y (leans with up/down)" };
+
+static void ts2p_report(int final)
+{
+    int cat, i, k;
+
+    if (!g_ts2p.list) {
+        uint32_t i2, n[4] = { 0, 0, 0, 0 };
+        for (i2 = 0; i2 < g_ts2p.words; i2++)
+            for (cat = 0; cat < 4; cat++)
+                if (g_ts2p.flags[i2] & (1 << cat))
+                    n[cat]++;
+        fprintf(stderr, "[TS2-PROBE] frame %u: still %u yaw, %u pitch, %u sway x, %u sway y "
+                        "candidates -- keep turning and resting\n",
+                g_ts2p.frame, n[0], n[1], n[2], n[3]);
+        fflush(stderr);
+        return;
+    }
+    for (cat = 0; cat < 4; cat++) {
+        int shown = 0;
+        const int need = 20;
+        fprintf(stderr, "[TS2-PROBE] %s:\n", k_ts2p_cat[cat]);
+        /* strongest evidence first: a few passes over a small list */
+        for (k = 255; k >= need && shown < 8; k--)
+            for (i = 0; i < g_ts2p.list_n && shown < 8; i++) {
+                Ts2ProbeCand *c = &g_ts2p.list[i];
+                if (!(c->flags & (1 << cat)) || c->ev[cat] != k)
+                    continue;
+                shown++;
+                if (cat < 2)
+                    fprintf(stderr, "[TS2-PROBE]   0x%08X  now %g, seen %g..%g, %g a frame at "
+                                    "full stick, sign %+d  (evidence %d)\n",
+                            c->addr, (double)ts2p_val(TS2_MEM32_EARLY(c->addr)),
+                            (double)c->lo, (double)c->hi,
+                            c->n_d[cat] ? (double)(c->sum_d[cat] / (float)c->n_d[cat]) : 0.0,
+                            ((c->sign >> cat) & 1) ? 1 : -1, c->ev[cat]);
+                else
+                    fprintf(stderr, "[TS2-PROBE]   0x%08X  rest %g, seen %g..%g  (evidence %d)\n",
+                            c->addr, ts2p_val(c->rest), (double)c->lo, (double)c->hi, c->ev[cat]);
+            }
+        if (!shown)
+            fprintf(stderr, "[TS2-PROBE]   none yet\n");
+    }
+    if (final) {
+        Ts2ProbeCand *best[4] = { NULL, NULL, NULL, NULL };
+        for (i = 0; i < g_ts2p.list_n; i++)
+            for (cat = 0; cat < 4; cat++) {
+                Ts2ProbeCand *c = &g_ts2p.list[i];
+                int leans = ((c->flags & TS2P_LX) && c->ev[2] >= 20) ||
+                            ((c->flags & TS2P_LY) && c->ev[3] >= 20);
+                if (!(c->flags & (1 << cat)) || c->ev[cat] < 20)
+                    continue;
+                /* A sway ramps while the stick is held, so it passes as a
+                 * turn too; an angle never comes back to rest. */
+                if (cat < 2 && leans)
+                    continue;
+                if (!best[cat] || c->ev[cat] > best[cat]->ev[cat] ||
+                    (c->ev[cat] == best[cat]->ev[cat] &&
+                     c->hi - c->lo > best[cat]->hi - best[cat]->lo))
+                    best[cat] = c;
+            }
+        if (best[0] && best[1]) {
+            float span = best[0]->hi - best[0]->lo;
+            fprintf(stderr, "[TS2-PROBE] try:  RECOMP_TS2_AIM=yaw=0x%08X,pitch=0x%08X,"
+                            "yaw_sign=%d,pitch_sign=%d,units=%s,pitch_min=%g,pitch_max=%g%s",
+                    best[0]->addr, best[1]->addr,
+                    ((best[0]->sign >> 0) & 1) ? 1 : -1, ((best[1]->sign >> 1) & 1) ? 1 : -1,
+                    span > 7.0f ? "57.29578" : "1",
+                    (double)best[1]->lo, (double)best[1]->hi,
+                    span > 6.0f && span < 6.6f ? ",wrap=6.283185"
+                    : span > 300.0f && span < 361.0f ? ",wrap=360" : "");
+            if (best[2]) fprintf(stderr, ",cross_x=0x%08X", best[2]->addr);
+            if (best[3]) fprintf(stderr, ",cross_y=0x%08X", best[3]->addr);
+            fprintf(stderr, "\n[TS2-PROBE] the addresses may move between levels: "
+                            "RECOMP_FIND_VALUE / RECOMP_WATCH_WRITE then find the "
+                            "pointer to give as base= (docs/mouse-aim.md)\n");
+        } else {
+            fprintf(stderr, "[TS2-PROBE] no yaw and pitch pair yet: play longer, rest "
+                            "between turns, or try RECOMP_TS2_AIM_PROBE=int\n");
+        }
+    }
+    fflush(stderr);
+}
+
+static void ts2p_begin(void)
+{
+    const char *v = getenv("RECOMP_TS2_AIM_PROBE");
+    size_t ram;
+
+    if (!v || !*v || !strcmp(v, "0")) {
+        g_ts2p.on = -1;
+        return;
+    }
+    g_ts2p.ints = !strcmp(v, "int");
+    ram = g_xbox_total_ram ? g_xbox_total_ram : (size_t)64 * 1024 * 1024;
+    g_ts2p.first = 0x10000u / 4;
+    g_ts2p.words = (uint32_t)(ram / 4) - g_ts2p.first;
+    g_ts2p.prev  = (uint32_t *)malloc((size_t)g_ts2p.words * 4);
+    g_ts2p.rest  = (uint32_t *)malloc((size_t)g_ts2p.words * 4);
+    g_ts2p.flags = (uint8_t *)malloc(g_ts2p.words);
+    g_ts2p.sign  = (uint8_t *)calloc(g_ts2p.words, 1);
+    g_ts2p.ev    = (uint8_t *)calloc((size_t)g_ts2p.words * 4, 1);
+    if (!g_ts2p.prev || !g_ts2p.rest || !g_ts2p.flags || !g_ts2p.sign || !g_ts2p.ev) {
+        fprintf(stderr, "[TS2-PROBE] not enough memory for the probe\n");
+        g_ts2p.on = -1;
+        return;
+    }
+    memcpy(g_ts2p.prev, (const void *)((uintptr_t)(g_ts2p.first * 4) + xbox_GetMemoryOffset()),
+           (size_t)g_ts2p.words * 4);
+    memcpy(g_ts2p.rest, g_ts2p.prev, (size_t)g_ts2p.words * 4);
+    memset(g_ts2p.flags, TS2P_TX | TS2P_TY | TS2P_LX | TS2P_LY, g_ts2p.words);
+    g_ts2p.on = 1;
+    g_ts2p.state = TS2P_OTHER;
+    fprintf(stderr, "[TS2-PROBE] watching %u MB of guest RAM as %s: turn left and right, "
+                    "look up and down, rest in between (mouse look off)\n",
+            (unsigned)((size_t)g_ts2p.words * 4 >> 20), g_ts2p.ints ? "integers" : "floats");
+    fflush(stderr);
+}
+
+/* Once a frame, in a level (ts2_present). */
+static void ts2_aim_probe_frame(int in_level)
+{
+    short st[4];
+    int state, sx = 0, sy = 0;
+    float rx, ry;
+
+    if (g_ts2p.on == 0)
+        ts2p_begin();
+    if (g_ts2p.on < 0 || g_ts2p.failed || !in_level)
+        return;
+    recomp_input_host_last_sticks(st);
+    rx = (float)st[2] / 32767.0f;
+    ry = (float)st[3] / 32767.0f;
+    if (rx > -0.12f && rx < 0.12f && ry > -0.12f && ry < 0.12f)
+        state = TS2P_IDLE;
+    else if ((rx > 0.6f || rx < -0.6f) && ry > -0.2f && ry < 0.2f)
+        state = TS2P_X, sx = rx > 0 ? 1 : -1;
+    else if ((ry > 0.6f || ry < -0.6f) && rx > -0.2f && rx < 0.2f)
+        state = TS2P_Y, sy = ry > 0 ? 1 : -1;
+    else
+        state = TS2P_OTHER;
+    if (state != g_ts2p.state || sx != g_ts2p.sx || sy != g_ts2p.sy) {
+        g_ts2p.state = state;
+        g_ts2p.sx = sx;
+        g_ts2p.sy = sy;
+        g_ts2p.held = 0;
+    } else if (g_ts2p.held < 1000000) {
+        g_ts2p.held++;
+    }
+    g_ts2p.frame++;
+
+    if (!g_ts2p.list) {
+        const uint32_t *mem = (const uint32_t *)((uintptr_t)(g_ts2p.first * 4) +
+                                                 xbox_GetMemoryOffset());
+        uint32_t i, alive = 0;
+
+        for (i = 0; i < g_ts2p.words; i++) {
+            uint32_t raw = mem[i];
+            uint8_t f = g_ts2p.flags[i];
+            if (f) {
+                f = ts2p_rules(f, &g_ts2p.sign[i], &g_ts2p.ev[i * 4], raw,
+                               g_ts2p.prev[i], &g_ts2p.rest[i]);
+                g_ts2p.flags[i] = f;
+                alive += f != 0;
+            }
+            g_ts2p.prev[i] = raw;
+        }
+        if (alive <= TS2P_LIST_MAX)
+            ts2p_compact();
+    } else {
+        int i;
+        for (i = 0; i < g_ts2p.list_n; i++) {
+            Ts2ProbeCand *c = &g_ts2p.list[i];
+            uint32_t raw = TS2_MEM32_EARLY(c->addr);
+            double v = ts2p_val(raw), d = v - ts2p_val(c->prev);
+
+            if (c->flags) {
+                c->flags = ts2p_rules(c->flags, &c->sign, c->ev, raw, c->prev, &c->rest);
+                if (g_ts2p.held >= 6 && raw != c->prev &&
+                    (g_ts2p.state == TS2P_X || g_ts2p.state == TS2P_Y)) {
+                    int k = g_ts2p.state == TS2P_Y;
+                    c->sum_d[k] += (float)(d < 0 ? -d : d);
+                    c->n_d[k]++;
+                }
+                if ((float)v < c->lo) c->lo = (float)v;
+                if ((float)v > c->hi) c->hi = (float)v;
+            }
+            c->prev = raw;
+        }
+    }
+    if (g_ts2p.frame - g_ts2p.said_at >= 300) {
+        g_ts2p.said_at = g_ts2p.frame;
+        ts2p_report(g_ts2p.list != NULL);
+    }
+}
+
 /*
  * Frame interpolation (xboxrecomp hle_d3d8_interp.c, RECOMP_FRAME_INTERP)
  * blends the matrices in TS2's vertex constants, measured from captures:
@@ -570,6 +1186,16 @@ static void ts2_present(void (*present)(void))
     present();
     xbox_D3D8SetWideFrames(ts2_menus_wide() ||
                            (g_ts2_frame_camera && !g_ts2_frame_front_end));
+    /* A frame of a level (or one of its cutscenes): the mouse aims there.
+     * The front end resets the unzoomed field of view for the next level. */
+    {
+        int in_level = g_ts2_frame_camera && !g_ts2_frame_front_end;
+
+        if (g_ts2_frame_front_end)
+            g_ts2_fov_base = 0.0f;
+        ts2_aim_frame(in_level);
+        ts2_aim_probe_frame(in_level);
+    }
     g_ts2_frame_camera = g_ts2_frame_front_end = 0;
 }
 
