@@ -115,3 +115,13 @@ endif()
 if(COMMAND recomp_add_launcher)
     recomp_add_launcher(${PROJECT_NAME}_launcher ${PROJECT_NAME}.exe)
 endif()
+
+# The native one (launcher/, Qt 6): TimeSplitters 2's own options, mouse aim
+# and mods, and it keeps every settings line it does not set. Needs a Qt 6.4+
+# kit on CMAKE_PREFIX_PATH; the toolkit's launcher above stays for releases.
+option(SPLIT2_QT_LAUNCHER "Build the Qt launcher (launcher/, needs Qt 6)" OFF)
+if(SPLIT2_QT_LAUNCHER)
+    add_subdirectory(launcher)
+    set_target_properties(split2_launcher PROPERTIES
+        RUNTIME_OUTPUT_DIRECTORY "$<TARGET_FILE_DIR:${PROJECT_NAME}>")
+endif()
