@@ -486,13 +486,47 @@ static float ts2_camera_widen(void)
 /* What the frame now being drawn has run, for the choice below. */
 static int g_ts2_frame_camera, g_ts2_frame_front_end;
 
+extern const char *recomp_config_lookup(const char *env_name, const char *key);
+
 static void ts2_aim_note_fov(float fov_degrees);   /* the mouse aim, below */
+
+/*
+ * The field of view, as the player likes it: RECOMP_TS2_FOV / ts2_fov, a
+ * percentage of the game's own (100, the default, changes nothing; 70..150).
+ * Applied to camera_setup's fov_degrees argument, the same way the
+ * widescreen aspect is, so the projection and the culling half-width
+ * (camera+0x31C/0x320) both follow and nothing pops at the edges. Every
+ * field of view the game asks for is scaled, a scope's too, so zooming in
+ * still zooms by the game's own ratio; cutscenes framed by the in-game
+ * camera are widened as well.
+ */
+static float ts2_fov_scale(void)
+{
+    static float scale;
+
+    if (scale == 0.0f) {
+        const char *v = recomp_config_lookup("RECOMP_TS2_FOV", "ts2_fov");
+        int pct = v && *v ? atoi(v) : 100;
+
+        if (pct < 70)  pct = 70;
+        if (pct > 150) pct = 150;
+        scale = (float)pct / 100.0f;
+        if (pct != 100)
+            fprintf(stderr, "[TS2] field of view %d%% of the game's (RECOMP_TS2_FOV)\n", pct);
+    }
+    return scale;
+}
 
 static void ts2_camera_setup(void (*camera_setup)(void))
 {
     float widen = ts2_camera_widen();
+    float fov_scale = ts2_fov_scale();
 
     ts2_aim_note_fov(TS2_MEMF(g_esp + 0x10));   /* fov_degrees, for the scope */
+    if (fov_scale != 1.0f) {
+        float fov = TS2_MEMF(g_esp + 0x10) * fov_scale;
+        TS2_MEMF(g_esp + 0x10) = fov > 170.0f ? 170.0f : fov;
+    }
     if (widen != 1.0f)
         TS2_MEMF(g_esp + 0x0C) *= widen;   /* [esp] is the return address */
     camera_setup();

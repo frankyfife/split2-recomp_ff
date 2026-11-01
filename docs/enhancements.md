@@ -92,7 +92,14 @@ reads "B" and acts as the game's A.
 
 ### Native mouselook
 
-The toolkit has no mouse input today.
+**Prepared (Nov 2026, not yet run against the game):** the toolkit hands a
+title the mouse's counts (`recomp_mouse_take`, xboxrecomp_ff), TS2 adds
+them to the view angles once a frame and holds the crosshair centred, and
+`RECOMP_TS2_AIM_PROBE=1` finds the angles per release. What is left is
+finding them and the checks in [pc-work-plan.md](pc-work-plan.md); how it
+works is [mouse-aim.md](mouse-aim.md).
+
+The estimate below dates from before that: the toolkit then had no mouse input.
 
 | Step | Where | Estimate |
 | --- | --- | --- |

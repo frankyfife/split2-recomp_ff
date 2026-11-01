@@ -416,6 +416,12 @@ QWidget *MainWindow::buildVideoTab()
     menus_ = combo({{T("16:9 like the levels"), QStringLiteral("wide")}, {T("4:3 between bars, as the console"), QStringLiteral("43")}});
     addRow(f, T("Menus"), menus_, T("The front end in widescreen, or kept at 4:3."));
 
+    fov_ = new QSpinBox;
+    fov_->setRange(70, 150);
+    fov_->setSingleStep(5);
+    fov_->setSuffix(QStringLiteral(" %"));
+    addRow(f, T("Field of view"), fov_, T("A percentage of the game's own: more shows more of the world. A scope still zooms by the game's ratio."));
+
     aniso_ = combo({{T("Off"), QStringLiteral("1")}, {QStringLiteral("2x"), QStringLiteral("2")}, {QStringLiteral("4x"), QStringLiteral("4")},
                     {QStringLiteral("8x"), QStringLiteral("8")}, {QStringLiteral("16x"), QStringLiteral("16")}});
     addRow(f, T("Texture sharpness"), aniso_, T("Anisotropic filtering: floors and walls seen at a glancing angle stay sharp."));
@@ -668,6 +674,7 @@ void MainWindow::load()
                            conf_.get(QStringLiteral("ts2_menus")) == QLatin1String("4:3")
                        ? QStringLiteral("43")
                        : QStringLiteral("wide"));
+    fov_->setValue(conf_.getInt(QStringLiteral("ts2_fov"), 100, 70, 150));
     {
         const int a = conf_.getInt(QStringLiteral("anisotropy"), 1, 1, 16);
         select(aniso_, QString::number(a >= 16 ? 16 : a >= 8 ? 8 : a >= 4 ? 4 : a >= 2 ? 2 : 1));
@@ -717,6 +724,11 @@ bool MainWindow::save()
                   QStringLiteral("16:9, with the wider camera and menus.  [RECOMP_WIDESCREEN]"));
     conf_.set(QStringLiteral("ts2_menus"), valueOf(menus_),
               QStringLiteral("TimeSplitters 2: the front end at 16:9 (wide) or 4:3 (43).  [RECOMP_TS2_MENUS]"));
+    if (fov_->value() == 100)
+        conf_.unset(QStringLiteral("ts2_fov"));
+    else
+        conf_.set(QStringLiteral("ts2_fov"), fov_->value(),
+                  QStringLiteral("TimeSplitters 2: field of view, percent of the game's (70-150).  [RECOMP_TS2_FOV]"));
     conf_.set(QStringLiteral("anisotropy"), valueOf(aniso_), QStringLiteral("Anisotropic filtering, 1-16.  [RECOMP_ANISO]"));
     conf_.set(QStringLiteral("frame_cap"), valueOf(frameCap_),
               QStringLiteral("adaptive, 60, 30 or 0 (uncapped).  [RECOMP_FPS_CAP]"));

@@ -70,6 +70,7 @@ private:
     // video
     QComboBox *renderer_ = nullptr, *resolution_ = nullptr, *menus_ = nullptr, *aniso_ = nullptr;
     QComboBox *frameCap_ = nullptr, *interp_ = nullptr;
+    QSpinBox *fov_ = nullptr;
     QCheckBox *widescreen_ = nullptr, *fullscreen_ = nullptr, *vrr_ = nullptr, *fps_ = nullptr, *pal60_ = nullptr;
 
     // controls
