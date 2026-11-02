@@ -271,6 +271,30 @@ Second round, after the player's first try (2 Nov 2026):
   the host's copy (`xbox_HleSetTextureFixup`); TS2 recognises this atlas
   by its level 0 (FNV-1a 0x1FEBA36F) and turns the top row over in every
   level. Checked in a new pause-menu capture: the A's shine is on top.
+
+Third round, from the player's screenshots of the profile screens:
+
+- A panel with a title and a footer ("Controller wählen", "Bitte wählen
+  Sie", "Profil wählen") has them as rows placed from its top (flags 8),
+  and the rows between (flag 0x100) placed from the end of the title
+  (+0x24) and shown up to the footer (+0x28). The hit test placed every
+  row from the top, so it was one title's height (25 to 47 px) too high:
+  the top entry could not be hit and the click below it chose it.
+- A click while the pointer moved (a hand always moves it a little) was
+  lost: the chase of the row under the pointer took that frame. The click
+  is now handled first, and pressed as soon as the last press is let go.
+- Presses are held for frames, not pad samples (some screens read the pad
+  more than once a frame and never saw a two-sample press: Festplatte).
+- "Controller wählen" has no chosen row (it waits to see which pad the
+  player uses, -1 at +0x398) and its rows are never chosen, so it had no
+  pointer at all. A panel like that now shows it, and a click inside is
+  START on port 0 (the name entry grid is one too: START finishes it).
+- Checked by `RECOMP_TS2_MENU_SCRIPT` from a copy of the player's saves:
+  Controller wählen, Festplatte, the main menu and the 5-row list after
+  it, hover moving the choice up and down and a click confirming.
+- Seen on the way, not the mouse's doing: with these saves "Spieler 1"
+  goes on to "Neuer Spieler" by itself a second or two after it opens,
+  driven by the input script alone too.
 - [ ] By hand: every front-end screen, the pause menu, the name entry grid.
 - [ ] Sliders and option values (left/right on a row) by click.
 - [ ] The "Select / Back" hints at a panel's foot are not clickable.

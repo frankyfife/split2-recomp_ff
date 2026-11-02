@@ -1596,10 +1596,15 @@ static void ts2_menu_panel(void (*update)(void))
     if (screen >= 0x10000u && panel >= 0x10000u &&
         !(TS2_MEM32_EARLY(screen + 8u) & 2u) &&
         (TS2_MEM32_EARLY(panel + 0xCu) & 6u) == 6u &&
-        (int32_t)TS2_MEM32_EARLY(panel + 0x398u) >= 0 &&
+        (int32_t)TS2_MEM32_EARLY(panel + 0x398u) >= -1 &&
         (int32_t)TS2_MEM32_EARLY(panel + 0x394u) > 0) {
-        if (panel != g_menu_seen.panel && getenv("RECOMP_TS2_MENU_TRACE")) {
+        static uint32_t traced_items, traced_rows;
+        if ((panel != g_menu_seen.panel || TS2_MEM32_EARLY(panel + 0x38Cu) != traced_items ||
+             TS2_MEM32_EARLY(panel + 0x394u) != traced_rows) && getenv("RECOMP_TS2_MENU_TRACE")) {
             uint32_t k;
+            traced_items = TS2_MEM32_EARLY(panel + 0x38Cu);
+            traced_rows = TS2_MEM32_EARLY(panel + 0x394u);
+            fprintf(stderr, "[TS2-MENU] at frame %lu:", g_menu_frames);
             fprintf(stderr, "[TS2-MENU] panel %08X (screen %08X flags %X):", panel, screen,
                     TS2_MEM32_EARLY(screen + 8u));
             for (k = 0; k < 0xC0u; k += 4u)
@@ -1634,13 +1639,24 @@ static void ts2_menu_panel(void (*update)(void))
     update();
 }
 
-/* The port-0 filter's share: the presses asked for below. */
+/* The port-0 filter's share: the presses asked for below. A press is held
+ * for frames, not for samples of the pad: some screens ("Bitte wählen Sie",
+ * the save device) read the pad more than once a frame and look for the
+ * button down in one frame and up in an earlier one, which two samples in a
+ * frame never showed them. */
 static void ts2_menu_filter(uint16_t *buttons, uint8_t analog[8])
 {
     if (g_menu_press_hold > 0) {
         *buttons |= g_menu_press_buttons;
         if (g_menu_press_a) analog[0] = 0xFF;
         if (g_menu_press_b) analog[1] = 0xFF;
+    }
+}
+
+/* Once a frame: the held press runs out, then a gap of frames let go. */
+static void ts2_menu_press_tick(void)
+{
+    if (g_menu_press_hold > 0) {
         if (--g_menu_press_hold == 0)
             g_menu_press_gap = 2;
     } else if (g_menu_press_gap > 0) {
@@ -1659,18 +1675,27 @@ static void ts2_menu_press(uint16_t buttons, int a, int b)
     g_menu_press_a = a;
     g_menu_press_b = b;
     g_menu_press_gap = 0;
-    g_menu_press_hold = 2;
+    /* frames: A and B one, so the screen they open does not see them too */
+    g_menu_press_hold = (a || b) ? 1 : 2;
+    if (getenv("RECOMP_TS2_MENU_TRACE"))
+        fprintf(stderr, "[TS2-MENU] frame %lu: press %X%s%s\n", g_menu_frames, buttons,
+                a ? " A" : "", b ? " B" : "");
 }
 
 /* Which item the pointer is over: row and column, or -1. Every item has its
  * rectangle in the panel (+0x64 x, +0x68 y, +0x6C width, +0x70 height;
  * FUN_000F01D0 scrolls by them), the rows chained by +8 and a row's
- * columns by +0xC. The pause menu's panel is laid out another way: no
+ * columns by +0xC. A panel with a title and a footer ("Controller wählen",
+ * "Profil wählen") has them as rows too (flags 8, cannot be chosen), placed
+ * from the panel's top; the rows between (flag 0x100) scroll, and are
+ * placed from the end of the title (+0x24) and seen only up to the footer
+ * (+0x28). The pause menu's panel is laid out another way: no
  * height, and each row's place a float at +0x60, which measured against
  * the picture is y = 257 - 402 * it (OPTIONEN to Beenden, within 5 px). */
 static int ts2_menu_hit(uint32_t p, float gx, float gy, int *col_out)
 {
     int x0 = (int32_t)TS2_MEM32_EARLY(p + 0x34u), y0 = (int32_t)TS2_MEM32_EARLY(p + 0x38u);
+    int body0 = (int32_t)TS2_MEM32_EARLY(p + 0x24u), body1 = (int32_t)TS2_MEM32_EARLY(p + 0x28u);
     float scroll = TS2_MEMF(p + 0x54u);
     uint32_t it = TS2_MEM32_EARLY(p + 0x38Cu);
     int row;
@@ -1686,8 +1711,12 @@ static int ts2_menu_hit(uint32_t p, float gx, float gy, int *col_out)
             int iw = (int32_t)TS2_MEM32_EARLY(c + 0x6Cu), ih = (int32_t)TS2_MEM32_EARLY(c + 0x70u);
             int hit_it;
 
-            if (ih > 0) {
-                float x = (float)(x0 + ix), y = (float)(y0 + iy) - scroll;
+            if (ih > 0 && (TS2_MEM32_EARLY(c + 0x28u) & 0x100u)) {
+                float x = (float)(x0 + ix), y = (float)(y0 + body0 + iy) - scroll;
+                hit_it = gx >= x && gx < x + (float)iw && gy >= y && gy < y + (float)ih &&
+                         gy >= (float)(y0 + body0) && (body1 <= body0 || gy < (float)(y0 + body1));
+            } else if (ih > 0) {
+                float x = (float)(x0 + ix), y = (float)(y0 + iy);
                 hit_it = gx >= x && gx < x + (float)iw && gy >= y && gy < y + (float)ih;
             } else {
                 float v = TS2_MEMF(c + 0x60u), cy = 257.0f - 402.0f * v;
@@ -1717,6 +1746,7 @@ static int ts2_menu_frame(void)
     int held, x0, y0, w, h, rows, row_h, sel, scroll_px, moved;
 
     g_menu_frames++;
+    ts2_menu_press_tick();
     if (getenv("RECOMP_TS2_MENU_TRACE") && g_menu_frames % 60 == 0)
         fprintf(stderr, "[TS2-MENU] frame %lu: last panel %08X seen at %lu\n", g_menu_frames,
                 g_menu_seen.panel, g_menu_seen.frame);
@@ -1732,6 +1762,7 @@ static int ts2_menu_frame(void)
         }
         g_menu_shown = 0;
         g_menu_target = -1;
+        g_menu_click_pending = 0;
         return 0;
     }
     x0 = (int32_t)TS2_MEM32_EARLY(p + 0x34u);
@@ -1747,7 +1778,7 @@ static int ts2_menu_frame(void)
     if (!g_menu_shown) {
         /* Start on the chosen row, so nothing moves until the mouse does. */
         g_menu_x = (float)(x0 + w / 2);
-        g_menu_y = (float)(y0 + sel * row_h - scroll_px + row_h / 2);
+        g_menu_y = (float)(y0 + (sel < 0 ? 0 : sel) * row_h - scroll_px + row_h / 2);
         recomp_mouse_take(NULL, NULL);
         xbox_HleSetPointerMode(1);          /* Windows' pointer, hidden over the picture */
         g_menu_shown = 1;
@@ -1821,19 +1852,59 @@ static int ts2_menu_frame(void)
             row = -1;
         if (col > 0)
             cols = col + 1;
+        if (sel < 0) {
+            /* No row chosen: a list that waits for a press, as "Controller
+             * wählen" waits to see which pad is the player's (its rows are
+             * marked as never chosen). A click in the panel is START, on
+             * port 0, the mouse's pad; nothing to chase. Not A: after A
+             * there the next screen ("Spieler 1") went on to "Neuer
+             * Spieler" by itself, as it does after the pad's own A; START
+             * leaves it to be chosen. */
+            int in_panel = g_menu_x >= (float)x0 && g_menu_x < (float)(x0 + w) &&
+                           g_menu_y >= (float)y0 && g_menu_y < (float)(y0 + h);
+            g_menu_target = -1;
+            if (back && !ts2_menu_busy())
+                ts2_menu_press(0, 0, 1);
+            else if (click && in_panel)
+                g_menu_click_pending = 1;
+            if (g_menu_click_pending && !ts2_menu_busy()) {
+                g_menu_click_pending = 0;
+                ts2_menu_press(0x10u, 0, 0);     /* START */
+            }
+            held_last = held;
+            return 1;
+        }
         if (moved && row >= 0 && (row != g_menu_target || col != g_menu_target_col)) {
             g_menu_target = row;
             g_menu_target_col = col;
             g_menu_target_presses = 0;
         }
-        if (back && !ts2_menu_busy()) {
-            ts2_menu_press(0, 0, 1);
+        /* A click is handled before the chase: a pointer that moves as it
+         * clicks (a hand on a mouse always does a little) would otherwise
+         * have the chase take the frame and the click be lost. On the
+         * chosen row it is A at once, or as soon as the last press is let
+         * go; on another row the row is chased first, then clicked. */
+        if (back) {
             g_menu_target = -1;
-        } else if (g_menu_target >= 0 && !ts2_menu_busy()) {
+            g_menu_click_pending = 0;
+            if (!ts2_menu_busy())
+                ts2_menu_press(0, 0, 1);
+        } else if (click && row >= 0) {
+            g_menu_click_pending = 1;
+            if (row == sel && col == col_now) {
+                g_menu_target = -1;
+            } else {
+                g_menu_target = row;
+                g_menu_target_col = col;
+                g_menu_target_presses = 0;
+            }
+        }
+        if (g_menu_target >= 0 && !ts2_menu_busy()) {
             /* Chase it; give up after a list's length of presses, so a row
              * that cannot be reached never scrolls the list round for good. */
             if (++g_menu_target_presses > rows + 4 || g_menu_target >= rows) {
                 g_menu_target = -1;
+                g_menu_click_pending = 0;
             } else if (g_menu_target < sel) {
                 ts2_menu_press(1u, 0, 0);    /* D-pad up */
             } else if (g_menu_target > sel) {
@@ -1845,19 +1916,10 @@ static int ts2_menu_frame(void)
             } else {
                 g_menu_target = -1;          /* there */
             }
-        } else if (click && row >= 0 && row == sel && !ts2_menu_busy()) {
-            ts2_menu_press(0, 1, 0);         /* A on the chosen row */
-        }
-        if (click && row >= 0 && row != sel) {
-            g_menu_target = row;             /* go there, then click it */
-            g_menu_target_col = col;
-            g_menu_target_presses = 0;
-            g_menu_click_pending = 1;
         }
         if (g_menu_click_pending && g_menu_target < 0 && !ts2_menu_busy()) {
             g_menu_click_pending = 0;
-            if (row >= 0 && row == sel)
-                ts2_menu_press(0, 1, 0);
+            ts2_menu_press(0, 1, 0);         /* A on the chosen row */
         }
     }
     held_last = held;
