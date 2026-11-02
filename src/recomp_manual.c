@@ -1464,6 +1464,78 @@ static void ts2_aim_probe_frame(int in_level)
     }
 }
 
+/* ── TimeSplitters 2: the pause menu's button glyphs ── */
+
+/*
+ * The pause menu draws its button glyphs (the "A OK" at its foot) from a
+ * 128x64 DXT3 atlas whose top row holds B, A, X and Y in 32x32 cells, and
+ * on the disc those four are stored upside down: the A reads as a V, the Y
+ * as a lambda, each one's shine at the bottom. The draw's texture
+ * coordinates are the ordinary way up and the row below (START, BACK, the
+ * arrows) is right, so it is the art, and the console showed it the same.
+ * Decoded from the player's capture of the pause menu (texture 7).
+ *
+ * The toolkit hands each upload's texels to a title (xbox_HleSetTextureFixup)
+ * before the host gets them; this one is recognised by its level 0 (FNV-1a
+ * 0x1FEBA36F over its 8192 bytes) and the top half of every level is turned
+ * the right way up: the block rows in reverse, and each block's four rows of
+ * alpha and of colour indices in reverse. Guest memory is not touched.
+ */
+extern void xbox_HleSetTextureFixup(void (*fixup)(uint32_t, uint32_t, uint32_t, uint32_t,
+                                                  uint8_t *, uint32_t, uint32_t));
+
+static int g_ts2_glyphs_seen;            /* level 0 matched: flip the levels after it */
+
+static void ts2_dxt3_flip_block(uint8_t *b)
+{
+    uint8_t t[2];
+    uint8_t c;
+
+    /* alpha: four rows of 16 bits */
+    memcpy(t, b, 2);     memcpy(b, b + 6, 2); memcpy(b + 6, t, 2);
+    memcpy(t, b + 2, 2); memcpy(b + 2, b + 4, 2); memcpy(b + 4, t, 2);
+    /* colour indices: four rows of a byte, after the two colours */
+    c = b[12]; b[12] = b[15]; b[15] = c;
+    c = b[13]; b[13] = b[14]; b[14] = c;
+}
+
+static void ts2_texture_fixup(uint32_t fmt, uint32_t w, uint32_t h, uint32_t level,
+                              uint8_t *bits, uint32_t pitch, uint32_t rows)
+{
+    uint32_t r, half, x;
+
+    if (fmt != 0x0E || (w << level) != 128u || (h << level) != 64u)
+        return;
+    if (level == 0) {
+        uint32_t s = 0x811C9DC5u, k;
+        g_ts2_glyphs_seen = 0;
+        if (rows != 16u || pitch < 512u)
+            return;
+        for (r = 0; r < rows; r++)
+            for (k = 0; k < 512u; k++)
+                s = (s ^ bits[r * pitch + k]) * 16777619u;
+        if (s != 0x1FEBA36Fu)
+            return;
+        g_ts2_glyphs_seen = 1;
+    }
+    if (!g_ts2_glyphs_seen)
+        return;
+    half = rows / 2u;                       /* block rows in the top half */
+    if (half == 0)
+        return;
+    for (r = 0; r < half; r++) {
+        uint8_t *row = bits + (size_t)r * pitch;
+        for (x = 0; x < pitch / 16u && x < (w + 3u) / 4u; x++)
+            ts2_dxt3_flip_block(row + x * 16u);
+    }
+    for (r = 0; r < half / 2u; r++) {
+        uint8_t tmp[512];
+        uint8_t *a = bits + (size_t)r * pitch, *b = bits + (size_t)(half - 1u - r) * pitch;
+        uint32_t n = pitch < sizeof tmp ? pitch : (uint32_t)sizeof tmp;
+        memcpy(tmp, a, n); memcpy(a, b, n); memcpy(b, tmp, n);
+    }
+}
+
 /* ── TimeSplitters 2: the menus with the mouse ── */
 
 /*
@@ -1977,6 +2049,7 @@ static void ts2_present(void (*present)(void))
     if (!interp_said) {
         interp_said = 1;
         xbox_D3D8SetInterpRegisters(60, 64, 12);
+        xbox_HleSetTextureFixup(ts2_texture_fixup);   /* the pause menu's glyphs */
     }
     present();
     xbox_D3D8SetWideFrames(ts2_menus_wide() ||

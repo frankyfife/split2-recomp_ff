@@ -263,9 +263,14 @@ Second round, after the player's first try (2 Nov 2026):
   front.
 - In widescreen the light rays behind the level select's column
   (`0x000EF824`) are left out: they stopped at the 4:3 screen's edge.
-- [ ] The pause menu's A glyph is upside down: drawn with ordinary UVs
-      from a 128x64 DXT3 atlas (texture 7 in the player's capture), while
-      the front end's glyphs are right; the atlas cell itself is next.
+- The pause menu's A glyph was upside down, and so was the disc's art:
+  decoded from the player's capture (`RECOMP_REPLAY_TEX_DUMP=7`), the
+  128x64 DXT3 atlas holds B, A, X and Y upside down in its top row while
+  START, BACK and the arrows below are right, and the draw's coordinates
+  are the ordinary way up. The toolkit now lets a title correct texels in
+  the host's copy (`xbox_HleSetTextureFixup`); TS2 recognises this atlas
+  by its level 0 (FNV-1a 0x1FEBA36F) and turns the top row over in every
+  level. Checked in a new pause-menu capture: the A's shine is on top.
 - [ ] By hand: every front-end screen, the pause menu, the name entry grid.
 - [ ] Sliders and option values (left/right on a row) by click.
 - [ ] The "Select / Back" hints at a panel's foot are not clickable.
