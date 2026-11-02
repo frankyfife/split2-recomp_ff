@@ -345,3 +345,22 @@ both on by default); off, those sites get the toolkit's new HIDE placement
 and their draws are left out. A few large star-shaped flakes come from the
 general particle system (`FUN_001BFFCA`, smoke and sparks too) and stay.
 USA's sites are PAL's found by their bytes, not run.
+
+## 14. 5.1 sound (done, Nov 2026)
+
+Asked by the player: is there 5.1? TS2 mixes its music, voices and menu
+sounds to the front pair (mix bins 0 and 1) and positions world sounds as
+DirectSound 3D voices (`SetPosition`, min/max distance, a rolloff curve),
+which the XDK spreads over the four crosstalk bins: front and rear when the
+console is in surround mode (Dolby Digital), front only otherwise. The
+toolkit always took the second. Now (`hle_dsound_3d.c`) a device with four
+or more channels is a console in surround mode: a 3D voice is shared
+between front and rear by where it is relative to the listener's front,
+constant power as the ears share left and right, fading to both inside the
+source's minimum distance (the player's own gunshot sits 0.1 m behind the
+camera). `surround` (`RECOMP_SURROUND`, launcher "Surround sound") forces
+it either way. Checked in Siberia's trace: sources to the right and behind
+on BR, ahead and left on L. Centre and LFE stay unused, as the game sends
+nothing there.
+
+- [ ] By hand on the 5.1 receiver: a guard behind you is heard behind you.

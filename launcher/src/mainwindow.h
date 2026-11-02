@@ -86,7 +86,7 @@ private:
     QVector<KeyCapture *> keyButtons_;
 
     // audio
-    QComboBox *audioPath_ = nullptr;
+    QComboBox *audioPath_ = nullptr, *surround_ = nullptr;
     QCheckBox *mute_ = nullptr;
     QSlider *volume_ = nullptr;
 

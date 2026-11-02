@@ -594,6 +594,10 @@ QWidget *MainWindow::buildAudioTab()
     audioPath_ = combo({{T("Native (default)"), QStringLiteral("native")}, {T("Emulated Xbox sound chip (APU)"), QStringLiteral("apu")}});
     addRow(f, T("Sound"), audioPath_, T("Native plays the game's DirectSound on this computer's audio, with the Xbox's 3D sound and room reverb. "
                                         "The emulated chip runs the game's own mixer; try it if a sound is missing."));
+    surround_ = combo({{T("Automatic (by the speakers)"), QStringLiteral("auto")}, {T("Surround (5.1)"), QStringLiteral("1")},
+                       {T("Stereo"), QStringLiteral("0")}});
+    addRow(f, T("Surround sound"), surround_,
+           T("With 5.1 speakers or a receiver, sounds in the world come from behind you too, as on an Xbox set to Dolby Digital. Music and voices stay in front, as the game mixes them."));
     volume_ = new QSlider(Qt::Horizontal);
     volume_->setRange(5, 100);
     addRow(f, T("Volume"), volume_);
@@ -733,6 +737,7 @@ void MainWindow::load()
     zoomMatch_->setValue(conf_.getInt(QStringLiteral("ts2_zoom_match"), 100, 0, 100));
 
     select(audioPath_, conf_.get(QStringLiteral("audio"), QStringLiteral("native")));
+    select(surround_, conf_.get(QStringLiteral("surround"), QStringLiteral("auto")));
     volume_->setValue(conf_.getInt(QStringLiteral("launcher_volume"), 100, 5, 100));
     mute_->setChecked(conf_.getBool(QStringLiteral("launcher_mute"), false));
 
@@ -814,6 +819,11 @@ bool MainWindow::save()
     conf_.set(QStringLiteral("ts2_zoom_match"), zoomMatch_->value(),
               QStringLiteral("TimeSplitters 2: 0-100, how much the mouse slows when zoomed.  [RECOMP_TS2_ZOOM_MATCH]"));
 
+    if (valueOf(surround_) == QLatin1String("auto"))
+        conf_.unset(QStringLiteral("surround"));
+    else
+        conf_.set(QStringLiteral("surround"), valueOf(surround_),
+                  QStringLiteral("3D sound on the rear speakers: 1, or 0 for stereo; no line follows the device.  [RECOMP_SURROUND]"));
     if (valueOf(audioPath_) == QLatin1String("native"))
         conf_.unset(QStringLiteral("audio"));
     else
