@@ -438,6 +438,10 @@ QWidget *MainWindow::buildVideoTab()
                     {QStringLiteral("8x"), QStringLiteral("8")}, {QStringLiteral("16x"), QStringLiteral("16")}});
     addRow(f, T("Texture sharpness"), aniso_, T("Anisotropic filtering: floors and walls seen at a glancing angle stay sharp."));
 
+    screenFilters_ = new QCheckBox(T("The game's blur filter"));
+    addRow(f, QString(), screenFilters_,
+           T("TimeSplitters 2 softens its picture with copies of itself laid over it. Off gives a sharp picture; on, the blur is drawn at the output resolution."));
+
     frameCap_ = combo({{T("Adaptive (as the console)"), QStringLiteral("adaptive")}, {T("60 frames a second"), QStringLiteral("60")},
                        {T("30 frames a second"), QStringLiteral("30")}, {T("Uncapped (the game runs too fast)"), QStringLiteral("0")}});
     addRow(f, T("Frame rate"), frameCap_, T("TimeSplitters 2 runs its logic once a frame, so it must stay at 60. For smoother motion use frame interpolation. F10 changes it while playing."));
@@ -704,6 +708,7 @@ void MainWindow::load()
         const int a = conf_.getInt(QStringLiteral("anisotropy"), 1, 1, 16);
         select(aniso_, QString::number(a >= 16 ? 16 : a >= 8 ? 8 : a >= 4 ? 4 : a >= 2 ? 2 : 1));
     }
+    screenFilters_->setChecked(conf_.getInt(QStringLiteral("screen_filters"), 1, 0, 1) != 0);
     select(frameCap_, conf_.get(QStringLiteral("frame_cap"), QStringLiteral("adaptive")));
     select(interp_, QString::number(conf_.getInt(QStringLiteral("frame_interp"), 1, 1, 4)));
     fullscreen_->setChecked(conf_.getBool(QStringLiteral("fullscreen"), false));
@@ -766,6 +771,8 @@ bool MainWindow::save()
         conf_.set(QStringLiteral("ts2_fov"), fov_->value(),
                   QStringLiteral("TimeSplitters 2: field of view, percent of the game's (70-150).  [RECOMP_TS2_FOV]"));
     conf_.set(QStringLiteral("anisotropy"), valueOf(aniso_), QStringLiteral("Anisotropic filtering, 1-16.  [RECOMP_ANISO]"));
+    conf_.set(QStringLiteral("screen_filters"), screenFilters_->isChecked() ? 1 : 0,
+              QStringLiteral("The game's full-screen filters over a copy of its frame (blur): 1 on, 0 off.  [RECOMP_SCREEN_FILTERS]"));
     conf_.set(QStringLiteral("frame_cap"), valueOf(frameCap_),
               QStringLiteral("adaptive, 60, 30 or 0 (uncapped).  [RECOMP_FPS_CAP]"));
     conf_.set(QStringLiteral("frame_interp"), valueOf(interp_),

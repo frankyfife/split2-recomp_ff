@@ -285,20 +285,26 @@ The launcher and the game have Windows' default icon. Needs a `.ico` (16 to
 `setWindowIcon` for the Qt window. It must be our own drawing, not TS2's
 artwork or logo, which are not ours to ship.
 
-## 11. The blur filter (to do)
+## 11. The blur filter (done, Nov 2026)
 
-Seen by the player: the game's blur ("Unschärfe") is drawn at a low
-resolution, so with a resolution scale above 1 it smears the sharp picture
-into a soft one, as Prince of Persia's did on the Xbox.
+Seen by the player: the game's blur ("Unschärfe") was drawn at a low
+resolution, so at a resolution scale above 1 it smeared the sharp picture.
 
-- Find the pass: a capture (F11, frame interpolation off) where it shows,
-  replayed draw by draw, names the render target it is drawn into and its
-  size. Likely a fixed-size offscreen target (or a screen copy) that is not
-  scaled with the output, which is the toolkit's R3
-  (`xboxrecomp/docs/technical/widescreen-and-resolution.md`): then the fix
-  is there, for every title.
-- Make it switchable: a setting (`ts2_blur = 0`, launcher row) that skips
-  the pass's draws in TS2 once they are known by call site, as the UI sites
-  are.
-- [ ] Off: the picture stays sharp at scale 2 and above, nothing else gone.
-- [ ] On: the blurred image at output size, no blocky edges.
+What it is, from the player's F11 capture in Siberia (`d3d8_replay
+--list-draws`): after the world and before the HUD, TS2 copies the whole
+back buffer into a 640x480 texture (CopyRects, no render target), draws it
+back as a full-screen quad shifted by one pixel at about a fifth opacity,
+copies again and draws again: three passes (draws 250-252 there). The
+toolkit made that copy at the title's 640x480 by taking one scene pixel in
+25 at scale 5, unfiltered, so a coarse, shimmering image lay over the sharp
+one. Both fixes are in the toolkit (`widescreen-and-resolution.md`, R3):
+
+- The copy is held at the scene's size; the shift stays one console pixel,
+  so the softening is the console's, now sharp underneath.
+- `screen_filters = 0` (launcher: "Unschärfe-Filter des Spiels", Graphics
+  tab) leaves the passes out.
+
+Checked: the capture replayed at scale 5 (cliff detail sharp with it off,
+soft but no longer blocky with it on), and a live run to Siberia at scale 3
+with frame interpolation (no faults, 120 frames shown). The handheld's map
+(a rectangle copy) is a different path and unchanged.
