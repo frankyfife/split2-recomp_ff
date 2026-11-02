@@ -873,6 +873,56 @@ static void ts2_aim_mode_auto(uint32_t obj, int moved)
     }
 }
 
+/* RECOMP_TS2_WPN_PROBE=1: every dword of player 1's object (0xD3C) and its
+ * character (+0x1BC, +0x124; 0x1580) that changes from one frame to the
+ * next, with the frame. For finding the weapon change's timer and the rate
+ * of fire (docs/pc-work-plan.md, 8 and 9): play, switch weapons and fire,
+ * and the fields that move only then are the ones. Not yet run with more
+ * than one weapon in hand. */
+static void ts2_weapon_probe(uint32_t obj)
+{
+    enum { SPAN = 0x1580, PSPAN = 0xD3C };
+    static int on = -1, lines;
+    static uint32_t last[SPAN / 4], plast[PSPAN / 4], last_chr;
+    static unsigned long frame;
+    uint32_t body, chr, k;
+
+    if (on < 0)
+        on = getenv("RECOMP_TS2_WPN_PROBE") != NULL;
+    if (!on || lines > 400000)
+        return;
+    frame++;
+    body = TS2_MEM32_EARLY(obj + 0x1BC);
+    chr = body >= 0x10000u ? TS2_MEM32_EARLY(body + 0x124) : 0;
+    if (chr < 0x10000u)
+        return;
+    if (chr != last_chr) {
+        for (k = 0; k < SPAN / 4; k++)
+            last[k] = TS2_MEM32_EARLY(chr + k * 4);
+        for (k = 0; k < PSPAN / 4; k++)
+            plast[k] = TS2_MEM32_EARLY(obj + k * 4);
+        last_chr = chr;
+        fprintf(stderr, "[TS2-WPN] player %08X body %08X chr %08X\n", obj, body, chr);
+        return;
+    }
+    for (k = 0; k < SPAN / 4; k++) {
+        uint32_t v = TS2_MEM32_EARLY(chr + k * 4);
+        if (v != last[k]) {
+            fprintf(stderr, "[TS2-WPN] f%lu chr+0x%03X %08X -> %08X\n", frame, k * 4, last[k], v);
+            lines++;
+        }
+        last[k] = v;
+    }
+    for (k = 0; k < PSPAN / 4; k++) {
+        uint32_t v = TS2_MEM32_EARLY(obj + k * 4);
+        if (v != plast[k]) {
+            fprintf(stderr, "[TS2-WPN] f%lu P+0x%03X %08X -> %08X\n", frame, k * 4, plast[k], v);
+            lines++;
+        }
+        plast[k] = v;
+    }
+}
+
 static void ts2_aim_frame(int in_level)
 {
     float dx, dy, scale, yaw, pitch;
@@ -894,6 +944,7 @@ static void ts2_aim_frame(int in_level)
         recomp_mouse_take(NULL, NULL);
         return;
     }
+    ts2_weapon_probe(ya - g_ts2_aim.yaw);
     control = g_ts2_aim.base ? ts2_aim_in_control(ya - g_ts2_aim.yaw) : 1;
     if (control == 2)
         return;                         /* a turret or vehicle: the stick has it */
