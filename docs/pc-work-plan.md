@@ -463,13 +463,26 @@ nothing there.
 
 - [ ] By hand on the 5.1 receiver: a guard behind you is heard behind you.
 
-## 15. Running (to do)
+## 15. Running (first version, Nov 2026)
 
-Asked for by the player: TS2 has no run. A button the console's layout
-leaves free on the pad, and Shift on the keyboard, held for a faster walk:
-find the walk speed the left stick scales (the player's movement code
-near the look code, `FUN_00148EB0`) and raise it while the button is held,
-through the port-0 filter or a hook there.
+Asked for by the player: TS2 has no run. The walk, `FUN_00145300` (PAL;
+USA `FUN_00144EB0`, the same 2711 bytes), moves the player being moved (the
+global PAL 0x00497340, USA 0x00497100, `k_ts2_player_now`) by a forward and
+a sideways step for the frame, its third and sixth arguments, and caps the
+two together at the frame's share of a top speed per stance (the player's
++0xC0 + 4 * stance, +0x15C). `ts2_run_walk` wraps it: while Black is held,
+for player 1 only, both steps and the cap are multiplied by
+`ts2_run_speed` (percent, 160) for the call and the cap put back after.
+Black does not reach the game (its Standard layout has no use for it).
+`ts2_run = 0` turns it off, `ts2_run_toggle = 1` makes a press switch it.
+The launcher's Controls tab has "Running speed" and the toggle; its PC
+layout puts Black on left Shift. `RECOMP_TS2_RUN_TRACE=1` logs player 1's
+steps and position every 5 walks that move. Checked in Siberia with the
+stick held forward: 0.52 units a 5 walks walking, 0.82 with Black held
+(1.6 times), sliding along a wall as before, and back to 0.52 after.
+
+- [ ] By hand: the feel, the legs' animation (it plays at walking pace).
+- [ ] USA: wrapped by its bytes, not run.
 
 ## 16. Jumping (first version, Nov 2026)
 

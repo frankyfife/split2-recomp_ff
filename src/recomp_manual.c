@@ -2148,6 +2148,97 @@ static void ts2_switch_trace(uint32_t obj)
     last_have = have;
 }
 
+/* ── TimeSplitters 2: running ── */
+
+/*
+ * TS2 has no run. The walk (FUN_00145300, PAL: the player's movement mode
+ * 0) moves the player by a forward and a sideways step for the frame, its
+ * third and sixth arguments, which the caller makes from the left stick,
+ * and caps the two together at the frame's share of a top speed per
+ * stance, the player's +0xC0 + 4 * stance (+0x15C: standing, crouching).
+ * The game keeps the player being moved in a global, k_ts2_player_now; the
+ * walk is player 1's when that is the first of the players' table.
+ *
+ * While the black button is held (Shift in the launcher's PC layout; the
+ * game's Standard layout has no use for Black, as for White, the jump) both
+ * steps and the cap are multiplied by ts2_run_speed (percent, 160 by
+ * default; RECOMP_TS2_RUN_SPEED) for that call and the cap put back after,
+ * so collision, slopes and the rest of the walk see a faster stick and
+ * nothing else changes. The button does not reach the game. ts2_run = 0
+ * (RECOMP_TS2_RUN) turns it off; ts2_run_toggle = 1 makes a press switch
+ * it on and off rather than holding it.
+ */
+extern const uint32_t k_ts2_player_now;
+
+static volatile int g_run_down;
+static int          g_run_on = -1, g_run_toggle, g_run_latched;
+static float        g_run_factor = 1.0f;
+
+static void ts2_run_filter(uint8_t analog[8])
+{
+    if (g_run_on == 0)
+        return;
+    g_run_down = analog[4] > 30;            /* BLACK */
+    analog[4] = 0;
+}
+
+static void ts2_run_walk(void (*walk)(void))
+{
+    uint32_t now, p1, cap_at = 0, cap_was = 0;
+    float step_f, step_s;
+    static int down_last;
+    int running;
+
+    if (g_run_on < 0) {
+        const char *v = recomp_config_lookup("RECOMP_TS2_RUN_SPEED", "ts2_run_speed");
+        int pct = v && *v ? atoi(v) : 160;
+        if (pct < 100) pct = 100;
+        if (pct > 300) pct = 300;
+        g_run_factor = (float)pct / 100.0f;
+        g_run_toggle = recomp_config_bool("RECOMP_TS2_RUN_TOGGLE", "ts2_run_toggle", 0);
+        g_run_on = recomp_config_bool("RECOMP_TS2_RUN", "ts2_run", 1);
+    }
+    if (g_run_toggle) {
+        if (g_run_down && !down_last)
+            g_run_latched = !g_run_latched;
+        running = g_run_latched;
+    } else {
+        running = g_run_down;
+    }
+    down_last = g_run_down;
+
+    now = k_ts2_player_now ? TS2_MEM32_EARLY(k_ts2_player_now) : 0;
+    p1 = g_ts2_aim.base ? TS2_MEM32_EARLY(g_ts2_aim.base) : 0;
+    step_f = TS2_MEMF(g_esp + 0x18u);
+    step_s = TS2_MEMF(g_esp + 0x0Cu);
+    if (g_run_on && running && now >= 0x10000u && now == p1) {
+        uint32_t stance = TS2_MEM32_EARLY(now + 0x15Cu);
+
+        if (stance < 4u) {
+            cap_at = now + 0xC0u + 4u * stance;
+            cap_was = TS2_MEM32_EARLY(cap_at);
+            TS2_MEMF(cap_at) *= g_run_factor;
+        }
+        TS2_MEMF(g_esp + 0x0Cu) *= g_run_factor;   /* the frame's steps */
+        TS2_MEMF(g_esp + 0x18u) *= g_run_factor;
+    }
+    walk();
+    if (cap_at)
+        TS2_MEM32_EARLY(cap_at) = cap_was;
+    {
+        /* RECOMP_TS2_RUN_TRACE=1: player 1's steps (before running) and
+         * position every 5 walks that move. */
+        static int trace = -1;
+        static unsigned long n;
+        if (trace < 0)
+            trace = getenv("RECOMP_TS2_RUN_TRACE") != NULL;
+        if (trace && now >= 0x10000u && now == p1 && (step_f != 0.0f || step_s != 0.0f) &&
+            ++n % 5 == 0 && n < 2000)
+            fprintf(stderr, "[TS2-RUN] walk %lu: steps %.4f %.4f, x %.3f z %.3f, running %d\n", n,
+                    step_f, step_s, TS2_MEMF(now + 0xF0u), TS2_MEMF(now + 0xF8u), running);
+    }
+}
+
 /* ── TimeSplitters 2: a free camera ── */
 
 /*
@@ -2191,6 +2282,7 @@ static void ts2_freecam_filter(uint16_t *buttons, uint8_t analog[8], int16_t sti
 
     ts2_menu_filter(buttons, analog);
     ts2_jump_filter(analog);
+    ts2_run_filter(analog);
     int both = (*buttons & 0xC0u) == 0xC0u;
 
     if (both && !chord_held)

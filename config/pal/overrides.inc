@@ -321,6 +321,12 @@ const uint32_t k_ts2_weather_sites[] = { 0x001B2078, 0 };
  * to write them each frame. Read in Ghidra: FUN_00035960, case 8. */
 const Ts2Freecam k_ts2_freecam = { 0x004B2CA0, 0x004B2CB0, 0x004B2CC0, 0x004B2CCC, 0x004B2CD8 };
 
+/* The player being moved, and the walk (the player's movement mode 0),
+ * FUN_00145300: running (ts2_run_walk) widens its steps and cap. */
+const uint32_t k_ts2_player_now = 0x00497340;
+extern void sub_00145300_gen(void);
+void sub_00145300(void) { ts2_run_walk(sub_00145300_gen); }
+
 /* The menus' panel update, FUN_000F1D30(screen, panel): the mouse points at
  * menus through it (ts2_menu_panel). Found by a write watch on the title
  * screen's selected row while the D-pad moved it. */

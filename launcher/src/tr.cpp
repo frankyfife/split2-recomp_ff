@@ -103,6 +103,13 @@ const QHash<QString, QString> &german()
                         "Es ändert die Waffentabelle des Spiels, also gilt es auch für die Waffen der Gegner.")},
         {QStringLiteral("All back to 100 %"), QStringLiteral("Alle auf 100 % zurück")},
         {QStringLiteral("Weapon switch speed"), QStringLiteral("Waffenwechsel-Tempo")},
+        {QStringLiteral("Moving"), QStringLiteral("Bewegung")},
+        {QStringLiteral("Running speed"), QStringLiteral("Renn-Tempo")},
+        {QStringLiteral("TimeSplitters 2 has no run: while Black is held (Shift; on a pad the button bound to Black below) the player "
+                        "moves this much faster. 100 turns it off."),
+         QStringLiteral("TimeSplitters 2 kennt kein Rennen: Solange Black gehalten wird (Shift; am Pad die Taste, die unten "
+                        "auf Black liegt), läuft die Figur so viel schneller. 100 schaltet es ab.")},
+        {QStringLiteral("A press switches running on and off"), QStringLiteral("Ein Druck schaltet Rennen ein und aus")},
         {QStringLiteral("How fast a gun is put away and the next one drawn, as a percentage of the game's (0.35 s each): "
                         "200 switches in half the time."),
          QStringLiteral("Wie schnell eine Waffe weggesteckt und die nächste gezogen wird, in Prozent des Originals "

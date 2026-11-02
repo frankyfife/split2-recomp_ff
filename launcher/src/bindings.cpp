@@ -326,6 +326,7 @@ void File::applyPcPreset()
     //   D-pad up/dn  the menus              the arrows
     //   Start, Back  pause, objectives      Escape (also frees the pointer), Tab
     //   White        jump (not the game's own: src/recomp_manual.c)   Space
+    //   Black        run, held (not the game's own either)           Shift
     // The right stick is the mouse's, so no keys are on it.
     static const struct { const char *control; const char *src[3]; } k[] = {
         {"lstick_up", {"key:W"}},     {"lstick_down", {"key:S"}},
@@ -342,7 +343,7 @@ void File::applyPcPreset()
         {"dpad_right", {"mouse:wheeldown", "key:RIGHT"}},
         {"dpad_up", {"key:UP"}},      {"dpad_down", {"key:DOWN"}},
         {"start", {"key:ESCAPE"}},    {"back", {"key:TAB"}},
-        {"white", {"key:SPACE"}},     {"black", {}},
+        {"white", {"key:SPACE"}},     {"black", {"key:LSHIFT"}},
         {"rstick_up", {}}, {"rstick_down", {}}, {"rstick_left", {}}, {"rstick_right", {}},
     };
     resetController1();

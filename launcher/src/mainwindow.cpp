@@ -519,6 +519,19 @@ QWidget *MainWindow::buildControlsTab()
     addRow(f, T("Slower when zoomed"), zoomMatch_,
            T("100: the mouse slows with the zoom, so a movement covers the same part of the picture. 0: the same speed zoomed."));
     l->addWidget(aimBox);
+
+    auto *moveBox = new QGroupBox(T("Moving"));
+    auto *mf = new QFormLayout(moveBox);
+    runSpeed_ = new QSpinBox;
+    runSpeed_->setRange(100, 300);
+    runSpeed_->setSingleStep(10);
+    runSpeed_->setSuffix(QStringLiteral(" %"));
+    addRow(mf, T("Running speed"), runSpeed_,
+           T("TimeSplitters 2 has no run: while Black is held (Shift; on a pad the button bound to Black below) the player "
+             "moves this much faster. 100 turns it off."));
+    runToggle_ = new QCheckBox(T("A press switches running on and off"));
+    addRow(mf, QString(), runToggle_);
+    l->addWidget(moveBox);
     connect(sens_, &QSlider::valueChanged, sensBox_, &QSpinBox::setValue);
     connect(sensBox_, qOverload<int>(&QSpinBox::valueChanged), sens_, &QSlider::setValue);
     connect(sensReset, &QPushButton::clicked, this, [this] { sens_->setValue(kSensDefault); });
@@ -788,6 +801,9 @@ void MainWindow::load()
     invert_->setChecked(conf_.getBool(QStringLiteral("mouse_invert"), false));
     autoAim_->setChecked(conf_.get(QStringLiteral("ts2_aim_mode"), QStringLiteral("auto")) != QLatin1String("button"));
     pitchLimit_->setValue(conf_.getInt(QStringLiteral("ts2_pitch_limit"), 85, 40, 89));
+    runSpeed_->setValue(conf_.getBool(QStringLiteral("ts2_run"), true)
+                            ? conf_.getInt(QStringLiteral("ts2_run_speed"), 160, 100, 300) : 100);
+    runToggle_->setChecked(conf_.getBool(QStringLiteral("ts2_run_toggle"), false));
     zoomMatch_->setValue(conf_.getInt(QStringLiteral("ts2_zoom_match"), 100, 0, 100));
     rofAll_->setValue(conf_.getInt(QStringLiteral("ts2_rof"), 100, 25, 400));
     switchSpeed_->setValue(conf_.getInt(QStringLiteral("ts2_switch"), 100, 25, 400));
@@ -874,6 +890,12 @@ bool MainWindow::save()
               QStringLiteral("TimeSplitters 2: auto holds the aim mode on with the mouse, button keeps the console's.  [RECOMP_TS2_AIM_MODE]"));
     conf_.set(QStringLiteral("ts2_pitch_limit"), pitchLimit_->value(),
               QStringLiteral("TimeSplitters 2: degrees the mouse tilts the view, 40-89.  [RECOMP_TS2_PITCH_LIMIT]"));
+    conf_.setBool(QStringLiteral("ts2_run"), runSpeed_->value() > 100,
+                  QStringLiteral("TimeSplitters 2: running while Black is held.  [RECOMP_TS2_RUN]"));
+    conf_.set(QStringLiteral("ts2_run_speed"), runSpeed_->value() > 100 ? runSpeed_->value() : 160,
+              QStringLiteral("TimeSplitters 2: running speed, percent of walking, 100-300.  [RECOMP_TS2_RUN_SPEED]"));
+    conf_.setBool(QStringLiteral("ts2_run_toggle"), runToggle_->isChecked(),
+                  QStringLiteral("TimeSplitters 2: 1 makes a press of Black switch running on and off.  [RECOMP_TS2_RUN_TOGGLE]"));
     if (switchSpeed_->value() == 100)
         conf_.unset(QStringLiteral("ts2_switch"));
     else
