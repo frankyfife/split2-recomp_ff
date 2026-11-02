@@ -250,6 +250,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), conf_(paths::sett
     tabs_->addTab(buildGameTab(), T("Game"));
     tabs_->addTab(buildVideoTab(), T("Graphics"));
     tabs_->addTab(buildControlsTab(), T("Controls"));
+    tabs_->addTab(buildWeaponsTab(), T("Weapons"));
     tabs_->addTab(buildAudioTab(), T("Sound"));
     tabs_->addTab(buildLinkTab(), T("System Link"));
     tabs_->addTab(buildAdvancedTab(), T("Advanced"));
@@ -587,6 +588,54 @@ QWidget *MainWindow::buildControlsTab()
     return scroll;
 }
 
+// The weapons a player holds, by their row in the game's weapon table and
+// named after their model files (ob/guns/<name>_ph.xbr): src/recomp_manual.c,
+// "rate of fire per weapon", says how the rows were found.
+static const struct { int row; const char *name; } kWeapons[] = {
+    {0, "Silenced Pistol"},   {1, "Silenced Luger"},      {2, "Luger"},
+    {3, "Magnum"},            {4, "Assault Shotgun"},     {5, "Minigun"},
+    {6, "Sniper Rifle"},      {7, "Bolt-Action Rifle"},   {8, "Flamethrower"},
+    {9, "Fire Extinguisher"}, {10, "AK-47"},              {11, "Electro Gun"},
+    {12, "Sci-Fi Handgun"},   {13, "Rocket Launcher"},    {14, "Homing Rocket Launcher"},
+    {15, "Laser"},            {16, "Plasma Machine Gun"}, {17, "Grenade Launcher"},
+    {19, "Proximity Mine"},   {20, "Remote Mine"},        {21, "Timed Mine"},
+    {22, "TNT"},              {23, "Tommy Gun"},          {24, "Uzi"},
+    {25, "Double-Barrel Shotgun"}, {26, "Brick"},         {36, "Crossbow"},
+    {37, "Powder Keg"},
+};
+
+static QSpinBox *percentBox()
+{
+    auto *b = new QSpinBox;
+    b->setRange(25, 400);
+    b->setSingleStep(10);
+    b->setSuffix(QStringLiteral(" %"));
+    return b;
+}
+
+QWidget *MainWindow::buildWeaponsTab()
+{
+    QFormLayout *f;
+    QWidget *w = page(&f);
+    rofAll_ = percentBox();
+    addRow(f, T("Rate of fire, all weapons"), rofAll_,
+           T("How often the guns fire, as a percentage of the game's: 200 fires twice as often, 50 half as often. "
+             "The game's own weapon table changes, so the enemies' guns follow too."));
+    for (const auto &k : kWeapons) {
+        QSpinBox *b = percentBox();
+        rofWeapon_.append({k.row, b});
+        addRow(f, T(k.name), b);
+    }
+    auto *reset = new QPushButton(T("All back to 100 %"));
+    connect(reset, &QPushButton::clicked, this, [this] {
+        rofAll_->setValue(100);
+        for (const auto &e : rofWeapon_)
+            e.second->setValue(100);
+    });
+    addRow(f, QString(), reset);
+    return w;
+}
+
 QWidget *MainWindow::buildAudioTab()
 {
     QFormLayout *f;
@@ -735,6 +784,9 @@ void MainWindow::load()
     autoAim_->setChecked(conf_.get(QStringLiteral("ts2_aim_mode"), QStringLiteral("auto")) != QLatin1String("button"));
     pitchLimit_->setValue(conf_.getInt(QStringLiteral("ts2_pitch_limit"), 85, 40, 89));
     zoomMatch_->setValue(conf_.getInt(QStringLiteral("ts2_zoom_match"), 100, 0, 100));
+    rofAll_->setValue(conf_.getInt(QStringLiteral("ts2_rof"), 100, 25, 400));
+    for (const auto &e : rofWeapon_)
+        e.second->setValue(conf_.getInt(QStringLiteral("ts2_rof_%1").arg(e.first), 100, 25, 400));
 
     select(audioPath_, conf_.get(QStringLiteral("audio"), QStringLiteral("native")));
     select(surround_, conf_.get(QStringLiteral("surround"), QStringLiteral("auto")));
@@ -816,6 +868,19 @@ bool MainWindow::save()
               QStringLiteral("TimeSplitters 2: auto holds the aim mode on with the mouse, button keeps the console's.  [RECOMP_TS2_AIM_MODE]"));
     conf_.set(QStringLiteral("ts2_pitch_limit"), pitchLimit_->value(),
               QStringLiteral("TimeSplitters 2: degrees the mouse tilts the view, 40-89.  [RECOMP_TS2_PITCH_LIMIT]"));
+    if (rofAll_->value() == 100)
+        conf_.unset(QStringLiteral("ts2_rof"));
+    else
+        conf_.set(QStringLiteral("ts2_rof"), rofAll_->value(),
+                  QStringLiteral("TimeSplitters 2: rate of fire of every weapon, percent (100 the game's).  [RECOMP_TS2_ROF]"));
+    for (const auto &e : rofWeapon_) {
+        const QString key = QStringLiteral("ts2_rof_%1").arg(e.first);
+        if (e.second->value() == 100)
+            conf_.unset(key);
+        else
+            conf_.set(key, e.second->value(),
+                      QStringLiteral("TimeSplitters 2: rate of fire of weapon %1, percent.").arg(e.first));
+    }
     conf_.set(QStringLiteral("ts2_zoom_match"), zoomMatch_->value(),
               QStringLiteral("TimeSplitters 2: 0-100, how much the mouse slows when zoomed.  [RECOMP_TS2_ZOOM_MATCH]"));
 

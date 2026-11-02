@@ -3,6 +3,8 @@
 // Save; closing the window writes nothing.
 #pragma once
 
+#include <QList>
+#include <QPair>
 #include "bindings.h"
 #include "builder.h"
 #include "conffile.h"
@@ -38,6 +40,7 @@ private:
     QWidget *buildVideoTab();
     QWidget *buildControlsTab();
     QWidget *buildAudioTab();
+    QWidget *buildWeaponsTab();
     QWidget *buildLinkTab();
     QWidget *buildAdvancedTab();
     QWidget *buildAboutTab();
@@ -77,6 +80,8 @@ private:
     QCheckBox *screenFilters_ = nullptr, *sunGlare_ = nullptr, *weather_ = nullptr;
     QCheckBox *mouseAim_ = nullptr, *invert_ = nullptr, *autoAim_ = nullptr;
     QSpinBox *pitchLimit_ = nullptr, *zoomMatch_ = nullptr;
+    QSpinBox *rofAll_ = nullptr;
+    QList<QPair<int, QSpinBox *>> rofWeapon_;   // weapon row, its rate
     QComboBox *aimMode_ = nullptr, *device_ = nullptr, *padApi_ = nullptr;
     QSlider *sens_ = nullptr;
     QSpinBox *sensBox_ = nullptr;

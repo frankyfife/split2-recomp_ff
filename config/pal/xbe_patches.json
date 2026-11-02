@@ -1,7 +1,7 @@
 {
  "format": 1,
  "xbe_sha1": "2809eb147385723eaa90c425be89ee4db033fc5a",
- "comment": "TimeSplitters 2 PAL: the character roster with 32 spare slots (127-158), for characters a mod adds (ts2/characters.ini). Written by tools/ts2_roster_patches.py; docs/formats/roster.md, 'Room for more characters', says why each site changes. sub_0008FAE0's search (0x0008FB6E) keeps its 127: recomp_manual.c covers it. Then 60 ticks a second, as the USA release has, where the PAL release turned seconds into ticks with 50 (366 sites, 'tick rate:'; tools/ts2_tick_rate.py).",
+ "comment": "TimeSplitters 2 PAL: the character roster with 32 spare slots (127-158), for characters a mod adds (ts2/characters.ini). Written by tools/ts2_roster_patches.py; docs/formats/roster.md, 'Room for more characters', says why each site changes. sub_0008FAE0's search (0x0008FB6E) keeps its 127: recomp_manual.c covers it. Then 60 ticks a second, as the USA release has, where the PAL release turned seconds into ticks with 50 (529 sites, 'tick rate:'; tools/ts2_tick_rate.py).",
  "operations": [
   {
    "op": "add_section",
@@ -3589,6 +3589,1310 @@
    "old": "0AD7A33C",
    "new": "8988883C",
    "why": "tick rate: mov dword ptr [esi + 0xe8], 0x3ca3d70a: 1/50 to 1/60 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C38F8",
+   "data": true,
+   "old": "19000000",
+   "new": "1E000000",
+   "why": "tick rate: weapon table, ticks between shots: 30 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C38FC",
+   "data": true,
+   "old": "1B000000",
+   "new": "20000000",
+   "why": "tick rate: weapon table, ticks between shots: 32 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C39A8",
+   "data": true,
+   "old": "19000000",
+   "new": "1E000000",
+   "why": "tick rate: weapon table, ticks between shots: 30 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C39AC",
+   "data": true,
+   "old": "1B000000",
+   "new": "20000000",
+   "why": "tick rate: weapon table, ticks between shots: 32 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C3B38",
+   "data": true,
+   "old": "12000000",
+   "new": "16000000",
+   "why": "tick rate: weapon table, ticks between shots: 22 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C3B3C",
+   "data": true,
+   "old": "1E000000",
+   "new": "23000000",
+   "why": "tick rate: weapon table, ticks between shots: 35 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C3BE8",
+   "data": true,
+   "old": "12000000",
+   "new": "16000000",
+   "why": "tick rate: weapon table, ticks between shots: 22 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C3BEC",
+   "data": true,
+   "old": "1E000000",
+   "new": "23000000",
+   "why": "tick rate: weapon table, ticks between shots: 35 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C3D78",
+   "data": true,
+   "old": "12000000",
+   "new": "16000000",
+   "why": "tick rate: weapon table, ticks between shots: 22 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C3D7C",
+   "data": true,
+   "old": "1E000000",
+   "new": "23000000",
+   "why": "tick rate: weapon table, ticks between shots: 35 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C3E28",
+   "data": true,
+   "old": "12000000",
+   "new": "16000000",
+   "why": "tick rate: weapon table, ticks between shots: 22 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C3E2C",
+   "data": true,
+   "old": "1E000000",
+   "new": "23000000",
+   "why": "tick rate: weapon table, ticks between shots: 35 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C3FB8",
+   "data": true,
+   "old": "11000000",
+   "new": "14000000",
+   "why": "tick rate: weapon table, ticks between shots: 20 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C3FBC",
+   "data": true,
+   "old": "22000000",
+   "new": "28000000",
+   "why": "tick rate: weapon table, ticks between shots: 40 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C4068",
+   "data": true,
+   "old": "11000000",
+   "new": "14000000",
+   "why": "tick rate: weapon table, ticks between shots: 20 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C406C",
+   "data": true,
+   "old": "22000000",
+   "new": "28000000",
+   "why": "tick rate: weapon table, ticks between shots: 40 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C41F8",
+   "data": true,
+   "old": "28000000",
+   "new": "30000000",
+   "why": "tick rate: weapon table, ticks between shots: 48 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C42A8",
+   "data": true,
+   "old": "2E000000",
+   "new": "37000000",
+   "why": "tick rate: weapon table, ticks between shots: 55 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C42AC",
+   "data": true,
+   "old": "2E000000",
+   "new": "37000000",
+   "why": "tick rate: weapon table, ticks between shots: 55 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C42C8",
+   "data": true,
+   "old": "0A000000",
+   "new": "0C000000",
+   "why": "tick rate: weapon table, ticks between shots: 12 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C4438",
+   "data": true,
+   "old": "0A000000",
+   "new": "0C000000",
+   "why": "tick rate: weapon table, ticks between shots: 12 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C4458",
+   "data": true,
+   "old": "03000000",
+   "new": "04000000",
+   "why": "tick rate: weapon table, ticks between shots: 4 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C44E8",
+   "data": true,
+   "old": "0A000000",
+   "new": "0F000000",
+   "why": "tick rate: weapon table, ticks between shots: 15 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C44EC",
+   "data": true,
+   "old": "0A000000",
+   "new": "0F000000",
+   "why": "tick rate: weapon table, ticks between shots: 15 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C4678",
+   "data": true,
+   "old": "25000000",
+   "new": "2B000000",
+   "why": "tick rate: weapon table, ticks between shots: 43 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C467C",
+   "data": true,
+   "old": "32000000",
+   "new": "3C000000",
+   "why": "tick rate: weapon table, ticks between shots: 60 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C4728",
+   "data": true,
+   "old": "25000000",
+   "new": "2B000000",
+   "why": "tick rate: weapon table, ticks between shots: 43 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C472C",
+   "data": true,
+   "old": "32000000",
+   "new": "3C000000",
+   "why": "tick rate: weapon table, ticks between shots: 60 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C48B8",
+   "data": true,
+   "old": "25000000",
+   "new": "2B000000",
+   "why": "tick rate: weapon table, ticks between shots: 43 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C48BC",
+   "data": true,
+   "old": "32000000",
+   "new": "3C000000",
+   "why": "tick rate: weapon table, ticks between shots: 60 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C4968",
+   "data": true,
+   "old": "25000000",
+   "new": "2B000000",
+   "why": "tick rate: weapon table, ticks between shots: 43 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C496C",
+   "data": true,
+   "old": "32000000",
+   "new": "3C000000",
+   "why": "tick rate: weapon table, ticks between shots: 60 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C4F78",
+   "data": true,
+   "old": "06000000",
+   "new": "08000000",
+   "why": "tick rate: weapon table, ticks between shots: 8 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C4F7C",
+   "data": true,
+   "old": "06000000",
+   "new": "08000000",
+   "why": "tick rate: weapon table, ticks between shots: 8 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C5028",
+   "data": true,
+   "old": "19000000",
+   "new": "1E000000",
+   "why": "tick rate: weapon table, ticks between shots: 30 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C502C",
+   "data": true,
+   "old": "32000000",
+   "new": "3C000000",
+   "why": "tick rate: weapon table, ticks between shots: 60 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C53F8",
+   "data": true,
+   "old": "12000000",
+   "new": "15000000",
+   "why": "tick rate: weapon table, ticks between shots: 21 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C53FC",
+   "data": true,
+   "old": "12000000",
+   "new": "15000000",
+   "why": "tick rate: weapon table, ticks between shots: 21 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C5418",
+   "data": true,
+   "old": "05000000",
+   "new": "06000000",
+   "why": "tick rate: weapon table, ticks between shots: 6 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C54A8",
+   "data": true,
+   "old": "12000000",
+   "new": "15000000",
+   "why": "tick rate: weapon table, ticks between shots: 21 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C54AC",
+   "data": true,
+   "old": "12000000",
+   "new": "15000000",
+   "why": "tick rate: weapon table, ticks between shots: 21 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C54C8",
+   "data": true,
+   "old": "06000000",
+   "new": "07000000",
+   "why": "tick rate: weapon table, ticks between shots: 7 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C5638",
+   "data": true,
+   "old": "19000000",
+   "new": "1E000000",
+   "why": "tick rate: weapon table, ticks between shots: 30 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C563C",
+   "data": true,
+   "old": "32000000",
+   "new": "3C000000",
+   "why": "tick rate: weapon table, ticks between shots: 60 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C56E8",
+   "data": true,
+   "old": "4B000000",
+   "new": "5A000000",
+   "why": "tick rate: weapon table, ticks between shots: 90 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C56EC",
+   "data": true,
+   "old": "64000000",
+   "new": "78000000",
+   "why": "tick rate: weapon table, ticks between shots: 120 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C5878",
+   "data": true,
+   "old": "19000000",
+   "new": "1E000000",
+   "why": "tick rate: weapon table, ticks between shots: 30 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C587C",
+   "data": true,
+   "old": "32000000",
+   "new": "3C000000",
+   "why": "tick rate: weapon table, ticks between shots: 60 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C5928",
+   "data": true,
+   "old": "4B000000",
+   "new": "5A000000",
+   "why": "tick rate: weapon table, ticks between shots: 90 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C592C",
+   "data": true,
+   "old": "64000000",
+   "new": "78000000",
+   "why": "tick rate: weapon table, ticks between shots: 120 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C5AB8",
+   "data": true,
+   "old": "11000000",
+   "new": "14000000",
+   "why": "tick rate: weapon table, ticks between shots: 20 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C5DA8",
+   "data": true,
+   "old": "14000000",
+   "new": "19000000",
+   "why": "tick rate: weapon table, ticks between shots: 25 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C5DAC",
+   "data": true,
+   "old": "19000000",
+   "new": "1E000000",
+   "why": "tick rate: weapon table, ticks between shots: 30 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C5F38",
+   "data": true,
+   "old": "37000000",
+   "new": "41000000",
+   "why": "tick rate: weapon table, ticks between shots: 65 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C5F3C",
+   "data": true,
+   "old": "3C000000",
+   "new": "48000000",
+   "why": "tick rate: weapon table, ticks between shots: 72 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C5FE8",
+   "data": true,
+   "old": "37000000",
+   "new": "41000000",
+   "why": "tick rate: weapon table, ticks between shots: 65 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C5FEC",
+   "data": true,
+   "old": "3C000000",
+   "new": "48000000",
+   "why": "tick rate: weapon table, ticks between shots: 72 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C6178",
+   "data": true,
+   "old": "19000000",
+   "new": "1E000000",
+   "why": "tick rate: weapon table, ticks between shots: 30 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C617C",
+   "data": true,
+   "old": "32000000",
+   "new": "3C000000",
+   "why": "tick rate: weapon table, ticks between shots: 60 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C6228",
+   "data": true,
+   "old": "19000000",
+   "new": "1E000000",
+   "why": "tick rate: weapon table, ticks between shots: 30 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C622C",
+   "data": true,
+   "old": "32000000",
+   "new": "3C000000",
+   "why": "tick rate: weapon table, ticks between shots: 60 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C63B8",
+   "data": true,
+   "old": "22000000",
+   "new": "28000000",
+   "why": "tick rate: weapon table, ticks between shots: 40 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C63BC",
+   "data": true,
+   "old": "22000000",
+   "new": "28000000",
+   "why": "tick rate: weapon table, ticks between shots: 40 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C6468",
+   "data": true,
+   "old": "22000000",
+   "new": "28000000",
+   "why": "tick rate: weapon table, ticks between shots: 40 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C646C",
+   "data": true,
+   "old": "22000000",
+   "new": "28000000",
+   "why": "tick rate: weapon table, ticks between shots: 40 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C65F8",
+   "data": true,
+   "old": "22000000",
+   "new": "28000000",
+   "why": "tick rate: weapon table, ticks between shots: 40 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C65FC",
+   "data": true,
+   "old": "22000000",
+   "new": "28000000",
+   "why": "tick rate: weapon table, ticks between shots: 40 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C66A8",
+   "data": true,
+   "old": "09000000",
+   "new": "0A000000",
+   "why": "tick rate: weapon table, ticks between shots: 10 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C66AC",
+   "data": true,
+   "old": "09000000",
+   "new": "0A000000",
+   "why": "tick rate: weapon table, ticks between shots: 10 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C6838",
+   "data": true,
+   "old": "22000000",
+   "new": "28000000",
+   "why": "tick rate: weapon table, ticks between shots: 40 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C683C",
+   "data": true,
+   "old": "22000000",
+   "new": "28000000",
+   "why": "tick rate: weapon table, ticks between shots: 40 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C68E8",
+   "data": true,
+   "old": "22000000",
+   "new": "28000000",
+   "why": "tick rate: weapon table, ticks between shots: 40 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C68EC",
+   "data": true,
+   "old": "22000000",
+   "new": "28000000",
+   "why": "tick rate: weapon table, ticks between shots: 40 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C6A78",
+   "data": true,
+   "old": "22000000",
+   "new": "28000000",
+   "why": "tick rate: weapon table, ticks between shots: 40 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C6A7C",
+   "data": true,
+   "old": "22000000",
+   "new": "28000000",
+   "why": "tick rate: weapon table, ticks between shots: 40 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C6B28",
+   "data": true,
+   "old": "22000000",
+   "new": "28000000",
+   "why": "tick rate: weapon table, ticks between shots: 40 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C6B2C",
+   "data": true,
+   "old": "22000000",
+   "new": "28000000",
+   "why": "tick rate: weapon table, ticks between shots: 40 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C6CB8",
+   "data": true,
+   "old": "06000000",
+   "new": "07000000",
+   "why": "tick rate: weapon table, ticks between shots: 7 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C6CBC",
+   "data": true,
+   "old": "06000000",
+   "new": "07000000",
+   "why": "tick rate: weapon table, ticks between shots: 7 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C6D68",
+   "data": true,
+   "old": "06000000",
+   "new": "07000000",
+   "why": "tick rate: weapon table, ticks between shots: 7 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C6D6C",
+   "data": true,
+   "old": "06000000",
+   "new": "07000000",
+   "why": "tick rate: weapon table, ticks between shots: 7 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C6EF8",
+   "data": true,
+   "old": "06000000",
+   "new": "08000000",
+   "why": "tick rate: weapon table, ticks between shots: 8 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C6EFC",
+   "data": true,
+   "old": "03000000",
+   "new": "04000000",
+   "why": "tick rate: weapon table, ticks between shots: 4 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C6FA8",
+   "data": true,
+   "old": "06000000",
+   "new": "08000000",
+   "why": "tick rate: weapon table, ticks between shots: 8 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C6FAC",
+   "data": true,
+   "old": "03000000",
+   "new": "04000000",
+   "why": "tick rate: weapon table, ticks between shots: 4 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C7138",
+   "data": true,
+   "old": "0A000000",
+   "new": "0C000000",
+   "why": "tick rate: weapon table, ticks between shots: 12 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C713C",
+   "data": true,
+   "old": "14000000",
+   "new": "19000000",
+   "why": "tick rate: weapon table, ticks between shots: 25 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C71E8",
+   "data": true,
+   "old": "0A000000",
+   "new": "0C000000",
+   "why": "tick rate: weapon table, ticks between shots: 12 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C71EC",
+   "data": true,
+   "old": "14000000",
+   "new": "19000000",
+   "why": "tick rate: weapon table, ticks between shots: 25 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C7378",
+   "data": true,
+   "old": "21000000",
+   "new": "28000000",
+   "why": "tick rate: weapon table, ticks between shots: 40 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C737C",
+   "data": true,
+   "old": "21000000",
+   "new": "28000000",
+   "why": "tick rate: weapon table, ticks between shots: 40 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C7428",
+   "data": true,
+   "old": "21000000",
+   "new": "28000000",
+   "why": "tick rate: weapon table, ticks between shots: 40 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C742C",
+   "data": true,
+   "old": "21000000",
+   "new": "28000000",
+   "why": "tick rate: weapon table, ticks between shots: 40 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C75B8",
+   "data": true,
+   "old": "04000000",
+   "new": "05000000",
+   "why": "tick rate: weapon table, ticks between shots: 5 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C75BC",
+   "data": true,
+   "old": "04000000",
+   "new": "05000000",
+   "why": "tick rate: weapon table, ticks between shots: 5 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C7668",
+   "data": true,
+   "old": "32000000",
+   "new": "3C000000",
+   "why": "tick rate: weapon table, ticks between shots: 60 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C766C",
+   "data": true,
+   "old": "32000000",
+   "new": "3C000000",
+   "why": "tick rate: weapon table, ticks between shots: 60 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C77F8",
+   "data": true,
+   "old": "08000000",
+   "new": "09000000",
+   "why": "tick rate: weapon table, ticks between shots: 9 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C77FC",
+   "data": true,
+   "old": "08000000",
+   "new": "09000000",
+   "why": "tick rate: weapon table, ticks between shots: 9 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C78A8",
+   "data": true,
+   "old": "08000000",
+   "new": "09000000",
+   "why": "tick rate: weapon table, ticks between shots: 9 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C78AC",
+   "data": true,
+   "old": "08000000",
+   "new": "09000000",
+   "why": "tick rate: weapon table, ticks between shots: 9 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C7A38",
+   "data": true,
+   "old": "0C000000",
+   "new": "0F000000",
+   "why": "tick rate: weapon table, ticks between shots: 15 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C7A3C",
+   "data": true,
+   "old": "0C000000",
+   "new": "0F000000",
+   "why": "tick rate: weapon table, ticks between shots: 15 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C7AE8",
+   "data": true,
+   "old": "0C000000",
+   "new": "0F000000",
+   "why": "tick rate: weapon table, ticks between shots: 15 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C7AEC",
+   "data": true,
+   "old": "0C000000",
+   "new": "0F000000",
+   "why": "tick rate: weapon table, ticks between shots: 15 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C7C78",
+   "data": true,
+   "old": "05000000",
+   "new": "06000000",
+   "why": "tick rate: weapon table, ticks between shots: 6 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C7C7C",
+   "data": true,
+   "old": "05000000",
+   "new": "06000000",
+   "why": "tick rate: weapon table, ticks between shots: 6 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C7D28",
+   "data": true,
+   "old": "1E000000",
+   "new": "28000000",
+   "why": "tick rate: weapon table, ticks between shots: 40 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C7D2C",
+   "data": true,
+   "old": "1E000000",
+   "new": "28000000",
+   "why": "tick rate: weapon table, ticks between shots: 40 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C7EB8",
+   "data": true,
+   "old": "07000000",
+   "new": "08000000",
+   "why": "tick rate: weapon table, ticks between shots: 8 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C7EBC",
+   "data": true,
+   "old": "07000000",
+   "new": "08000000",
+   "why": "tick rate: weapon table, ticks between shots: 8 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C7F68",
+   "data": true,
+   "old": "07000000",
+   "new": "08000000",
+   "why": "tick rate: weapon table, ticks between shots: 8 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C7F6C",
+   "data": true,
+   "old": "07000000",
+   "new": "08000000",
+   "why": "tick rate: weapon table, ticks between shots: 8 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C80F8",
+   "data": true,
+   "old": "14000000",
+   "new": "19000000",
+   "why": "tick rate: weapon table, ticks between shots: 25 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C80FC",
+   "data": true,
+   "old": "1E000000",
+   "new": "25000000",
+   "why": "tick rate: weapon table, ticks between shots: 37 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C81A8",
+   "data": true,
+   "old": "14000000",
+   "new": "19000000",
+   "why": "tick rate: weapon table, ticks between shots: 25 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C81AC",
+   "data": true,
+   "old": "1E000000",
+   "new": "25000000",
+   "why": "tick rate: weapon table, ticks between shots: 37 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C8338",
+   "data": true,
+   "old": "14000000",
+   "new": "19000000",
+   "why": "tick rate: weapon table, ticks between shots: 25 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C833C",
+   "data": true,
+   "old": "1E000000",
+   "new": "25000000",
+   "why": "tick rate: weapon table, ticks between shots: 37 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C83E8",
+   "data": true,
+   "old": "14000000",
+   "new": "19000000",
+   "why": "tick rate: weapon table, ticks between shots: 25 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C83EC",
+   "data": true,
+   "old": "1E000000",
+   "new": "25000000",
+   "why": "tick rate: weapon table, ticks between shots: 37 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C8578",
+   "data": true,
+   "old": "3C000000",
+   "new": "46000000",
+   "why": "tick rate: weapon table, ticks between shots: 70 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C857C",
+   "data": true,
+   "old": "3C000000",
+   "new": "46000000",
+   "why": "tick rate: weapon table, ticks between shots: 70 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C8628",
+   "data": true,
+   "old": "3C000000",
+   "new": "46000000",
+   "why": "tick rate: weapon table, ticks between shots: 70 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C862C",
+   "data": true,
+   "old": "3C000000",
+   "new": "46000000",
+   "why": "tick rate: weapon table, ticks between shots: 70 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C87B8",
+   "data": true,
+   "old": "22000000",
+   "new": "28000000",
+   "why": "tick rate: weapon table, ticks between shots: 40 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C87BC",
+   "data": true,
+   "old": "22000000",
+   "new": "28000000",
+   "why": "tick rate: weapon table, ticks between shots: 40 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C8868",
+   "data": true,
+   "old": "22000000",
+   "new": "28000000",
+   "why": "tick rate: weapon table, ticks between shots: 40 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C886C",
+   "data": true,
+   "old": "22000000",
+   "new": "28000000",
+   "why": "tick rate: weapon table, ticks between shots: 40 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C89F8",
+   "data": true,
+   "old": "0A000000",
+   "new": "0C000000",
+   "why": "tick rate: weapon table, ticks between shots: 12 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C89FC",
+   "data": true,
+   "old": "0C000000",
+   "new": "0F000000",
+   "why": "tick rate: weapon table, ticks between shots: 15 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C8AA8",
+   "data": true,
+   "old": "0A000000",
+   "new": "0C000000",
+   "why": "tick rate: weapon table, ticks between shots: 12 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C8AAC",
+   "data": true,
+   "old": "0C000000",
+   "new": "0F000000",
+   "why": "tick rate: weapon table, ticks between shots: 15 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C8E78",
+   "data": true,
+   "old": "06000000",
+   "new": "07000000",
+   "why": "tick rate: weapon table, ticks between shots: 7 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C8E7C",
+   "data": true,
+   "old": "06000000",
+   "new": "07000000",
+   "why": "tick rate: weapon table, ticks between shots: 7 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C8F28",
+   "data": true,
+   "old": "06000000",
+   "new": "07000000",
+   "why": "tick rate: weapon table, ticks between shots: 7 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C8F2C",
+   "data": true,
+   "old": "06000000",
+   "new": "07000000",
+   "why": "tick rate: weapon table, ticks between shots: 7 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C90B8",
+   "data": true,
+   "old": "14000000",
+   "new": "19000000",
+   "why": "tick rate: weapon table, ticks between shots: 25 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C90BC",
+   "data": true,
+   "old": "1E000000",
+   "new": "25000000",
+   "why": "tick rate: weapon table, ticks between shots: 37 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C9168",
+   "data": true,
+   "old": "14000000",
+   "new": "19000000",
+   "why": "tick rate: weapon table, ticks between shots: 25 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C916C",
+   "data": true,
+   "old": "1E000000",
+   "new": "25000000",
+   "why": "tick rate: weapon table, ticks between shots: 37 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C92F8",
+   "data": true,
+   "old": "14000000",
+   "new": "1E000000",
+   "why": "tick rate: weapon table, ticks between shots: 30 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C92FC",
+   "data": true,
+   "old": "14000000",
+   "new": "1E000000",
+   "why": "tick rate: weapon table, ticks between shots: 30 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C93A8",
+   "data": true,
+   "old": "14000000",
+   "new": "19000000",
+   "why": "tick rate: weapon table, ticks between shots: 25 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C93AC",
+   "data": true,
+   "old": "19000000",
+   "new": "1E000000",
+   "why": "tick rate: weapon table, ticks between shots: 30 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C9538",
+   "data": true,
+   "old": "08000000",
+   "new": "0A000000",
+   "why": "tick rate: weapon table, ticks between shots: 10 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C953C",
+   "data": true,
+   "old": "08000000",
+   "new": "0A000000",
+   "why": "tick rate: weapon table, ticks between shots: 10 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C95E8",
+   "data": true,
+   "old": "32000000",
+   "new": "3C000000",
+   "why": "tick rate: weapon table, ticks between shots: 60 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C95EC",
+   "data": true,
+   "old": "32000000",
+   "new": "3C000000",
+   "why": "tick rate: weapon table, ticks between shots: 60 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C9778",
+   "data": true,
+   "old": "14000000",
+   "new": "19000000",
+   "why": "tick rate: weapon table, ticks between shots: 25 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C977C",
+   "data": true,
+   "old": "1E000000",
+   "new": "25000000",
+   "why": "tick rate: weapon table, ticks between shots: 37 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C9828",
+   "data": true,
+   "old": "14000000",
+   "new": "19000000",
+   "why": "tick rate: weapon table, ticks between shots: 25 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C982C",
+   "data": true,
+   "old": "1E000000",
+   "new": "25000000",
+   "why": "tick rate: weapon table, ticks between shots: 37 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C9A68",
+   "data": true,
+   "old": "14000000",
+   "new": "19000000",
+   "why": "tick rate: weapon table, ticks between shots: 25 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C9A6C",
+   "data": true,
+   "old": "1E000000",
+   "new": "25000000",
+   "why": "tick rate: weapon table, ticks between shots: 37 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C9BF8",
+   "data": true,
+   "old": "06000000",
+   "new": "07000000",
+   "why": "tick rate: weapon table, ticks between shots: 7 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C9BFC",
+   "data": true,
+   "old": "06000000",
+   "new": "07000000",
+   "why": "tick rate: weapon table, ticks between shots: 7 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C9CA8",
+   "data": true,
+   "old": "3C000000",
+   "new": "4B000000",
+   "why": "tick rate: weapon table, ticks between shots: 75 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C9CAC",
+   "data": true,
+   "old": "3C000000",
+   "new": "4B000000",
+   "why": "tick rate: weapon table, ticks between shots: 75 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C9E38",
+   "data": true,
+   "old": "22000000",
+   "new": "28000000",
+   "why": "tick rate: weapon table, ticks between shots: 40 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C9E3C",
+   "data": true,
+   "old": "22000000",
+   "new": "28000000",
+   "why": "tick rate: weapon table, ticks between shots: 40 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C9EE8",
+   "data": true,
+   "old": "07000000",
+   "new": "08000000",
+   "why": "tick rate: weapon table, ticks between shots: 8 as in the USA release"
+  },
+  {
+   "op": "patch",
+   "va": "0x002C9EEC",
+   "data": true,
+   "old": "0A000000",
+   "new": "0C000000",
+   "why": "tick rate: weapon table, ticks between shots: 12 as in the USA release"
   }
  ]
 }

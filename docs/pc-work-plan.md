@@ -311,23 +311,26 @@ on the character at [[player+0x1BC]+0x124]). Find the timer that runs the
 change and shorten it, or let a quick run of wheel notches skip the weapons
 in between, as PC shooters do.
 
-## 9. Rate of fire per weapon (to do)
+## 9. Rate of fire per weapon (done, Nov 2026)
 
-Asked for by the player: each weapon's rate of fire settable, on a tab of
-its own in the launcher ("Waffen").
+The weapon table (PAL 0x002C3890, USA 0x002C3470; 46 rows of 0x240) gives
+each weapon two fire modes of 0xB0 from +0x58, and a mode's delay between
+shots in ticks at +0x10 and +0x14: `FUN_000AFAA0` lets a hand (the
+character's +0xD0, or +0x408 for the left) fire once its ticks since the
+last shot (+0xAC) reach it, scaled by the shooter's skill. Comparing the
+two releases' tables: they differ only there and at +0x30, and PAL's are
+about five sixths of USA's (25 for 30): every gun fired 1.2 times too fast
+at 60 ticks. `tools/ts2_tick_rate.py` now sets those 163 values to USA's.
 
-- The weapon table (PAL 0x2C3890, USA 0x2C3470, rows 0x240 apart, the scope
-  flag 0x20 already read by `ts2_aim_mode_auto`) is the first place to look:
-  find the field the firing code waits on between two shots (a watchpoint
-  on the character's refire timer while holding fire, then which row field
-  it is loaded from), and its unit (ticks of 1/60).
-- Write the rows at level start from the settings (`ts2_rof_<weapon> = %`,
-  100 = the game's), not the XBE: the table is data, so nothing is relifted
-  and every release only needs its table address.
-- Launcher: a "Waffen" tab listing the weapons by their in-game names (the
-  table or the text banks give them), a percentage each, and a reset.
-- [ ] A changed rate shows in Siberia (the tracker, the sniper rifle);
-      multiplayer and the AI's weapons see the same table, say so on the tab.
+On top, `ts2_rof` (all) and `ts2_rof_<row>` (one weapon), percent, divide
+the delays once at start-up (`ts2_rof_apply`); the launcher's Weapons tab
+writes them, listing the 28 weapons with a first-person model, named after
+it (`ob/guns/<name>_ph.xbr`, found through each row's object id at -4 and
+the object table at 0x002D8DF0). The table is shared, so the AI follows.
+Checked: 200 % halves row 0's delays (30/32 to 15/16), and a weapon at
+50 % under 200 % keeps USA's own.
+
+- [ ] By hand: the feel of a few guns at 100 % now (they fire as on NTSC).
 
 ## 10. An icon for the launcher (done, Nov 2026)
 

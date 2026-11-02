@@ -1862,6 +1862,60 @@ static int ts2_menu_frame(void)
     return 1;
 }
 
+/* ── TimeSplitters 2: rate of fire per weapon ── */
+
+/*
+ * The weapon table (k_ts2_aim.weapons: 46 rows of 0x240) gives each of a
+ * weapon's two fire modes (0xB0 apiece from +0x58) its delay between shots
+ * in ticks, at +0x10 and +0x14: FUN_000AFAA0 lets a hand fire once its
+ * ticks since the last shot (+0xAC of the hand) reach it, scaled by the
+ * shooter's skill. (On PAL these are the USA release's since the tick-rate
+ * patches, config/pal/xbe_patches.json.)
+ *
+ * ts2_rof (percent, all weapons) and ts2_rof_<row> (percent, that weapon)
+ * set the rate: 200 fires twice as often, 50 half as often; 100 is the
+ * game's. The delays are divided by it once, at the first frame, never
+ * below one tick. The table is everyone's, so the AI's guns follow too.
+ * The launcher's Weapons tab writes the keys; its rows are the weapons a
+ * player holds (those with a hand model), named by their model files.
+ */
+static void ts2_rof_apply(void)
+{
+    uint32_t base = g_ts2_aim.weapons;
+    int all, w, m, k, changed = 0;
+    const char *v = recomp_config_lookup("RECOMP_TS2_ROF", "ts2_rof");
+
+    if (!base)
+        return;
+    all = v && *v ? atoi(v) : 100;
+    if (all < 10 || all > 1000)
+        all = 100;
+    for (w = 0; w < 46; w++) {
+        char key[32], env[32];
+        int pct = all;
+
+        snprintf(key, sizeof key, "ts2_rof_%d", w);
+        snprintf(env, sizeof env, "RECOMP_TS2_ROF_%d", w);
+        v = recomp_config_lookup(env, key);
+        if (v && *v && atoi(v) >= 10 && atoi(v) <= 1000)
+            pct = all * atoi(v) / 100;
+        if (pct == 100)
+            continue;
+        for (m = 0; m < 2; m++)
+            for (k = 0x10; k <= 0x14; k += 4) {
+                uint32_t a = base + (uint32_t)w * 0x240u + 0x58u + (uint32_t)m * 0xB0u + (uint32_t)k;
+                int32_t t = (int32_t)TS2_MEM32_EARLY(a), n;
+                if (t <= 0 || t > 10000)
+                    continue;
+                n = (t * 100 + pct / 2) / pct;
+                TS2_MEM32_EARLY(a) = (uint32_t)(n < 1 ? 1 : n);
+            }
+        changed++;
+    }
+    if (changed)
+        fprintf(stderr, "[TS2-WPN] rate of fire changed for %d weapon(s)\n", changed);
+}
+
 /* ── TimeSplitters 2: jumping ── */
 
 /*
@@ -2137,6 +2191,8 @@ static int ts2_freecam_frame(int in_level)
  */
 extern void xbox_D3D8SetInterpRegisters(int projection, int affine_first, int affine_count);
 
+static void ts2_weapon_names_dump(void);
+
 static void ts2_present(void (*present)(void))
 {
     static int interp_said;
@@ -2145,8 +2201,11 @@ static void ts2_present(void (*present)(void))
         interp_said = 1;
         xbox_D3D8SetInterpRegisters(60, 64, 12);
         xbox_HleSetTextureFixup(ts2_texture_fixup);   /* the pause menu's glyphs */
+        ts2_aim_init();
+        ts2_rof_apply();
     }
     present();
+    ts2_weapon_names_dump();
     xbox_D3D8SetWideFrames(ts2_menus_wide() ||
                            (g_ts2_frame_camera && !g_ts2_frame_front_end));
     /* A frame of a level (or one of its cutscenes): the mouse aims there.
@@ -3800,6 +3859,37 @@ static void ts2_paks_read_async(void (*start)(void))
  * been found in that release by what it does. A release that has not found
  * one leaves its hook unused, and the lifted function runs as it is.
  */
+
+/* RECOMP_TS2_WEAPON_NAMES=<frame>: at that present, every field of each
+ * weapon row (and of the item table) that reads as a text id, with its text
+ * in the first two languages: how the weapons tab's names were found. */
+static void ts2_weapon_names_dump(void)
+{
+    static unsigned long n;
+    const Ts2Roster *r = &k_ts2_roster;
+    const char *v = getenv("RECOMP_TS2_WEAPON_NAMES");
+    uint32_t base = g_ts2_aim.weapons, t0, t1;
+    int w, k;
+
+    if (!v || ++n != strtoul(v, NULL, 10) || !base || !r->strings)
+        return;
+    t0 = TS2_MEM32(r->strings);
+    t1 = r->languages > 1 ? TS2_MEM32(r->strings + 4u) : 0;
+    for (w = 0; w < 46; w++) {
+        for (k = 0; k < 0x58; k += 2) {
+            int id = (uint16_t)TS2_MEM16(base + (uint32_t)w * 0x240u + (uint32_t)k);
+            uint32_t a, b;
+            if (id <= 0 || id >= r->string_count || !t0)
+                continue;
+            a = TS2_MEM32(t0 + 4u * (uint32_t)id);
+            b = t1 ? TS2_MEM32(t1 + 4u * (uint32_t)id) : 0;
+            if (a >= 0x10000u)
+                fprintf(stderr, "[TS2-WPN] weapon %d +%02X id %d: \"%.40s\" / \"%.40s\"\n",
+                        w, k, id, TS2_PTR8(a), b >= 0x10000u ? TS2_PTR8(b) : "");
+        }
+    }
+}
+
 #include "ts2_region.h"
 
 #if defined(TS2_REGION_PAL)

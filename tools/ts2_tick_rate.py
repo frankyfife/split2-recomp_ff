@@ -29,7 +29,8 @@ because the USA release has 50 or 0.02 there too, or because it could not
 be told: 0x001841AB and 0x00176EA5 (50.0), 0x00138E9F and 0x00094D9B
 (1/50), and 18 immediates of 50.0 or 0.02 in 0x00163821-0x00189147.
 
-Integer counts of ticks (a wait of 50 for a second) are not covered.
+Integer counts of ticks (a wait of 50 for a second) are not covered, but
+for the weapon table's (WEAPON_TICK_SITES, below).
 """
 
 import struct
@@ -108,6 +109,180 @@ PER_TICK_IMM_SITES = [
 ]
 
 
+# The weapon table (0x002C3890, 46 rows of 0x240) counts in ticks too: each
+# fire mode's (two a weapon, 0xB0 from +0x58) delay between shots at +0x10
+# and +0x14 (FUN_000AFAA0 compares them with the hand's ticks since its last
+# shot) and +0x30. The PAL release has them about five sixths of the USA
+# release's -- 25 for 30, 18 for 22 -- so every gun fired 1.2 times too fast
+# at 60 ticks a second. The rest of the table is the same in both. Each is
+# set to the USA release's value: (address, PAL, USA).
+WEAPON_TICK_SITES = [
+    (0x002C38F8, 25, 30),  # weapon 0 +0x068
+    (0x002C38FC, 27, 32),  # weapon 0 +0x06C
+    (0x002C39A8, 25, 30),  # weapon 0 +0x118
+    (0x002C39AC, 27, 32),  # weapon 0 +0x11C
+    (0x002C3B38, 18, 22),  # weapon 1 +0x068
+    (0x002C3B3C, 30, 35),  # weapon 1 +0x06C
+    (0x002C3BE8, 18, 22),  # weapon 1 +0x118
+    (0x002C3BEC, 30, 35),  # weapon 1 +0x11C
+    (0x002C3D78, 18, 22),  # weapon 2 +0x068
+    (0x002C3D7C, 30, 35),  # weapon 2 +0x06C
+    (0x002C3E28, 18, 22),  # weapon 2 +0x118
+    (0x002C3E2C, 30, 35),  # weapon 2 +0x11C
+    (0x002C3FB8, 17, 20),  # weapon 3 +0x068
+    (0x002C3FBC, 34, 40),  # weapon 3 +0x06C
+    (0x002C4068, 17, 20),  # weapon 3 +0x118
+    (0x002C406C, 34, 40),  # weapon 3 +0x11C
+    (0x002C41F8, 40, 48),  # weapon 4 +0x068
+    (0x002C42A8, 46, 55),  # weapon 4 +0x118
+    (0x002C42AC, 46, 55),  # weapon 4 +0x11C
+    (0x002C42C8, 10, 12),  # weapon 4 +0x138
+    (0x002C4438, 10, 12),  # weapon 5 +0x068
+    (0x002C4458, 3, 4),  # weapon 5 +0x088
+    (0x002C44E8, 10, 15),  # weapon 5 +0x118
+    (0x002C44EC, 10, 15),  # weapon 5 +0x11C
+    (0x002C4678, 37, 43),  # weapon 6 +0x068
+    (0x002C467C, 50, 60),  # weapon 6 +0x06C
+    (0x002C4728, 37, 43),  # weapon 6 +0x118
+    (0x002C472C, 50, 60),  # weapon 6 +0x11C
+    (0x002C48B8, 37, 43),  # weapon 7 +0x068
+    (0x002C48BC, 50, 60),  # weapon 7 +0x06C
+    (0x002C4968, 37, 43),  # weapon 7 +0x118
+    (0x002C496C, 50, 60),  # weapon 7 +0x11C
+    (0x002C4F78, 6, 8),  # weapon 10 +0x068
+    (0x002C4F7C, 6, 8),  # weapon 10 +0x06C
+    (0x002C5028, 25, 30),  # weapon 10 +0x118
+    (0x002C502C, 50, 60),  # weapon 10 +0x11C
+    (0x002C53F8, 18, 21),  # weapon 12 +0x068
+    (0x002C53FC, 18, 21),  # weapon 12 +0x06C
+    (0x002C5418, 5, 6),  # weapon 12 +0x088
+    (0x002C54A8, 18, 21),  # weapon 12 +0x118
+    (0x002C54AC, 18, 21),  # weapon 12 +0x11C
+    (0x002C54C8, 6, 7),  # weapon 12 +0x138
+    (0x002C5638, 25, 30),  # weapon 13 +0x068
+    (0x002C563C, 50, 60),  # weapon 13 +0x06C
+    (0x002C56E8, 75, 90),  # weapon 13 +0x118
+    (0x002C56EC, 100, 120),  # weapon 13 +0x11C
+    (0x002C5878, 25, 30),  # weapon 14 +0x068
+    (0x002C587C, 50, 60),  # weapon 14 +0x06C
+    (0x002C5928, 75, 90),  # weapon 14 +0x118
+    (0x002C592C, 100, 120),  # weapon 14 +0x11C
+    (0x002C5AB8, 17, 20),  # weapon 15 +0x068
+    (0x002C5DA8, 20, 25),  # weapon 16 +0x118
+    (0x002C5DAC, 25, 30),  # weapon 16 +0x11C
+    (0x002C5F38, 55, 65),  # weapon 17 +0x068
+    (0x002C5F3C, 60, 72),  # weapon 17 +0x06C
+    (0x002C5FE8, 55, 65),  # weapon 17 +0x118
+    (0x002C5FEC, 60, 72),  # weapon 17 +0x11C
+    (0x002C6178, 25, 30),  # weapon 18 +0x068
+    (0x002C617C, 50, 60),  # weapon 18 +0x06C
+    (0x002C6228, 25, 30),  # weapon 18 +0x118
+    (0x002C622C, 50, 60),  # weapon 18 +0x11C
+    (0x002C63B8, 34, 40),  # weapon 19 +0x068
+    (0x002C63BC, 34, 40),  # weapon 19 +0x06C
+    (0x002C6468, 34, 40),  # weapon 19 +0x118
+    (0x002C646C, 34, 40),  # weapon 19 +0x11C
+    (0x002C65F8, 34, 40),  # weapon 20 +0x068
+    (0x002C65FC, 34, 40),  # weapon 20 +0x06C
+    (0x002C66A8, 9, 10),  # weapon 20 +0x118
+    (0x002C66AC, 9, 10),  # weapon 20 +0x11C
+    (0x002C6838, 34, 40),  # weapon 21 +0x068
+    (0x002C683C, 34, 40),  # weapon 21 +0x06C
+    (0x002C68E8, 34, 40),  # weapon 21 +0x118
+    (0x002C68EC, 34, 40),  # weapon 21 +0x11C
+    (0x002C6A78, 34, 40),  # weapon 22 +0x068
+    (0x002C6A7C, 34, 40),  # weapon 22 +0x06C
+    (0x002C6B28, 34, 40),  # weapon 22 +0x118
+    (0x002C6B2C, 34, 40),  # weapon 22 +0x11C
+    (0x002C6CB8, 6, 7),  # weapon 23 +0x068
+    (0x002C6CBC, 6, 7),  # weapon 23 +0x06C
+    (0x002C6D68, 6, 7),  # weapon 23 +0x118
+    (0x002C6D6C, 6, 7),  # weapon 23 +0x11C
+    (0x002C6EF8, 6, 8),  # weapon 24 +0x068
+    (0x002C6EFC, 3, 4),  # weapon 24 +0x06C
+    (0x002C6FA8, 6, 8),  # weapon 24 +0x118
+    (0x002C6FAC, 3, 4),  # weapon 24 +0x11C
+    (0x002C7138, 10, 12),  # weapon 25 +0x068
+    (0x002C713C, 20, 25),  # weapon 25 +0x06C
+    (0x002C71E8, 10, 12),  # weapon 25 +0x118
+    (0x002C71EC, 20, 25),  # weapon 25 +0x11C
+    (0x002C7378, 33, 40),  # weapon 26 +0x068
+    (0x002C737C, 33, 40),  # weapon 26 +0x06C
+    (0x002C7428, 33, 40),  # weapon 26 +0x118
+    (0x002C742C, 33, 40),  # weapon 26 +0x11C
+    (0x002C75B8, 4, 5),  # weapon 27 +0x068
+    (0x002C75BC, 4, 5),  # weapon 27 +0x06C
+    (0x002C7668, 50, 60),  # weapon 27 +0x118
+    (0x002C766C, 50, 60),  # weapon 27 +0x11C
+    (0x002C77F8, 8, 9),  # weapon 28 +0x068
+    (0x002C77FC, 8, 9),  # weapon 28 +0x06C
+    (0x002C78A8, 8, 9),  # weapon 28 +0x118
+    (0x002C78AC, 8, 9),  # weapon 28 +0x11C
+    (0x002C7A38, 12, 15),  # weapon 29 +0x068
+    (0x002C7A3C, 12, 15),  # weapon 29 +0x06C
+    (0x002C7AE8, 12, 15),  # weapon 29 +0x118
+    (0x002C7AEC, 12, 15),  # weapon 29 +0x11C
+    (0x002C7C78, 5, 6),  # weapon 30 +0x068
+    (0x002C7C7C, 5, 6),  # weapon 30 +0x06C
+    (0x002C7D28, 30, 40),  # weapon 30 +0x118
+    (0x002C7D2C, 30, 40),  # weapon 30 +0x11C
+    (0x002C7EB8, 7, 8),  # weapon 31 +0x068
+    (0x002C7EBC, 7, 8),  # weapon 31 +0x06C
+    (0x002C7F68, 7, 8),  # weapon 31 +0x118
+    (0x002C7F6C, 7, 8),  # weapon 31 +0x11C
+    (0x002C80F8, 20, 25),  # weapon 32 +0x068
+    (0x002C80FC, 30, 37),  # weapon 32 +0x06C
+    (0x002C81A8, 20, 25),  # weapon 32 +0x118
+    (0x002C81AC, 30, 37),  # weapon 32 +0x11C
+    (0x002C8338, 20, 25),  # weapon 33 +0x068
+    (0x002C833C, 30, 37),  # weapon 33 +0x06C
+    (0x002C83E8, 20, 25),  # weapon 33 +0x118
+    (0x002C83EC, 30, 37),  # weapon 33 +0x11C
+    (0x002C8578, 60, 70),  # weapon 34 +0x068
+    (0x002C857C, 60, 70),  # weapon 34 +0x06C
+    (0x002C8628, 60, 70),  # weapon 34 +0x118
+    (0x002C862C, 60, 70),  # weapon 34 +0x11C
+    (0x002C87B8, 34, 40),  # weapon 35 +0x068
+    (0x002C87BC, 34, 40),  # weapon 35 +0x06C
+    (0x002C8868, 34, 40),  # weapon 35 +0x118
+    (0x002C886C, 34, 40),  # weapon 35 +0x11C
+    (0x002C89F8, 10, 12),  # weapon 36 +0x068
+    (0x002C89FC, 12, 15),  # weapon 36 +0x06C
+    (0x002C8AA8, 10, 12),  # weapon 36 +0x118
+    (0x002C8AAC, 12, 15),  # weapon 36 +0x11C
+    (0x002C8E78, 6, 7),  # weapon 38 +0x068
+    (0x002C8E7C, 6, 7),  # weapon 38 +0x06C
+    (0x002C8F28, 6, 7),  # weapon 38 +0x118
+    (0x002C8F2C, 6, 7),  # weapon 38 +0x11C
+    (0x002C90B8, 20, 25),  # weapon 39 +0x068
+    (0x002C90BC, 30, 37),  # weapon 39 +0x06C
+    (0x002C9168, 20, 25),  # weapon 39 +0x118
+    (0x002C916C, 30, 37),  # weapon 39 +0x11C
+    (0x002C92F8, 20, 30),  # weapon 40 +0x068
+    (0x002C92FC, 20, 30),  # weapon 40 +0x06C
+    (0x002C93A8, 20, 25),  # weapon 40 +0x118
+    (0x002C93AC, 25, 30),  # weapon 40 +0x11C
+    (0x002C9538, 8, 10),  # weapon 41 +0x068
+    (0x002C953C, 8, 10),  # weapon 41 +0x06C
+    (0x002C95E8, 50, 60),  # weapon 41 +0x118
+    (0x002C95EC, 50, 60),  # weapon 41 +0x11C
+    (0x002C9778, 20, 25),  # weapon 42 +0x068
+    (0x002C977C, 30, 37),  # weapon 42 +0x06C
+    (0x002C9828, 20, 25),  # weapon 42 +0x118
+    (0x002C982C, 30, 37),  # weapon 42 +0x11C
+    (0x002C9A68, 20, 25),  # weapon 43 +0x118
+    (0x002C9A6C, 30, 37),  # weapon 43 +0x11C
+    (0x002C9BF8, 6, 7),  # weapon 44 +0x068
+    (0x002C9BFC, 6, 7),  # weapon 44 +0x06C
+    (0x002C9CA8, 60, 75),  # weapon 44 +0x118
+    (0x002C9CAC, 60, 75),  # weapon 44 +0x11C
+    (0x002C9E38, 34, 40),  # weapon 45 +0x068
+    (0x002C9E3C, 34, 40),  # weapon 45 +0x06C
+    (0x002C9EE8, 7, 8),  # weapon 45 +0x118
+    (0x002C9EEC, 10, 12),  # weapon 45 +0x11C
+]
+
+
 def operations(img, insn_at):
     """The patch operations, each checked against the image: the
     instruction at every site must read the PAL constant through its
@@ -147,4 +322,12 @@ def operations(img, insn_at):
                     "old": struct.pack("<I", IMM_INV50).hex().upper(),
                     "new": struct.pack("<I", IMM_INV60).hex().upper(),
                     "why": "tick rate: %s %s: 1/50 to 1/60 as in the USA release" % (i.mnemonic, i.op_str)})
+    for va, pal, usa in WEAPON_TICK_SITES:
+        have = struct.unpack("<I", img.read(va, 4, "weapon table"))[0]
+        if have != pal:
+            sys.exit("0x%08X holds %d, not %d" % (va, have, pal))
+        ops.append({"op": "patch", "va": "0x%08X" % va, "data": True,
+                    "old": struct.pack("<I", pal).hex().upper(),
+                    "new": struct.pack("<I", usa).hex().upper(),
+                    "why": "tick rate: weapon table, ticks between shots: %d as in the USA release" % usa})
     return ops
