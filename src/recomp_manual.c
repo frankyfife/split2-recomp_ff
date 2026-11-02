@@ -1862,6 +1862,100 @@ static int ts2_menu_frame(void)
     return 1;
 }
 
+/* ── TimeSplitters 2: jumping ── */
+
+/*
+ * TS2 has no jump, but it has falling: when the walk (FUN_00145300, the
+ * player's movement mode 0 at +0x158) finds no floor, it switches to mode 2
+ * (FUN_00145DA0), which is ballistic -- the horizontal speed at +0x8DC and
+ * +0x8E4 of the player, per tick, and the vertical at the character's
+ * +0x1338, which gravity takes 0.01 a tick from each tick down to -0.6 --
+ * and the collision puts the player back in mode 0 on landing, with fall
+ * damage past 15 units from where the fall began (+0x1388 against the floor
+ * at +0x1434). So a jump is that mode entered from the floor with an upward
+ * speed, carrying the walking speed of the moment: the game does the rest,
+ * landing, ceilings and walls included.
+ *
+ * The white button (RB on a modern pad), Space on the keyboard: a press, on
+ * the floor, while the player has control. The button does not reach the
+ * game (it has no use for it in the Standard layout). ts2_jump = 0
+ * (RECOMP_TS2_JUMP) turns it off; ts2_jump_height (units, 1.2 by default,
+ * 0.5-4) is how high.
+ */
+static volatile int g_jump_request;
+static int          g_jump_on = -1;
+static float        g_jump_last[3];
+static int          g_jump_last_set;
+
+static void ts2_jump_filter(uint8_t analog[8])
+{
+    static int was;
+    int down = analog[5] > 30;              /* WHITE */
+
+    if (g_jump_on == 0)
+        return;
+    if (down && !was)
+        g_jump_request = 1;
+    was = down;
+    analog[5] = 0;
+}
+
+static void ts2_jump_frame(uint32_t obj)
+{
+    float pos[3], ticks;
+    uint32_t body, chr;
+    int k;
+
+    if (g_jump_on < 0)
+        g_jump_on = recomp_config_bool("RECOMP_TS2_JUMP", "ts2_jump", 1);
+    if (!g_jump_on || obj < 0x10000u) {
+        g_jump_request = 0;
+        return;
+    }
+    for (k = 0; k < 3; k++)
+        pos[k] = TS2_MEMF(obj + 0xF0u + 4u * (uint32_t)k);
+    ticks = g_ts2_aim.frame_time ? TS2_MEMF(g_ts2_aim.frame_time) : 1.0f;
+    body = TS2_MEM32_EARLY(obj + 0x1BCu);
+    chr = body >= 0x10000u ? TS2_MEM32_EARLY(body + 0x124u) : 0;
+    if (g_jump_request && chr >= 0x10000u && ticks > 0.0f &&
+        TS2_MEM32_EARLY(obj + 0x158u) == 0 && TS2_MEM32_EARLY(obj + 0x998u) == 0 &&
+        g_jump_last_set) {
+        static float height = -1.0f;
+        float vy;
+
+        if (height < 0.0f) {
+            const char *v = recomp_config_lookup("RECOMP_TS2_JUMP_HEIGHT", "ts2_jump_height");
+            height = v && *v ? (float)atof(v) : 1.2f;
+            if (height < 0.5f) height = 0.5f;
+            if (height > 4.0f) height = 4.0f;
+        }
+        vy = sqrtf(2.0f * 0.01f * height);  /* apex = vy^2 / (2 g), g 0.01 a tick */
+        TS2_MEMF(obj + 0x8DCu) = (pos[0] - g_jump_last[0]) / ticks;
+        TS2_MEMF(obj + 0x8E4u) = (pos[2] - g_jump_last[2]) / ticks;
+        TS2_MEMF(chr + 0x1338u) = vy;
+        TS2_MEMF(chr + 0x1388u) = pos[1];   /* the fall starts here */
+        TS2_MEM32_EARLY(obj + 0xCu) |= 0x800000u;   /* as the walk sets it on falling */
+        TS2_MEM32_EARLY(obj + 0x158u) = 2u;
+        if (getenv("RECOMP_TS2_JUMP_TRACE"))
+            fprintf(stderr, "[TS2-JUMP] from y %.3f at %.3f a tick up, %.3f %.3f across\n",
+                    pos[1], vy, TS2_MEMF(obj + 0x8DCu), TS2_MEMF(obj + 0x8E4u));
+    }
+    {
+        /* RECOMP_TS2_JUMP_TRACE=1: the height and mode for a while after. */
+        static int trace = -1, left;
+        if (trace < 0)
+            trace = getenv("RECOMP_TS2_JUMP_TRACE") != NULL;
+        if (trace && TS2_MEM32_EARLY(obj + 0x158u) == 2u && !left)
+            left = 80;
+        if (trace && left > 0 && (left-- % 4) == 0)
+            fprintf(stderr, "[TS2-JUMP]   y %.3f mode %u\n", pos[1],
+                    TS2_MEM32_EARLY(obj + 0x158u));
+    }
+    g_jump_request = 0;
+    memcpy(g_jump_last, pos, sizeof pos);
+    g_jump_last_set = 1;
+}
+
 /* ── TimeSplitters 2: a free camera ── */
 
 /*
@@ -1904,6 +1998,7 @@ static void ts2_freecam_filter(uint16_t *buttons, uint8_t analog[8], int16_t sti
     static int chord_held;
 
     ts2_menu_filter(buttons, analog);
+    ts2_jump_filter(analog);
     int both = (*buttons & 0xC0u) == 0xC0u;
 
     if (both && !chord_held)
@@ -2061,8 +2156,13 @@ static void ts2_present(void (*present)(void))
 
         if (g_ts2_frame_front_end)
             g_ts2_fov_base = 0.0f;
-        if (!ts2_menu_frame() && !ts2_freecam_frame(in_level))
+        if (!ts2_menu_frame() && !ts2_freecam_frame(in_level)) {
             ts2_aim_frame(in_level);
+            if (in_level && g_ts2_aim.yaw) {
+                uint32_t ya = ts2_aim_at(g_ts2_aim.yaw);
+                ts2_jump_frame(ya ? ya - g_ts2_aim.yaw : 0);
+            }
+        }
         ts2_aim_probe_frame(in_level);
     }
     g_ts2_frame_camera = g_ts2_frame_front_end = 0;

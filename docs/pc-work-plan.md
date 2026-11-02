@@ -425,10 +425,23 @@ find the walk speed the left stick scales (the player's movement code
 near the look code, `FUN_00148EB0`) and raise it while the button is held,
 through the port-0 filter or a hook there.
 
-## 16. Jumping (to do)
+## 16. Jumping (first version, Nov 2026)
 
-Asked for by the player: TS2 has no jump either. Probably doable by giving
-the player an upward velocity once on a button and letting the game's own
-gravity bring them down: find the player's vertical velocity and the
-gravity it is integrated with, and whether the collision code accepts a
-player off the ground outside its ladders and drops.
+TS2 has no jump but has falling: when the walk (`FUN_00145300`, movement
+mode 0 at the player's +0x158) finds no floor it switches to mode 2
+(`FUN_00145DA0`), which is ballistic: across at +0x8DC/+0x8E4 a tick, up
+at the character's +0x1338, gravity 0.01 a tick each tick down to -0.6,
+and the collision lands the player back in mode 0, fall damage counted
+past 15 units from +0x1388. A jump (`ts2_jump_frame`) is that mode entered
+from the floor with an upward speed and the walking speed of the moment;
+the game does the rest.
+
+The white button (RB on a modern pad), Space on the keyboard (the PC
+layout now binds it). `ts2_jump = 0` turns it off, `ts2_jump_height`
+(units, 1.2 by default) sets how high. Checked by script with
+`RECOMP_TS2_JUMP_TRACE=1`: up 1.1 units in about 0.27 s, down and back to
+mode 0 after about half a second, twice the same.
+
+- [ ] By hand: running jumps (the carried speed was 0 in the scripted run,
+      the player standing), onto crates, into a low ceiling.
+- [ ] Whether the AI or a level script minds a player in the air.
