@@ -244,6 +244,28 @@ the title screen the pointer over "3 Players" chose it, back over
 "1 Player" chose that, and a click went on to Select Controller; the
 pointer drawn through `d3d8_replay --present` (`RECOMP_D3D8_POINTER_TEST`).
 
+Second round, after the player's first try (2 Nov 2026):
+
+- Rows are hit by each item's own rectangle (+0x64 x, +0x68 y, +0x6C
+  width, +0x70 height, as `FUN_000F01D0` scrolls by them), not the panel's
+  row height: the level select's rows are 107 px, which is why it chose
+  the wrong one and scrolled to the end. The pause menu's panel has no
+  height at all; its rows are a float at +0x60, y = 257 - 402 * it,
+  measured on the player's capture. Both checked by script.
+- Only movement chooses a row, and the chase stops after a list's length
+  of presses: a pointer at rest never fights the keys.
+- The window has a pointer mode now (`xbox_HleSetPointerMode`): while a
+  menu is up the mouse is not captured, Windows' pointer moves over the
+  window as usual, hidden over the picture, and the drawn pointer follows
+  it. Esc opened the pause menu and released the capture, so the mouse did
+  nothing there; and nothing took it back after the menu, so aiming hung
+  until a click. Leaving a menu now captures again when the window is in
+  front.
+- In widescreen the light rays behind the level select's column
+  (`0x000EF824`) are left out: they stopped at the 4:3 screen's edge.
+- [ ] The pause menu's A glyph is upside down: drawn with ordinary UVs
+      from a 128x64 DXT3 atlas (texture 7 in the player's capture), while
+      the front end's glyphs are right; the atlas cell itself is next.
 - [ ] By hand: every front-end screen, the pause menu, the name entry grid.
 - [ ] Sliders and option values (left/right on a row) by click.
 - [ ] The "Select / Back" hints at a panel's foot are not clickable.
@@ -389,3 +411,19 @@ on BR, ahead and left on L. Centre and LFE stay unused, as the game sends
 nothing there.
 
 - [ ] By hand on the 5.1 receiver: a guard behind you is heard behind you.
+
+## 15. Running (to do)
+
+Asked for by the player: TS2 has no run. A button the console's layout
+leaves free on the pad, and Shift on the keyboard, held for a faster walk:
+find the walk speed the left stick scales (the player's movement code
+near the look code, `FUN_00148EB0`) and raise it while the button is held,
+through the port-0 filter or a hook there.
+
+## 16. Jumping (to do)
+
+Asked for by the player: TS2 has no jump either. Probably doable by giving
+the player an upward velocity once on a button and letting the game's own
+gravity bring them down: find the player's vertical velocity and the
+gravity it is integrated with, and whether the collision code accepts a
+player off the ground outside its ladders and drops.

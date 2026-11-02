@@ -164,6 +164,10 @@ const Ts2Roster k_ts2_roster = {
  * renderer's width guess was sometimes kept at 4:3, and its edge showed
  * as a seam down both old borders on every screen. */
 const Ts2UiPlace k_ts2_ui_places[] = {
+    /* The light rays behind the level select's column: drawn to the 4:3
+     * screen's right edge, which hid where they stop; in 16:9 that edge
+     * shows as a hard line. Left out in widescreen. */
+    { 0x000EF824, TS2_UI_HIDE },
     /* Full-screen quads, fades and post passes (the glow over the frame). */
     { 0x000224CA, TS2_UI_STRETCH }, { 0x000224F3, TS2_UI_STRETCH },
     { 0x00022520, TS2_UI_STRETCH }, { 0x00022548, TS2_UI_STRETCH },

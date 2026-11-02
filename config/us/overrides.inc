@@ -116,6 +116,10 @@ void sub_001B7110(void) { ts2_ui_enter(); sub_001B7110_gen(); ts2_ui_leave(); }
  * stretch of code, checked on every entry to follow a call to one of the
  * functions wrapped above. Ends at site 0. */
 const Ts2UiPlace k_ts2_ui_places[] = {
+    /* The light rays behind the level select's column: drawn to the 4:3
+     * screen's right edge, which hid where they stop; in 16:9 that edge
+     * shows as a hard line. Left out in widescreen. */
+    { 0x000EF3F4, TS2_UI_HIDE },
     /* Full-screen quads, fades and post passes (the glow over the frame). */
     { 0x000224CA, TS2_UI_STRETCH }, { 0x000224F3, TS2_UI_STRETCH },
     { 0x00022520, TS2_UI_STRETCH }, { 0x00022548, TS2_UI_STRETCH },
