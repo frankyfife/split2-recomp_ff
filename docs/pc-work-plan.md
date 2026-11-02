@@ -302,14 +302,33 @@ the chord off).
       from them parts of the level may not be drawn.
 - [ ] Pausing the game meanwhile (a setting) is not done.
 
-## 8. Changing weapons faster (to do)
+## 8. Changing weapons faster (first version, Nov 2026)
 
 The D-pad (the wheel, on the PC layout) steps through the weapons, and the
-change between two is slow: the player waits for the old one to be put away
-and the new one drawn (+0xC8 is the weapon in hand, +0xCC the one wanted,
-on the character at [[player+0x1BC]+0x124]). Find the timer that runs the
-change and shorten it, or let a quick run of wheel notches skip the weapons
-in between, as PC shooters do.
+change between two is slow: the old one is put away, then the new one drawn.
+On the character at [[player+0x1BC]+0x124], +0xC8 is the item wanted and
++0xCC the one held, both indices into the item table (PAL 0x002CA010, 0x24
+apiece: the left hand's weapon row, then the main hand's). Each hand is run
+by `FUN_000B64C0` (PAL), a state machine at +0x34 of the hand's gun (the
+player's +0x528 for the main hand, +0x1D4 for the left) with its progress at
++0x38: 1 holding, 2 lowering (0 to 1), 3 the swap (+0xCC takes +0xC8), 4
+and 5 the new gun's model, 6 raising (0 to 1), and back to 1. Lowering and
+raising both advance by the frame's seconds times one float, 2.857 a second
+(0.35 s each), at PAL 0x00227C10 (USA 0x002277B8), which no other code
+reads.
+
+`ts2_switch` (percent, 100 the game's; `RECOMP_TS2_SWITCH`) scales that
+float once at start-up (`ts2_switch_apply`): 200 switches in half the time,
+the animation played faster rather than skipped. It is everyone's, the AI's
+too. The launcher's Weapons tab has it as "Weapon switch speed".
+`RECOMP_TS2_SWITCH_TRACE=<item>[:<frame>]` asks for an item in play and
+logs the main hand's states with the frame. Checked (Siberia, item 36 to
+the silenced pistol): lowering and raising take 21 frames each at 100 % and
+7 each at 300 %.
+
+- [ ] By hand: how 200 to 300 % feel with the wheel.
+- [ ] Skipping weapons on a quick run of wheel notches, as PC shooters do
+      (the wanted item moves on while the old gun is still going down).
 
 ## 9. Rate of fire per weapon (done, Nov 2026)
 

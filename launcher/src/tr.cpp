@@ -102,6 +102,11 @@ const QHash<QString, QString> &german()
          QStringLiteral("Wie schnell die Waffen feuern, in Prozent des Originals: 200 doppelt so oft, 50 halb so oft. "
                         "Es ändert die Waffentabelle des Spiels, also gilt es auch für die Waffen der Gegner.")},
         {QStringLiteral("All back to 100 %"), QStringLiteral("Alle auf 100 % zurück")},
+        {QStringLiteral("Weapon switch speed"), QStringLiteral("Waffenwechsel-Tempo")},
+        {QStringLiteral("How fast a gun is put away and the next one drawn, as a percentage of the game's (0.35 s each): "
+                        "200 switches in half the time."),
+         QStringLiteral("Wie schnell eine Waffe weggesteckt und die nächste gezogen wird, in Prozent des Originals "
+                        "(je 0,35 s): 200 wechselt in der halben Zeit.")},
         {QStringLiteral("Silenced Pistol"), QStringLiteral("Schallgedämpfte Pistole")},
         {QStringLiteral("Silenced Luger"), QStringLiteral("Schallgedämpfte Luger")},
         {QStringLiteral("Assault Shotgun"), QStringLiteral("Sturm-Schrotflinte")},

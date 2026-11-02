@@ -80,7 +80,7 @@ private:
     QCheckBox *screenFilters_ = nullptr, *sunGlare_ = nullptr, *weather_ = nullptr;
     QCheckBox *mouseAim_ = nullptr, *invert_ = nullptr, *autoAim_ = nullptr;
     QSpinBox *pitchLimit_ = nullptr, *zoomMatch_ = nullptr;
-    QSpinBox *rofAll_ = nullptr;
+    QSpinBox *rofAll_ = nullptr, *switchSpeed_ = nullptr;
     QList<QPair<int, QSpinBox *>> rofWeapon_;   // weapon row, its rate
     QComboBox *aimMode_ = nullptr, *device_ = nullptr, *padApi_ = nullptr;
     QSlider *sens_ = nullptr;

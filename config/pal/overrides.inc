@@ -296,6 +296,7 @@ const Ts2Aim k_ts2_aim = {
     0x00348CEC, /* frame_time */
     0x002C3890, /* weapons: FUN_00140F40's scope test (ts2_aim_mode_auto) */
     0x00497344, /* pitch_limit: set by FUN_001434F0, read by FUN_00148EB0 */
+    0x00227C10, /* switch_rate: FUN_000B64C0's lowering and raising, 0xB700D and 0xB7094 */
 };
 
 /* Effects the player can switch off (ts2_sun_glare, ts2_weather), by the

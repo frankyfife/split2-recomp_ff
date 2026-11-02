@@ -656,6 +656,7 @@ typedef struct Ts2Aim {
     uint32_t frame_time;            /* 0: not known; a global, never from base */
     uint32_t weapons;               /* 0: not known; the weapon table, a global */
     uint32_t pitch_limit;           /* 0: not known; the game's, a float global */
+    uint32_t switch_rate;           /* 0: not known; weapon switch speed, a float global */
 } Ts2Aim;
 
 extern int recomp_input_host_last_sticks(short out[4]);
@@ -699,6 +700,7 @@ static void ts2_aim_parse(Ts2Aim *a, const char *s)
         else if (!strcmp(key, "frame_time")) a->frame_time = (uint32_t)strtoul(eq, NULL, 0);
         else if (!strcmp(key, "weapons"))    a->weapons   = (uint32_t)strtoul(eq, NULL, 0);
         else if (!strcmp(key, "pitch_limit")) a->pitch_limit = (uint32_t)strtoul(eq, NULL, 0);
+        else if (!strcmp(key, "switch_rate")) a->switch_rate = (uint32_t)strtoul(eq, NULL, 0);
         else
             fprintf(stderr, "[TS2-AIM] RECOMP_TS2_AIM: unknown key '%s'\n", key);
         s = end ? end + 1 : NULL;
@@ -1916,6 +1918,36 @@ static void ts2_rof_apply(void)
         fprintf(stderr, "[TS2-WPN] rate of fire changed for %d weapon(s)\n", changed);
 }
 
+/*
+ * Switching weapons: each hand (FUN_000B64C0, PAL) is a state machine at
+ * +0x34 of its gun, whose +0x38 is the state's progress: 1 holding, 2
+ * lowering (progress 0 to 1), 3 the swap, 4 and 5 the new gun's model, 6
+ * raising (0 to 1), and back to 1. Lowering and raising go at the same
+ * rate, the float k_ts2_aim.switch_rate per second (2.857: 0.35 s each),
+ * which only those two instructions read. ts2_switch (percent, 100 the
+ * game's; RECOMP_TS2_SWITCH) scales it once, at the first frame: 200
+ * switches in half the time. The animation follows the progress, so it
+ * plays faster rather than being skipped. Everyone's hands use it, the
+ * AI's included.
+ */
+static void ts2_switch_apply(void)
+{
+    const char *v = recomp_config_lookup("RECOMP_TS2_SWITCH", "ts2_switch");
+    int pct = v && *v ? atoi(v) : 100;
+    float rate;
+
+    if (!g_ts2_aim.switch_rate || pct == 100 || pct < 25 || pct > 1000)
+        return;
+    rate = TS2_MEMF(g_ts2_aim.switch_rate);
+    if (rate < 2.8f || rate > 2.9f) {   /* not the constant this was read from */
+        fprintf(stderr, "[TS2-WPN] switch rate at 0x%08X is %g: left alone\n",
+                g_ts2_aim.switch_rate, (double)rate);
+        return;
+    }
+    TS2_MEMF(g_ts2_aim.switch_rate) = rate * (float)pct / 100.0f;
+    fprintf(stderr, "[TS2-WPN] weapon switch at %d%%\n", pct);
+}
+
 /* ── TimeSplitters 2: jumping ── */
 
 /*
@@ -2008,6 +2040,50 @@ static void ts2_jump_frame(uint32_t obj)
     g_jump_request = 0;
     memcpy(g_jump_last, pos, sizeof pos);
     g_jump_last_set = 1;
+}
+
+/* RECOMP_TS2_SWITCH_TRACE=<item>[:<frame>]: at that frame in play (600 by
+ * default) ask for that item (the character's +0xC8, an index into the item
+ * table 0x2CA010, whose second dword is the main hand's weapon row), and log
+ * every change of the main hand's state (the player's +0x528, +0x34:
+ * ts2_switch_apply says what they are) with the frame: how long a switch
+ * takes. */
+static void ts2_switch_trace(uint32_t obj)
+{
+    static int on = -1, item, at = 600;
+    static unsigned long frame;
+    static uint32_t last_state = 0xFFFFFFFFu, last_want, last_have;
+    uint32_t body, chr, st, want, have;
+
+    if (on < 0) {
+        const char *v = getenv("RECOMP_TS2_SWITCH_TRACE");
+        on = v != NULL;
+        if (v) {
+            item = atoi(v);
+            if (strchr(v, ':'))
+                at = atoi(strchr(v, ':') + 1);
+        }
+    }
+    if (!on || obj < 0x10000u)
+        return;
+    body = TS2_MEM32_EARLY(obj + 0x1BCu);
+    chr = body >= 0x10000u ? TS2_MEM32_EARLY(body + 0x124u) : 0;
+    if (chr < 0x10000u)
+        return;
+    frame++;
+    if (frame == (unsigned long)at) {
+        fprintf(stderr, "[TS2-SW] frame %lu: asking for item %d\n", frame, item);
+        TS2_MEM32_EARLY(chr + 0xC8u) = (uint32_t)item;
+    }
+    st = TS2_MEM32_EARLY(obj + 0x528u + 0x34u);
+    want = TS2_MEM32_EARLY(chr + 0xC8u);
+    have = TS2_MEM32_EARLY(chr + 0xCCu);
+    if (st != last_state || want != last_want || have != last_have)
+        fprintf(stderr, "[TS2-SW] frame %lu: state %u progress %.3f, item wanted %u, held %u\n",
+                frame, st, TS2_MEMF(obj + 0x528u + 0x38u), want, have);
+    last_state = st;
+    last_want = want;
+    last_have = have;
 }
 
 /* ── TimeSplitters 2: a free camera ── */
@@ -2203,6 +2279,7 @@ static void ts2_present(void (*present)(void))
         xbox_HleSetTextureFixup(ts2_texture_fixup);   /* the pause menu's glyphs */
         ts2_aim_init();
         ts2_rof_apply();
+        ts2_switch_apply();
     }
     present();
     ts2_weapon_names_dump();
@@ -2220,6 +2297,7 @@ static void ts2_present(void (*present)(void))
             if (in_level && g_ts2_aim.yaw) {
                 uint32_t ya = ts2_aim_at(g_ts2_aim.yaw);
                 ts2_jump_frame(ya ? ya - g_ts2_aim.yaw : 0);
+                ts2_switch_trace(ya ? ya - g_ts2_aim.yaw : 0);
             }
         }
         ts2_aim_probe_frame(in_level);

@@ -249,6 +249,7 @@ const Ts2Aim k_ts2_aim = {
     0x003488A4, /* frame_time */
     0x002C3470, /* weapons: FUN_00140B00's scope test (ts2_aim_mode_auto) */
     0x00497104, /* pitch_limit: the global FUN_00148A60 clamps to */
+    0x002277B8, /* switch_rate: the hand's lowering and raising, 0xB6F9D and 0xB7024 */
 };
 
 /* Effects the player can switch off (ts2_sun_glare, ts2_weather): PAL's

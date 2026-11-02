@@ -621,6 +621,10 @@ QWidget *MainWindow::buildWeaponsTab()
     addRow(f, T("Rate of fire, all weapons"), rofAll_,
            T("How often the guns fire, as a percentage of the game's: 200 fires twice as often, 50 half as often. "
              "The game's own weapon table changes, so the enemies' guns follow too."));
+    switchSpeed_ = percentBox();
+    addRow(f, T("Weapon switch speed"), switchSpeed_,
+           T("How fast a gun is put away and the next one drawn, as a percentage of the game's (0.35 s each): "
+             "200 switches in half the time."));
     for (const auto &k : kWeapons) {
         QSpinBox *b = percentBox();
         rofWeapon_.append({k.row, b});
@@ -629,6 +633,7 @@ QWidget *MainWindow::buildWeaponsTab()
     auto *reset = new QPushButton(T("All back to 100 %"));
     connect(reset, &QPushButton::clicked, this, [this] {
         rofAll_->setValue(100);
+        switchSpeed_->setValue(100);
         for (const auto &e : rofWeapon_)
             e.second->setValue(100);
     });
@@ -785,6 +790,7 @@ void MainWindow::load()
     pitchLimit_->setValue(conf_.getInt(QStringLiteral("ts2_pitch_limit"), 85, 40, 89));
     zoomMatch_->setValue(conf_.getInt(QStringLiteral("ts2_zoom_match"), 100, 0, 100));
     rofAll_->setValue(conf_.getInt(QStringLiteral("ts2_rof"), 100, 25, 400));
+    switchSpeed_->setValue(conf_.getInt(QStringLiteral("ts2_switch"), 100, 25, 400));
     for (const auto &e : rofWeapon_)
         e.second->setValue(conf_.getInt(QStringLiteral("ts2_rof_%1").arg(e.first), 100, 25, 400));
 
@@ -868,6 +874,11 @@ bool MainWindow::save()
               QStringLiteral("TimeSplitters 2: auto holds the aim mode on with the mouse, button keeps the console's.  [RECOMP_TS2_AIM_MODE]"));
     conf_.set(QStringLiteral("ts2_pitch_limit"), pitchLimit_->value(),
               QStringLiteral("TimeSplitters 2: degrees the mouse tilts the view, 40-89.  [RECOMP_TS2_PITCH_LIMIT]"));
+    if (switchSpeed_->value() == 100)
+        conf_.unset(QStringLiteral("ts2_switch"));
+    else
+        conf_.set(QStringLiteral("ts2_switch"), switchSpeed_->value(),
+                  QStringLiteral("TimeSplitters 2: weapon switch speed, percent (100 the game's).  [RECOMP_TS2_SWITCH]"));
     if (rofAll_->value() == 100)
         conf_.unset(QStringLiteral("ts2_rof"));
     else
