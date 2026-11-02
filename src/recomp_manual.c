@@ -1464,6 +1464,205 @@ static void ts2_aim_probe_frame(int in_level)
     }
 }
 
+/* ── TimeSplitters 2: the menus with the mouse ── */
+
+/*
+ * Every list in TS2's menus is one kind of object, a panel, updated by
+ * FUN_000F1D30(screen, panel) each frame (PAL; found by watching the title
+ * screen's selected row change under the D-pad). What a pointer needs is in
+ * it, in the title's 640x480 pixels:
+ *
+ *   +0x34, +0x38  where the panel is      +0x44, +0x48  its width, height
+ *   +0x4C         a row's height           +0x54         scrolled by (float)
+ *   +0x38C        its items, a list        +0x394        rows
+ *   +0x398        the selected row         +0x39C        the selected column
+ *   +0x0C & 6     shown and taking input   screen +8 & 2: the screen is busy
+ *
+ * and an item has its columns at +0x14 and its flags at +0x28 (8: cannot be
+ * chosen). The panel that takes input this frame is the one the mouse is
+ * for. The mouse moves a pointer (the toolkit draws it over the picture,
+ * xbox_D3D8SetPointer); over a row of that panel, the row is chosen by
+ * pressing the D-pad for the player, one row per press, so the game's own
+ * logic (its sounds, skipping rows that cannot be chosen, a grid's columns)
+ * does it; a left click on the chosen row is A, a right click anywhere B.
+ * The presses go in through the same port-0 filter as the free camera's.
+ *
+ * Shown only while a panel takes input, so in play the mouse aims as
+ * before. ts2_menu_mouse = 0 (RECOMP_TS2_MENU_MOUSE) turns it off.
+ */
+typedef struct { uint32_t panel; unsigned long frame; } Ts2MenuSeen;
+
+static Ts2MenuSeen    g_menu_seen;
+static unsigned long  g_menu_frames;
+static int            g_menu_on = -1, g_menu_shown;
+static float          g_menu_x = 320.0f, g_menu_y = 240.0f;
+/* Presses for the player: held for a sample, then a sample let go. */
+static volatile uint16_t g_menu_press_buttons;
+static volatile int      g_menu_press_a, g_menu_press_b, g_menu_press_hold, g_menu_press_gap;
+
+extern int  recomp_mouse_buttons(void);
+extern int  recomp_mouse_invert(void);
+extern void xbox_D3D8SetPointer(int shown, float x, float y);
+extern void recomp_input_host_set_port0_filter(void (*filter)(uint16_t *, uint8_t[8], int16_t[4]));
+static void ts2_freecam_filter(uint16_t *buttons, uint8_t analog[8], int16_t sticks[4]);
+
+static void ts2_menu_panel(void (*update)(void))
+{
+    uint32_t screen = TS2_MEM32_EARLY(g_esp + 4u), panel = TS2_MEM32_EARLY(g_esp + 8u);
+
+    if (screen >= 0x10000u && panel >= 0x10000u &&
+        !(TS2_MEM32_EARLY(screen + 8u) & 2u) &&
+        (TS2_MEM32_EARLY(panel + 0xCu) & 6u) == 6u &&
+        (int32_t)TS2_MEM32_EARLY(panel + 0x398u) >= 0 &&
+        (int32_t)TS2_MEM32_EARLY(panel + 0x394u) > 0) {
+        g_menu_seen.panel = panel;
+        g_menu_seen.frame = g_menu_frames;
+    }
+    update();
+}
+
+/* The port-0 filter's share: the presses asked for below. */
+static void ts2_menu_filter(uint16_t *buttons, uint8_t analog[8])
+{
+    if (g_menu_press_hold > 0) {
+        *buttons |= g_menu_press_buttons;
+        if (g_menu_press_a) analog[0] = 0xFF;
+        if (g_menu_press_b) analog[1] = 0xFF;
+        if (--g_menu_press_hold == 0)
+            g_menu_press_gap = 2;
+    } else if (g_menu_press_gap > 0) {
+        g_menu_press_gap--;
+    }
+}
+
+static int ts2_menu_busy(void)
+{
+    return g_menu_press_hold > 0 || g_menu_press_gap > 0;
+}
+
+static void ts2_menu_press(uint16_t buttons, int a, int b)
+{
+    g_menu_press_buttons = buttons;
+    g_menu_press_a = a;
+    g_menu_press_b = b;
+    g_menu_press_gap = 0;
+    g_menu_press_hold = 2;
+}
+
+/* Returns 1 while a menu has the mouse. */
+static int ts2_menu_frame(void)
+{
+    static int held_last;
+    uint32_t p;
+    float dx = 0.0f, dy = 0.0f;
+    int held, x0, y0, w, h, rows, row_h, sel, scroll_px;
+
+    g_menu_frames++;
+    if (g_menu_on < 0) {
+        g_menu_on = recomp_config_bool("RECOMP_TS2_MENU_MOUSE", "ts2_menu_mouse", 1);
+        recomp_input_host_set_port0_filter(ts2_freecam_filter);   /* the presses below */
+    }
+    p = g_menu_seen.panel;
+    if (!g_menu_on || !p || g_menu_frames - g_menu_seen.frame > 2) {
+        if (g_menu_shown)
+            xbox_D3D8SetPointer(0, 0.0f, 0.0f);
+        g_menu_shown = 0;
+        return 0;
+    }
+    x0 = (int32_t)TS2_MEM32_EARLY(p + 0x34u);
+    y0 = (int32_t)TS2_MEM32_EARLY(p + 0x38u);
+    w = (int32_t)TS2_MEM32_EARLY(p + 0x44u);
+    h = (int32_t)TS2_MEM32_EARLY(p + 0x48u);
+    rows = (int32_t)TS2_MEM32_EARLY(p + 0x394u);
+    row_h = (int32_t)TS2_MEM32_EARLY(p + 0x4Cu);
+    sel = (int32_t)TS2_MEM32_EARLY(p + 0x398u);
+    scroll_px = (int)TS2_MEMF(p + 0x54u);
+    if (row_h <= 0 && rows > 0)
+        row_h = h / rows;
+    if (!g_menu_shown) {
+        /* Start on the chosen row, so nothing moves until the mouse does. */
+        g_menu_x = (float)(x0 + w / 2);
+        g_menu_y = (float)(y0 + sel * row_h - scroll_px + row_h / 2);
+        recomp_mouse_take(NULL, NULL);
+        g_menu_shown = 1;
+    }
+    if (recomp_mouse_take(&dx, &dy)) {
+        float k = 0.6f * (float)recomp_mouse_sensitivity() / 80.0f;
+        float half = recomp_config_bool("RECOMP_WIDESCREEN", "widescreen", 0) ? 426.0f : 320.0f;
+        g_menu_x += dx * k;
+        g_menu_y += (recomp_mouse_invert() ? -dy : dy) * k;
+        if (g_menu_x < 320.0f - half) g_menu_x = 320.0f - half;
+        if (g_menu_x > 320.0f + half) g_menu_x = 320.0f + half;
+        if (g_menu_y < 0.0f) g_menu_y = 0.0f;
+        if (g_menu_y > 479.0f) g_menu_y = 479.0f;
+    }
+    xbox_D3D8SetPointer(1, g_menu_x, g_menu_y);
+
+    held = recomp_mouse_buttons();
+    {
+        /* RECOMP_TS2_MENU_SCRIPT=<frame>:<x>,<y>[,c][;...]: the pointer put
+         * there at that frame, c clicking, for a scripted run (a window in
+         * the background has no mouse). */
+        const char *sc = getenv("RECOMP_TS2_MENU_SCRIPT");
+        while (sc && *sc) {
+            unsigned long f = strtoul(sc, (char **)&sc, 10);
+            float sx = 0.0f, sy = 0.0f;
+            int c = 0;
+            if (*sc == ':') sx = (float)strtod(sc + 1, (char **)&sc);
+            if (*sc == ',') sy = (float)strtod(sc + 1, (char **)&sc);
+            if (*sc == ',' && sc[1] == 'c') { c = 1; sc += 2; }
+            if (f == g_menu_frames) {
+                g_menu_x = sx;
+                g_menu_y = sy;
+                if (c) held |= 1;
+                fprintf(stderr, "[TS2-MENU] frame %lu: pointer %.0f,%.0f%s; panel %08X at "
+                        "%d,%d %dx%d, %d rows of %d, row %d\n", g_menu_frames, sx, sy,
+                        c ? " click" : "", p, x0, y0, w, h, rows, row_h, sel);
+            }
+            sc = strchr(sc, ';');
+            if (sc) sc++;
+        }
+    }
+    {
+        int inside = g_menu_x >= (float)x0 && g_menu_x < (float)(x0 + w) &&
+                     g_menu_y >= (float)y0 && g_menu_y < (float)(y0 + h) && row_h > 0;
+        int row = inside ? ((int)g_menu_y - y0 + scroll_px) / row_h : -1;
+        int click = (held & 1) && !(held_last & 1);
+        int back = (held & 2) && !(held_last & 2);
+
+        if (row >= rows)
+            row = -1;
+        if (back && !ts2_menu_busy()) {
+            ts2_menu_press(0, 0, 1);
+        } else if (row >= 0 && !ts2_menu_busy()) {
+            uint32_t item = TS2_MEM32_EARLY(p + 0x38Cu);
+            int k, cols = 1, col_now = (int32_t)TS2_MEM32_EARLY(p + 0x39Cu), col;
+
+            for (k = 0; k < row && item >= 0x10000u; k++)
+                item = TS2_MEM32_EARLY(item + 4u);
+            if (item >= 0x10000u) {
+                cols = (int32_t)TS2_MEM32_EARLY(item + 0x14u);
+                if (cols < 1) cols = 1;
+            }
+            col = cols > 1 ? ((int)g_menu_x - x0) * cols / (w > 0 ? w : 1) : col_now;
+            if (item >= 0x10000u && (TS2_MEM32_EARLY(item + 0x28u) & 8u))
+                row = sel;                   /* a row that cannot be chosen */
+            if (row < sel)
+                ts2_menu_press(1u, 0, 0);    /* D-pad up */
+            else if (row > sel)
+                ts2_menu_press(2u, 0, 0);    /* down */
+            else if (cols > 1 && col < col_now)
+                ts2_menu_press(4u, 0, 0);    /* left */
+            else if (cols > 1 && col > col_now)
+                ts2_menu_press(8u, 0, 0);    /* right */
+            else if (click)
+                ts2_menu_press(0, 1, 0);     /* A on the chosen row */
+        }
+    }
+    held_last = held;
+    return 1;
+}
+
 /* ── TimeSplitters 2: a free camera ── */
 
 /*
@@ -1504,6 +1703,8 @@ static int16_t  g_fc_sticks[4];
 static void ts2_freecam_filter(uint16_t *buttons, uint8_t analog[8], int16_t sticks[4])
 {
     static int chord_held;
+
+    ts2_menu_filter(buttons, analog);
     int both = (*buttons & 0xC0u) == 0xC0u;
 
     if (both && !chord_held)
@@ -1542,8 +1743,7 @@ static int ts2_freecam_frame(int in_level)
 
     if (setup < 0) {
         setup = F->camera && recomp_config_bool("RECOMP_TS2_FREECAM", "ts2_freecam", 1);
-        if (setup)
-            recomp_input_host_set_port0_filter(ts2_freecam_filter);
+        recomp_input_host_set_port0_filter(ts2_freecam_filter);   /* the menus' presses too */
     }
     if (!setup)
         return 0;
@@ -1661,7 +1861,7 @@ static void ts2_present(void (*present)(void))
 
         if (g_ts2_frame_front_end)
             g_ts2_fov_base = 0.0f;
-        if (!ts2_freecam_frame(in_level))
+        if (!ts2_menu_frame() && !ts2_freecam_frame(in_level))
             ts2_aim_frame(in_level);
         ts2_aim_probe_frame(in_level);
     }

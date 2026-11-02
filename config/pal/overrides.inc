@@ -315,3 +315,9 @@ const uint32_t k_ts2_weather_sites[] = { 0x001B2078, 0 };
  * the view from those globals and nothing else, so the free camera only has
  * to write them each frame. Read in Ghidra: FUN_00035960, case 8. */
 const Ts2Freecam k_ts2_freecam = { 0x004B2CA0, 0x004B2CB0, 0x004B2CC0, 0x004B2CCC, 0x004B2CD8 };
+
+/* The menus' panel update, FUN_000F1D30(screen, panel): the mouse points at
+ * menus through it (ts2_menu_panel). Found by a write watch on the title
+ * screen's selected row while the D-pad moved it. */
+extern void sub_000F1D30_gen(void);
+void sub_000F1D30(void) { ts2_menu_panel(sub_000F1D30_gen); }

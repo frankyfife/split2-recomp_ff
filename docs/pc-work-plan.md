@@ -213,32 +213,41 @@ and culling agree. Not run yet:
 Not yet: MSAA (the toolkit has none), cutscene skip, controller icons
 (`docs/enhancements.md`).
 
-## 6. The mouse in the menus (to do)
+## 6. The mouse in the menus (first version, Nov 2026)
 
-Asked for by the player: the front end and the pause menu driven with the
-mouse, with a pointer drawn by the game rather than the Windows cursor.
-`docs/enhancements.md` ("Native mouselook") puts clicking TS2's menus at
-2-3 weeks, TS2's side.
+Every list in TS2's menus is one kind of object, a panel, updated by
+`FUN_000F1D30(screen, panel)` each frame (PAL; USA `FUN_000F1900`). Found
+with a RAM diff of the title screen while the D-pad moved its selection
+(`0x821A82F8` went 0, 1, 2, 1) and a write watch on it. The panel has what
+a pointer needs, in 640x480 pixels: its place (+0x34, +0x38), size (+0x44,
++0x48), row height (+0x4C), scroll (+0x54), rows (+0x394), the selected row
+and column (+0x398, +0x39C) and its items (+0x38C: columns +0x14, flags
++0x28, 8 = cannot be chosen).
 
-- Pointer: one of the game's own textures, drawn on the 2D layer at the
-  mouse's position. The crosshair is the first candidate (it is already
-  loaded in play; for the front end find whether it is loaded there, else
-  take a front-end texture: a highlight, an arrow, a cursor glyph). The
-  texture dump (`RECOMP_HLE_D3D8_DUMP*`) names them.
-- Placement: in widescreen the 2D layer is laid out per call site
-  (`k_ts2_ui_places`), so the pointer goes through the same mapping as the
-  menu items it points at.
-- Hover and click: find where the front end keeps its menu items' rectangles
-  and its selected index (a watchpoint on the index while moving with the
-  D-pad), then set the index on hover and send A on a left click, B on a
-  right click. Sliders and the name entry screen need their own handling.
-- Where the mouse aims (in play, `ts2_aim_frame`) the pointer is hidden and
-  the window keeps the pointer captured; in menus it is shown and released,
-  which the toolkit's mouse look already does on its side.
-- [ ] Front end: every screen reachable and usable with the mouse alone.
-- [ ] Pause menu in a level; resuming does not turn the view.
-- [ ] 4:3 and 16:9, resolution scale 1 and above: the pointer's tip is where
-      the click lands.
+`ts2_menu_panel` notes the panel that takes input each frame; while there
+is one, `ts2_menu_frame` moves a pointer with the mouse and, over a row,
+presses the D-pad for the player until that row is chosen (the game's own
+logic, sounds and skipping included; a grid's columns the same way with
+left and right); a left click on the chosen row is A, a right click B.
+In play there is no such panel, so the mouse aims as before.
+`ts2_menu_mouse = 0` switches it off.
+
+The pointer is drawn by the toolkit over the finished picture
+(`xbox_D3D8SetPointer`, `d3d8_pointer.c`): a ring and cross like a gun
+sight, computed in its shader, so it is sharp at any size, placed as the
+menus are (in proportion in the middle). Not yet one of the game's own
+textures: the crosshair is not loaded in the front end, and reading it
+from the paks at run time is the next step.
+
+Checked by script (`RECOMP_TS2_MENU_SCRIPT=<frame>:<x>,<y>[,c];...`): on
+the title screen the pointer over "3 Players" chose it, back over
+"1 Player" chose that, and a click went on to Select Controller; the
+pointer drawn through `d3d8_replay --present` (`RECOMP_D3D8_POINTER_TEST`).
+
+- [ ] By hand: every front-end screen, the pause menu, the name entry grid.
+- [ ] Sliders and option values (left/right on a row) by click.
+- [ ] The "Select / Back" hints at a panel's foot are not clickable.
+- [ ] The game's own texture for the pointer.
 
 ## 7. A free camera (done, Nov 2026)
 

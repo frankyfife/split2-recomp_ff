@@ -256,3 +256,7 @@ const uint32_t k_ts2_weather_sites[] = { 0x001B1C68, 0 };
 /* The free camera: PAL's globals (config/pal/overrides.inc), 0x2C0 higher
  * here, found by the bytes of FUN_00035960's counterpart. Not run. */
 const Ts2Freecam k_ts2_freecam = { 0x004B2F60, 0x004B2F70, 0x004B2F80, 0x004B2F8C, 0x004B2F98 };
+
+/* The menus' panel update: PAL's FUN_000F1D30, here by its bytes. Not run. */
+extern void sub_000F1900_gen(void);
+void sub_000F1900(void) { ts2_menu_panel(sub_000F1900_gen); }
