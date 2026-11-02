@@ -159,8 +159,15 @@ Found by the player (2 Nov 2026):
   matrices, to tell the replay from the blending (a static scene is needed
   for a whole-image compare; Siberia's falling snow gets in the way).
   The screen copy is not it (it reads the in-between image,
-  `d3d8_screencopy.c`). Meanwhile the player's settings have
-  `frame_interp = 1`.
+  `d3d8_screencopy.c`). **Fixed (Nov 2026):** a vertex declaration belongs
+  to its program's handle, and TS2 declares 0x10004 both with 24- and
+  36-byte vertices in one frame; the redraw kept the draws but not the
+  declarations, so every draw on that handle was redrawn with the frame's
+  last layout and the frost quad landed nowhere. `host_vsh_set_declaration`
+  is now kept in the list (xboxrecomp `hle_d3d8_record.c`). With snow and
+  glare off and `RECOMP_INTERP_BLEND=1`, in-between frames now equal their
+  real frame to the pixel (before: a sliver differed even there). The
+  player's `frame_interp` is back at 2.
 - **A periodic hitch, flicker and blue glass after F11** were the toolkit's
   F11 turning on the 24 interval dumps (fixed, `shadow_dump_frame`); a
   single F11 can still flash the glass once (the back buffer's read-back).
