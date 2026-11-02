@@ -618,7 +618,7 @@ static int ts2_menus_wide(void)
  *   RECOMP_TS2_AIM / ts2_aim = yaw=0x...,pitch=0x...[,base=0x...]
  *        [,yaw_sign=1][,pitch_sign=1][,units=1][,wrap=6.283185]
  *        [,pitch_min=-1.5][,pitch_max=1.5][,active=0x...][,active_is=1]
- *        [,cross_x=0x...][,cross_y=0x...]
+ *        [,cross_x=0x...][,cross_y=0x...][,frame_time=0x...]
  *
  *   base      an address that holds a pointer (player 1); yaw, pitch,
  *             cross_* and active are then offsets from what it points at
@@ -629,6 +629,9 @@ static int ts2_menus_wide(void)
  *             control (not paused, not in a cutscene); unknown: always
  *   cross_*   the crosshair's (and hip sway's) offsets, held at 0 while
  *             the mouse aims
+ *   frame_time  the game's frame-time scale (a float global, read as an
+ *             address, not from base): 0 while the game is paused, so the
+ *             mouse does not turn the view behind the pause menu
  *
  *   RECOMP_TS2_MOUSE_AIM / ts2_mouse_aim = native (the default) | stick
  *             stick keeps the toolkit's mouse look on the stick everywhere
@@ -649,6 +652,7 @@ typedef struct Ts2Aim {
     float    units;                 /* per radian */
     float    wrap;                  /* 0: no wrap */
     float    pitch_min, pitch_max;  /* in the angles' units; equal: no clamp */
+    uint32_t frame_time;            /* 0: not known; a global, never from base */
 } Ts2Aim;
 
 /* Each release's own, in config/<region>/overrides.inc. */
@@ -687,6 +691,7 @@ static void ts2_aim_parse(Ts2Aim *a, const char *s)
         else if (!strcmp(key, "wrap"))       a->wrap      = (float)atof(eq);
         else if (!strcmp(key, "pitch_min"))  a->pitch_min = (float)atof(eq);
         else if (!strcmp(key, "pitch_max"))  a->pitch_max = (float)atof(eq);
+        else if (!strcmp(key, "frame_time")) a->frame_time = (uint32_t)strtoul(eq, NULL, 0);
         else
             fprintf(stderr, "[TS2-AIM] RECOMP_TS2_AIM: unknown key '%s'\n", key);
         s = end ? end + 1 : NULL;
@@ -759,6 +764,8 @@ static uint32_t ts2_aim_at(uint32_t field)
  * and the menus run levels of their own, and before the story starts the
  * players' table holds a stale pointer whose bytes are text: +0x998 and the
  * mode rule that out. Same object layout in every release.
+ * Returns 1 to aim, 2 for modes 7 and 8 (the stick keeps the mouse there),
+ * 0 otherwise (the mouse is dropped).
  */
 static int ts2_aim_in_control(uint32_t obj)
 {
@@ -766,14 +773,16 @@ static int ts2_aim_in_control(uint32_t obj)
     uint32_t held  = TS2_MEM32_EARLY(obj + 0x998);
     uint32_t mode  = TS2_MEM32_EARLY(obj + 0x158);
 
-    return (flags & 8) && held == 0 && mode < 16 &&
-           mode != 6 && mode != 7 && mode != 8 && mode != 9;
+    if (!(flags & 8) || held != 0 || mode >= 16 || mode == 6 || mode == 9)
+        return 0;
+    return mode == 7 || mode == 8 ? 2 : 1;
 }
 
 static void ts2_aim_frame(int in_level)
 {
     float dx, dy, scale, yaw, pitch;
     uint32_t ya, pa, aa;
+    int control;
 
     ts2_aim_init();
     if (!g_ts2_aim_on || !g_ts2_aim.yaw || !g_ts2_aim.pitch || !in_level)
@@ -782,9 +791,12 @@ static void ts2_aim_frame(int in_level)
     pa = ts2_aim_at(g_ts2_aim.pitch);
     if (!ya || !pa)
         return;
+    control = g_ts2_aim.base ? ts2_aim_in_control(ya - g_ts2_aim.yaw) : 1;
+    if (control == 2)
+        return;                         /* a turret or vehicle: the stick has it */
     aa = ts2_aim_at(g_ts2_aim.active);
-    if ((aa && TS2_MEM32_EARLY(aa) != g_ts2_aim.active_is) ||
-        (g_ts2_aim.base && !ts2_aim_in_control(ya - g_ts2_aim.yaw))) {
+    if ((aa && TS2_MEM32_EARLY(aa) != g_ts2_aim.active_is) || !control ||
+        (g_ts2_aim.frame_time && TS2_MEMF(g_ts2_aim.frame_time) == 0.0f)) {
         recomp_mouse_take(NULL, NULL);  /* paused or in a cutscene: drop it */
         return;
     }

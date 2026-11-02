@@ -124,9 +124,12 @@ What to expect and what to check:
   mode's crosshair moves like a "turn" then, which gives its offset.
   Both go into `cross_x`/`cross_y` (only one pair is held today).
 - **Pause and cutscenes.** Mouse motion in the pause menu would turn the
-  view on resume. The probe does not find that flag; `active=` (a 32-bit
-  value equal to `active_is` while player 1 is in control) can be given by
-  hand once found, e.g. with a memory search between paused and playing.
+  view behind it. The game's own answer is its frame-time scale (PAL
+  0x348CEC, 1.0 in play, 0 while paused), which the look code multiplies
+  the stick by: give it as `frame_time=` and the mouse stops there too. It
+  was found by RAM dumps before and during the pause menu. `active=` (a
+  32-bit value equal to `active_is`, read from the player's object when
+  `base` is set) is for any other such test.
 - **Integers.** If nothing floats, `RECOMP_TS2_AIM_PROBE=int` tries 32-bit
   integers (the native path writes floats, so that would need code).
 
@@ -137,8 +140,13 @@ override) and `ts2_mouse_aim = native` needs no environment variable.
 ## Not done yet
 
 - Split screen: player 1 only, by design (one mouse).
-- Turrets and vehicles: if they keep their own angles the stick path still
-  has them, because TS2 only writes what `k_ts2_aim` names.
-- The pause flag (`active`), see above.
+- Turrets and vehicles: movement modes 7 and 8 turn something else within
+  limits of their own (`FUN_00148EB0`), so `ts2_aim_in_control` leaves
+  them to the stick: the mouse turns the right stick there, as before.
+  Not tried in a level that has one.
+- The aim mode (bit 1 of +0xC, set by `FUN_00140F40`) keeps the look flag,
+  so the mouse aims with the aim button and through a scope; the stick,
+  centred, leaves the crosshair in the middle. Checked by reading, not yet
+  by hand.
 - Forcing the game's own auto-aim and auto-lookahead off for the mouse: the
   player can switch them off in the game's control options meanwhile.

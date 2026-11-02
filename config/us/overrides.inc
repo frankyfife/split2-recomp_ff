@@ -227,17 +227,20 @@ const Ts2Roster k_ts2_roster = { 0 };
 const Ts2Paks k_ts2_paks = { 0 };
 
 /* Native mouse aim (ts2_aim_frame in recomp_manual.c): where player 1's
- * view angles live. Not found for this release yet, so every field is 0
- * and the mouse turns the right stick; RECOMP_TS2_AIM_PROBE=1 finds them
- * and RECOMP_TS2_AIM tries them without a rebuild (docs/mouse-aim.md).
- * Fill this in once a value has been checked in more than one level. */
+ * view angles live, as on PAL (config/pal/overrides.inc says how they were
+ * found). Here from Ghidra alone: the look code is FUN_00148A60 (PAL's
+ * FUN_00148EB0 less 0x450), working on the current player at 0x497100
+ * with the frame time at 0x3488A4 and the pitch limit at 0x497104; the
+ * frame loop (FUN_000220A0) fills 0x497100 from the table at 0x497028,
+ * players 0xD3C apart. The object's layout is PAL's. */
 const Ts2Aim k_ts2_aim = {
-    0,          /* base: address of the player pointer, or 0 */
-    0, 0,       /* yaw, pitch */
+    0x00497028, /* base: the players' table, [0] player 1 */
+    0x148, 0x14C, /* yaw, pitch */
     0, 0,       /* crosshair x, y */
     0, 0,       /* active, active_is */
-    1, 1,       /* yaw_sign, pitch_sign */
-    1.0f,       /* units per radian */
-    0.0f,       /* wrap */
-    0.0f, 0.0f, /* pitch_min, pitch_max */
+    -1, 1,      /* yaw_sign, pitch_sign */
+    57.29578f,  /* units per radian: degrees */
+    360.0f,     /* wrap */
+    -40.0f, 40.0f, /* pitch_min, pitch_max */
+    0x003488A4, /* frame_time */
 };

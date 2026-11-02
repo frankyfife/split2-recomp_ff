@@ -276,7 +276,10 @@ const Ts2UiPlace k_ts2_ui_places[] = {
  *           game's look is inverted by default), so pitch_sign +1 makes
  *           the mouse up look up; mouse_invert gives the console's way
  * +0x1AC/+0x1B0 hold the frame before's, +0x948 another copy of the yaw;
- * the game rebuilds them from +0x148/+0x14C. Checked in Siberia only. */
+ * the game rebuilds them from +0x148/+0x14C. Checked in Siberia only.
+ * frame_time: 0x348CEC is the frame-time scale the look code multiplies
+ * the stick by; RAM dumps either side of the pause menu show it 1.0 in
+ * play and 0 while paused, so the mouse stops there as the stick does. */
 const Ts2Aim k_ts2_aim = {
     0x00497268, /* base: players[0], player 1 */
     0x148, 0x14C, /* yaw, pitch */
@@ -286,4 +289,5 @@ const Ts2Aim k_ts2_aim = {
     57.29578f,  /* units per radian: degrees */
     360.0f,     /* wrap */
     -40.0f, 40.0f, /* pitch_min, pitch_max */
+    0x00348CEC, /* frame_time */
 };

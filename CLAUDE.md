@@ -70,6 +70,15 @@ no XMV movies. The toolkit's history with this game is in
 `ts2-performance-plan.md`, `resolution-and-framerate.md` and
 `modding-models-textures.md`.
 
+Timing (Nov 2026, read in Ghidra): the PAL release asks CreateDevice for
+50 Hz, but its clock is the vertical-blank callback (`FUN_001C8E02` counts
+0x47C828); a frame's ticks are the blanks since the last, 1 to 3
+(`FUN_001AE3C0`, into 0x348CE4 and the float 0x348CEC, both 0 while paused
+by 0x40BE98), and the game's speeds are per sixtieth (the look code's
+0x21C084 is 1/60). The host's vblank is 60 Hz whatever the title asks, so
+PAL plays at 60 ticks a second, the NTSC speed; on a 50 Hz console it ran
+at five sixths of it.
+
 USA (Oct 2026): driven by an input script it goes through the front end, saves
 a profile and plays the start of Siberia (picks up a weapon, opens the pause
 menu) at 60 fps with no unresolved indirect calls. Every PAL override is ported
