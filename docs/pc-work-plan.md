@@ -146,11 +146,21 @@ Found by the player (2 Nov 2026):
   `RECOMP_INTERP_DUMP` beside `RECOMP_HLE_D3D8_DUMP_EVERY=1`, both from swap
   5300 of the Siberia script plus `80000:lstick_up:1800`). At 120 Hz the two
   alternate, which reads as blue flicker. An F11 capture and its replay are
-  grey, i.e. right. So the redraw (`hle_d3d8_interp.c`, `redraw`) loses a
-  lightening layer; the screen copy is not it (it reads the in-between
-  image, `d3d8_screencopy.c`). Next: bisect the kept list's draws (skip
-  ranges in `redraw` against the real frame) to the one that differs.
-  Meanwhile the player's settings have `frame_interp = 1`.
+  grey, i.e. right. A capture of that very frame (`RECOMP_D3D8_CAPTURE`,
+  `_SWAP=5300`) replayed draw by draw (`d3d8_replay --draws n`) gives the
+  window (88, 100, 101) after draw 358 (its dark glass, indexed) and
+  (105, 115, 116) only after draw 388: the frost quad, a DrawPrimitiveUP of
+  two triangles in world space with a 64x64 texture, alpha-blended, depth
+  test LESSEQUAL and no depth write. So in the in-between frame draw 388
+  has no effect. Its vertices are kept (`host_DrawPrimitiveUP`,
+  `retain_call` copies them); not yet known whether it is not redrawn,
+  drawn with another texture, or fails the depth test there.
+  `RECOMP_INTERP_BLEND=1` draws every in-between frame with frame N's own
+  matrices, to tell the replay from the blending (a static scene is needed
+  for a whole-image compare; Siberia's falling snow gets in the way).
+  The screen copy is not it (it reads the in-between image,
+  `d3d8_screencopy.c`). Meanwhile the player's settings have
+  `frame_interp = 1`.
 - **A periodic hitch, flicker and blue glass after F11** were the toolkit's
   F11 turning on the 24 interval dumps (fixed, `shadow_dump_frame`); a
   single F11 can still flash the glass once (the back buffer's read-back).
