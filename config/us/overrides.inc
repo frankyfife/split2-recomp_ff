@@ -243,4 +243,6 @@ const Ts2Aim k_ts2_aim = {
     360.0f,     /* wrap */
     -40.0f, 40.0f, /* pitch_min, pitch_max */
     0x003488A4, /* frame_time */
+    0x002C3470, /* weapons: FUN_00140B00's scope test (ts2_aim_mode_auto) */
+    0x00497104, /* pitch_limit: the global FUN_00148A60 clamps to */
 };

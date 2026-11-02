@@ -136,7 +136,26 @@ there either: on a Steam Deck the toolkit's launcher is the better one.
 
 ## 4. Graphics glitches
 
-Nothing specific is recorded in the docs. For each glitch:
+Found by the player (2 Nov 2026):
+
+- **Glass flickers blue with frame interpolation on.** The frosted windows
+  of Siberia's first huts (and other surfaces with an overlay layer) are
+  darker in every in-between frame than in every real one: the small hut
+  window outside the tunnel measures (105, 115, 116) in each real frame and
+  (88, 100, 101) in each in-between one (`RECOMP_FRAME_INTERP=2`,
+  `RECOMP_INTERP_DUMP` beside `RECOMP_HLE_D3D8_DUMP_EVERY=1`, both from swap
+  5300 of the Siberia script plus `80000:lstick_up:1800`). At 120 Hz the two
+  alternate, which reads as blue flicker. An F11 capture and its replay are
+  grey, i.e. right. So the redraw (`hle_d3d8_interp.c`, `redraw`) loses a
+  lightening layer; the screen copy is not it (it reads the in-between
+  image, `d3d8_screencopy.c`). Next: bisect the kept list's draws (skip
+  ranges in `redraw` against the real frame) to the one that differs.
+  Meanwhile the player's settings have `frame_interp = 1`.
+- **A periodic hitch, flicker and blue glass after F11** were the toolkit's
+  F11 turning on the 24 interval dumps (fixed, `shadow_dump_frame`); a
+  single F11 can still flash the glass once (the back buffer's read-back).
+
+For each glitch:
 
 1. Where (level, screen) and with which settings (resolution scale,
    widescreen, frame interpolation, renderer).
@@ -203,3 +222,30 @@ mouse, with a pointer drawn by the game rather than the Windows cursor.
 - [ ] Pause menu in a level; resuming does not turn the view.
 - [ ] 4:3 and 16:9, resolution scale 1 and above: the pointer's tip is where
       the click lands.
+
+## 7. A free camera (to do)
+
+Asked for by the player, on the usual chord: L3 and R3 held together (on
+the keyboard Ctrl and the right button, both of which they are bound to)
+detach the camera from the player and fly it, the left stick or WASD
+moving it and the mouse or right stick turning it; the same chord brings it
+back. The game is paused meanwhile, or not (a setting), for screenshots.
+
+- The game has a fly camera of its own: `FUN_00033730` (PAL) reads all four
+  stick axes and keeps its angles in globals (0x353AF8, 0x353AFC, wrapped
+  by the double at 0x21C050). Find what turns it on (a debug flag) before
+  writing one.
+- Otherwise: hold the player still (`ts2_aim_in_control`'s +0x998 is
+  "something holds the player") and replace the view the renderer is given
+  (camera_setup's caller, `FUN_00034550`) with one of our own.
+- [ ] The chord does not also crouch and aim (L3 is crouch, R3 aim).
+- [ ] Leaving puts the view back exactly; nothing in the level moved.
+
+## 8. Changing weapons faster (to do)
+
+The D-pad (the wheel, on the PC layout) steps through the weapons, and the
+change between two is slow: the player waits for the old one to be put away
+and the new one drawn (+0xC8 is the weapon in hand, +0xCC the one wanted,
+on the character at [[player+0x1BC]+0x124]). Find the timer that runs the
+change and shorten it, or let a quick run of wheel notches skip the weapons
+in between, as PC shooters do.

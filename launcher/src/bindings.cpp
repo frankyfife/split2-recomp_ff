@@ -310,25 +310,51 @@ void File::resetController1()
 
 void File::applyPcPreset()
 {
-    // The pad's own mapping stays in the pad column; only keyboard and
-    // mouse change. Chosen for a PC shooter: the right hand aims with the
-    // mouse, so nothing is on the right stick; Escape is the pause menu.
-    static const char *const k[][2] = {
-        {"lstick_up", "key:W"},   {"lstick_down", "key:S"},
-        {"lstick_left", "key:A"}, {"lstick_right", "key:D"},
-        {"rtrigger", "mouse:left"},       // fire
-        {"ltrigger", "mouse:right"},      // aim mode / scope, where the game needs it
-        {"a", "key:SPACE"},       {"b", "key:C"},
-        {"x", "key:R"},           {"y", "key:Q"},
-        {"black", "key:F"},       {"white", "key:E"},
-        {"start", "key:ESCAPE"},  {"back", "key:TAB"},
-        {"dpad_up", "key:1"},     {"dpad_down", "key:2"},
-        {"dpad_left", "key:3"},   {"dpad_right", "key:4"},
-        {"lthumb", "key:LSHIFT"}, {"rthumb", "mouse:middle"},
-        {"rstick_up", ""}, {"rstick_down", ""}, {"rstick_left", ""}, {"rstick_right", ""},
+    // TimeSplitters 2's own control set-up "Standard" (Options > Controls),
+    // from the pad onto a PC shooter's keys. The pad column goes back to
+    // the defaults as well, so a pad plays the console's set-up beside it.
+    //   left stick   walk / strafe          WASD
+    //   R trigger    fire                   left button
+    //   L trigger    second weapon function middle button, F
+    //   R3           aim (zoom with a scope) right button (the mouse holds
+    //                                       the aim mode itself elsewhere)
+    //   A            activate               E, and Enter for the menus
+    //   B            back, in the menus     Backspace
+    //   Y            reload                 R
+    //   L3           crouch                 Ctrl, C
+    //   D-pad <>     change weapon          the wheel, Q and the arrows
+    //   D-pad up/dn  the menus              the arrows
+    //   Start, Back  pause, objectives      Escape (also frees the pointer), Tab
+    // The right stick is the mouse's, so no keys are on it.
+    static const struct { const char *control; const char *src[3]; } k[] = {
+        {"lstick_up", {"key:W"}},     {"lstick_down", {"key:S"}},
+        {"lstick_left", {"key:A"}},   {"lstick_right", {"key:D"}},
+        {"rtrigger", {"mouse:left"}},
+        {"ltrigger", {"mouse:middle", "key:F"}},
+        {"rthumb", {"mouse:right"}},
+        {"a", {"key:E", "key:RETURN"}},
+        {"b", {"key:BACKSPACE"}},
+        {"x", {"key:X"}},
+        {"y", {"key:R"}},
+        {"lthumb", {"key:LCTRL", "key:C"}},
+        {"dpad_left", {"mouse:wheelup", "key:Q", "key:LEFT"}},
+        {"dpad_right", {"mouse:wheeldown", "key:RIGHT"}},
+        {"dpad_up", {"key:UP"}},      {"dpad_down", {"key:DOWN"}},
+        {"start", {"key:ESCAPE"}},    {"back", {"key:TAB"}},
+        {"white", {}},                {"black", {}},
+        {"rstick_up", {}}, {"rstick_down", {}}, {"rstick_left", {}}, {"rstick_right", {}},
     };
-    for (const auto &e : k)
-        setKeySource(QLatin1String(e[0]), QLatin1String(e[1]));
+    resetController1();
+    for (const auto &e : k) {
+        QStringList s;
+        const QString pad = padSource(QLatin1String(e.control));
+        if (!pad.isEmpty())
+            s << pad;
+        for (const char *src : e.src)
+            if (src)
+                s << QLatin1String(src);
+        setSources(QLatin1String(e.control), s);
+    }
 }
 
 }

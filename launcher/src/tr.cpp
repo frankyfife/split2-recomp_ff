@@ -154,6 +154,20 @@ const QHash<QString, QString> &german()
          QStringLiteral("80 ist der Standard: etwa 18 cm für eine volle Drehung mit einer 800-dpi-Maus beim direkten Zielen.")},
         {QStringLiteral("Invert"), QStringLiteral("Invertieren")},
         {QStringLiteral("Mouse up looks down"), QStringLiteral("Maus hoch schaut nach unten")},
+        {QStringLiteral("Aim without the aim button"), QStringLiteral("Ohne Zieltaste zielen")},
+        {QStringLiteral("With direct aim the game's aim mode is held on, so the crosshair shows and sits in the middle. Scoped weapons "
+                        "keep the button, for the zoom. The pad's right stick gives the console's handling back."),
+         QStringLiteral("Bei direktem Zielen bleibt der Zielmodus des Spiels an: Das Fadenkreuz ist zu sehen und sitzt in der Mitte. "
+                        "Waffen mit Zielfernrohr behalten die Taste, für den Zoom. Der rechte Stick am Gamepad gibt die "
+                        "Konsolensteuerung zurück.")},
+        {QStringLiteral("Look up and down"), QStringLiteral("Nach oben und unten")},
+        {QStringLiteral("How far the view tilts with the mouse. The console stops at 40 degrees."),
+         QStringLiteral("Wie weit die Maus die Sicht neigt. Die Konsole hört bei 40 Grad auf.")},
+        {QStringLiteral("Slower when zoomed"), QStringLiteral("Langsamer im Zoom")},
+        {QStringLiteral("100: the mouse slows with the zoom, so a movement covers the same part of the picture. 0: the same speed zoomed."),
+         QStringLiteral("100: Die Maus wird mit dem Zoom langsamer, eine Bewegung deckt denselben Bildteil ab. 0: Im Zoom gleich schnell.")},
+        {QStringLiteral("In the game, Esc gives the pointer back; a click in the window takes it again."),
+         QStringLiteral("Im Spiel gibt Esc die Maus frei, ein Klick ins Fenster fängt sie wieder.")},
         {QStringLiteral("Controller 1"), QStringLiteral("Controller 1")},
         {QStringLiteral("Reads from"), QStringLiteral("Liest von")},
         {QStringLiteral("Gamepad 1"), QStringLiteral("Gamepad 1")},

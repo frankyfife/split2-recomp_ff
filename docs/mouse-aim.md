@@ -146,7 +146,33 @@ override) and `ts2_mouse_aim = native` needs no environment variable.
   Not tried in a level that has one.
 - The aim mode (bit 1 of +0xC, set by `FUN_00140F40`) keeps the look flag,
   so the mouse aims with the aim button and through a scope; the stick,
-  centred, leaves the crosshair in the middle. Checked by reading, not yet
-  by hand.
+  centred, leaves the crosshair in the middle.
+- **No aim button with the mouse** (`ts2_aim_mode_auto`, `ts2_aim_mode =
+  button` to switch it off): while the mouse is what aims, the aim mode is
+  held on wherever the game would allow it (a weapon in hand, +0xC8, none
+  being changed, +0xCC equal) and the weapon has no scope (flag 0x20 of its
+  row in the table, PAL 0x2C3890, USA 0x2C3470, rows 0x240 apart). Setting
+  it where the game does not allow it makes the game remember the press
+  (0x10) and zoom the next scope drawn: that was seen in Siberia, and is
+  why the test is the game's own. The pad's right stick past a third gives
+  the console's handling back. Checked in Siberia: on with the tracker,
+  off with the sniper rifle and no zoom; a crosshair with a gun without a
+  scope not seen yet.
+- In the front end the mouse does nothing (it used to wander the menus as
+  the right stick), until it can point at them (`docs/pc-work-plan.md` 6).
+- **No levelling while walking.** With the stick's vertical still and the
+  player moving, the look code eases the pitch back to 0 (+0x150 = 2, if
+  the game's look-ahead option is on). The mouse never moves the stick, so
+  the view sank back after every step; while the mouse aims, +0x150 is
+  held at 1, the "player is looking" state.
+- **The pitch limit** (40 degrees, the global PAL 0x497344 / USA 0x497104,
+  set by `FUN_001434F0` at the player's set-up) is raised to
+  `ts2_pitch_limit` (85 by default) while the mouse aims and put back for
+  the pad. Looking up 85 degrees in Siberia drew right.
+- **Zoomed**, the mouse slows by the field of view's ratio times
+  `ts2_zoom_match` / 100 (100 by default; 0 keeps its speed).
+- Windows: the window holds the pointer at its middle, hidden, and puts the
+  clip back if Windows drops it; Esc gives the pointer back, a click takes
+  it again (xboxrecomp `hle_d3d8.c`).
 - Forcing the game's own auto-aim and auto-lookahead off for the mouse: the
   player can switch them off in the game's control options meanwhile.

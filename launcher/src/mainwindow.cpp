@@ -494,6 +494,19 @@ QWidget *MainWindow::buildControlsTab()
     addRow(f, T("Sensitivity"), sensW, T("80 is the default: about 18 cm for a full turn on an 800 dpi mouse with direct aim."));
     invert_ = new QCheckBox(T("Mouse up looks down"));
     addRow(f, T("Invert"), invert_);
+    autoAim_ = new QCheckBox(T("Aim without the aim button"));
+    addRow(f, QString(), autoAim_,
+           T("With direct aim the game's aim mode is held on, so the crosshair shows and sits in the middle. Scoped weapons "
+             "keep the button, for the zoom. The pad's right stick gives the console's handling back."));
+    pitchLimit_ = new QSpinBox;
+    pitchLimit_->setRange(40, 89);
+    pitchLimit_->setSuffix(QStringLiteral(" °"));
+    addRow(f, T("Look up and down"), pitchLimit_, T("How far the view tilts with the mouse. The console stops at 40 degrees."));
+    zoomMatch_ = new QSpinBox;
+    zoomMatch_->setRange(0, 100);
+    zoomMatch_->setSuffix(QStringLiteral(" %"));
+    addRow(f, T("Slower when zoomed"), zoomMatch_,
+           T("100: the mouse slows with the zoom, so a movement covers the same part of the picture. 0: the same speed zoomed."));
     l->addWidget(aimBox);
     connect(sens_, &QSlider::valueChanged, sensBox_, &QSpinBox::setValue);
     connect(sensBox_, qOverload<int>(&QSpinBox::valueChanged), sens_, &QSlider::setValue);
@@ -702,6 +715,9 @@ void MainWindow::load()
     select(aimMode_, conf_.get(QStringLiteral("ts2_mouse_aim"), QStringLiteral("native")));
     sens_->setValue(conf_.getInt(QStringLiteral("mouse_sensitivity"), kSensDefault, kSensMin, kSensMax));
     invert_->setChecked(conf_.getBool(QStringLiteral("mouse_invert"), false));
+    autoAim_->setChecked(conf_.get(QStringLiteral("ts2_aim_mode"), QStringLiteral("auto")) != QLatin1String("button"));
+    pitchLimit_->setValue(conf_.getInt(QStringLiteral("ts2_pitch_limit"), 85, 40, 89));
+    zoomMatch_->setValue(conf_.getInt(QStringLiteral("ts2_zoom_match"), 100, 0, 100));
 
     select(audioPath_, conf_.get(QStringLiteral("audio"), QStringLiteral("native")));
     volume_->setValue(conf_.getInt(QStringLiteral("launcher_volume"), 100, 5, 100));
@@ -772,6 +788,12 @@ bool MainWindow::save()
     conf_.set(QStringLiteral("mouse_sensitivity"), sens_->value(), QStringLiteral("1-100, 80 the default.  [RECOMP_MOUSE_SENSITIVITY]"));
     conf_.setBool(QStringLiteral("mouse_invert"), invert_->isChecked(),
                   QStringLiteral("1 turns the view down when the mouse moves up.  [RECOMP_MOUSE_INVERT]"));
+    conf_.set(QStringLiteral("ts2_aim_mode"), autoAim_->isChecked() ? QStringLiteral("auto") : QStringLiteral("button"),
+              QStringLiteral("TimeSplitters 2: auto holds the aim mode on with the mouse, button keeps the console's.  [RECOMP_TS2_AIM_MODE]"));
+    conf_.set(QStringLiteral("ts2_pitch_limit"), pitchLimit_->value(),
+              QStringLiteral("TimeSplitters 2: degrees the mouse tilts the view, 40-89.  [RECOMP_TS2_PITCH_LIMIT]"));
+    conf_.set(QStringLiteral("ts2_zoom_match"), zoomMatch_->value(),
+              QStringLiteral("TimeSplitters 2: 0-100, how much the mouse slows when zoomed.  [RECOMP_TS2_ZOOM_MATCH]"));
 
     if (valueOf(audioPath_) == QLatin1String("native"))
         conf_.unset(QStringLiteral("audio"));
@@ -870,11 +892,11 @@ void MainWindow::refreshEnabled()
     sensBox_->setEnabled(aim);
     invert_->setEnabled(aim);
     const bool native = aim && valueOf(aimMode_) == QLatin1String("native");
-    const bool known = !conf_.get(QStringLiteral("ts2_aim")).isEmpty();
-    aimNote_->setVisible(native);
-    aimNote_->setText(known ? T("View angles from the settings file (ts2_aim).")
-                            : T("Direct aim needs where your release keeps the view angles. Until that is known for it "
-                                "(docs/mouse-aim.md), the game falls back to the mouse as the right stick by itself."));
+    autoAim_->setEnabled(native);
+    pitchLimit_->setEnabled(native);
+    zoomMatch_->setEnabled(native);
+    aimNote_->setVisible(aim);
+    aimNote_->setText(T("In the game, Esc gives the pointer back; a click in the window takes it again."));
 }
 
 void MainWindow::refreshGame()

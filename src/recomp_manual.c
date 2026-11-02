@@ -653,7 +653,11 @@ typedef struct Ts2Aim {
     float    wrap;                  /* 0: no wrap */
     float    pitch_min, pitch_max;  /* in the angles' units; equal: no clamp */
     uint32_t frame_time;            /* 0: not known; a global, never from base */
+    uint32_t weapons;               /* 0: not known; the weapon table, a global */
+    uint32_t pitch_limit;           /* 0: not known; the game's, a float global */
 } Ts2Aim;
+
+extern int recomp_input_host_last_sticks(short out[4]);
 
 /* Each release's own, in config/<region>/overrides.inc. */
 extern const Ts2Aim k_ts2_aim;
@@ -692,6 +696,8 @@ static void ts2_aim_parse(Ts2Aim *a, const char *s)
         else if (!strcmp(key, "pitch_min"))  a->pitch_min = (float)atof(eq);
         else if (!strcmp(key, "pitch_max"))  a->pitch_max = (float)atof(eq);
         else if (!strcmp(key, "frame_time")) a->frame_time = (uint32_t)strtoul(eq, NULL, 0);
+        else if (!strcmp(key, "weapons"))    a->weapons   = (uint32_t)strtoul(eq, NULL, 0);
+        else if (!strcmp(key, "pitch_limit")) a->pitch_limit = (uint32_t)strtoul(eq, NULL, 0);
         else
             fprintf(stderr, "[TS2-AIM] RECOMP_TS2_AIM: unknown key '%s'\n", key);
         s = end ? end + 1 : NULL;
@@ -778,6 +784,95 @@ static int ts2_aim_in_control(uint32_t obj)
     return mode == 7 || mode == 8 ? 2 : 1;
 }
 
+/*
+ * The aim mode without the aim button. On the console the button switches
+ * TS2 into its aim mode (bit 1 of the player's +0xC, PAL FUN_00140F40): the
+ * crosshair shows and the right stick moves it, the camera turning only past
+ * half the stick. With the mouse the camera is turned directly and the stick
+ * stays centred, so held in the aim mode the crosshair sits in the middle and
+ * shots go where the mouse points, with no button: a PC shooter's aiming.
+ * So while the mouse is what is aiming, the mode is held on -- except with a
+ * scoped weapon (flag 0x20 of its row in the weapon table, rows 0x240 apart,
+ * the test FUN_00140F40 makes), where the button is the zoom and stays the
+ * button. The pad's right stick moved past a third gives the stick back its
+ * console handling, and the mode is put back as it was, if this set it.
+ * ts2_aim_mode = button keeps the console's way with the mouse too.
+ */
+static float ts2_aim_pitch_limit(void)
+{
+    static float lim = -1.0f;
+
+    if (lim < 0.0f) {
+        const char *v = recomp_config_lookup("RECOMP_TS2_PITCH_LIMIT", "ts2_pitch_limit");
+        lim = v && *v ? (float)atof(v) : 85.0f;
+        if (lim < 10.0f) lim = 10.0f;
+        if (lim > 89.0f) lim = 89.0f;
+    }
+    return lim;
+}
+
+static void ts2_aim_mode_auto(uint32_t obj, int moved)
+{
+    static int mode = -1, mouse_in_use, forced;
+    short st[4];
+    int want = 0;
+
+    if (mode < 0) {
+        const char *m = recomp_config_lookup("RECOMP_TS2_AIM_MODE", "ts2_aim_mode");
+        mode = !(m && !strcmp(m, "button"));
+    }
+    if (moved)
+        mouse_in_use = 1;
+    if (recomp_input_host_last_sticks(st) &&
+        (st[2] > 11000 || st[2] < -11000 || st[3] > 11000 || st[3] < -11000))
+        mouse_in_use = 0;
+    if (mode && mouse_in_use && g_ts2_aim.weapons) {
+        uint32_t body = TS2_MEM32_EARLY(obj + 0x1BC), chr, w;
+        chr = body >= 0x10000u ? TS2_MEM32_EARLY(body + 0x124) : 0;
+        w = chr >= 0x10000u ? TS2_MEM32_EARLY(chr + 0x438) : 0xFFFFFFFFu;
+        /* Only where the game allows the mode itself: a weapon in hand
+         * (+0xC8) and none being changed (+0xCC the same). Elsewhere it
+         * turns a set bit into a pending one (0x10), which it then honours
+         * with whatever is drawn next, zooming a scope in. */
+        want = chr >= 0x10000u && w < 256 &&
+               TS2_MEM32_EARLY(chr + 0xC8) != 0 &&
+               TS2_MEM32_EARLY(chr + 0xC8) == TS2_MEM32_EARLY(chr + 0xCC) &&
+               !(TS2_MEM32_EARLY(g_ts2_aim.weapons + w * 0x240) & 0x20);
+    }
+    if (want)
+        TS2_MEM32_EARLY(obj + 0xC) |= 2u;
+    else if (forced)
+        TS2_MEM32_EARLY(obj + 0xC) &= ~(2u | 0x10u);
+    forced = want;
+
+    /* Walking without looking up or down, TS2 levels the view by itself
+     * (FUN_00148EB0: +0x150 goes to 2 when the stick's vertical is still and
+     * the player moves, and 2 eases the pitch to 0). The mouse never moves
+     * the stick, so the view kept sinking back to the horizon as soon as
+     * the player walked or was knocked back by a shot. 1 is the state the
+     * game is in while the player looks: held there, it leaves the pitch
+     * where the mouse put it. */
+    if (mouse_in_use)
+        TS2_MEM32_EARLY(obj + 0x150) = 1;
+
+    /* The pitch limit, 40 degrees from the player's set-up (FUN_001434F0),
+     * is a thumb's: with the mouse it is raised to ts2_pitch_limit (85 by
+     * default, short of straight up and down, where the view's matrix
+     * would flip), and put back for the pad. */
+    if (g_ts2_aim.pitch_limit) {
+        static float console_limit = -1.0f;
+        float now = TS2_MEMF(g_ts2_aim.pitch_limit);
+
+        if (console_limit < 0.0f && now > 0.0f && now < 90.0f)
+            console_limit = now;
+        if (console_limit > 0.0f) {
+            float lim = mouse_in_use ? ts2_aim_pitch_limit() : console_limit;
+            if (now != lim)
+                TS2_MEMF(g_ts2_aim.pitch_limit) = lim;
+        }
+    }
+}
+
 static void ts2_aim_frame(int in_level)
 {
     float dx, dy, scale, yaw, pitch;
@@ -785,12 +880,20 @@ static void ts2_aim_frame(int in_level)
     int control;
 
     ts2_aim_init();
-    if (!g_ts2_aim_on || !g_ts2_aim.yaw || !g_ts2_aim.pitch || !in_level)
+    if (!g_ts2_aim_on || !g_ts2_aim.yaw || !g_ts2_aim.pitch)
         return;                         /* not taking: the stick has the mouse */
+    if (!in_level) {
+        /* The front end: on the stick the mouse wandered through the menus
+         * as the stick would. Until it can point at them, it does nothing. */
+        recomp_mouse_take(NULL, NULL);
+        return;
+    }
     ya = ts2_aim_at(g_ts2_aim.yaw);
     pa = ts2_aim_at(g_ts2_aim.pitch);
-    if (!ya || !pa)
+    if (!ya || !pa) {
+        recomp_mouse_take(NULL, NULL);
         return;
+    }
     control = g_ts2_aim.base ? ts2_aim_in_control(ya - g_ts2_aim.yaw) : 1;
     if (control == 2)
         return;                         /* a turret or vehicle: the stick has it */
@@ -804,19 +907,34 @@ static void ts2_aim_frame(int in_level)
      * the mouse, for a scripted run (a background window has no pointer). */
     {
         const char *fake = getenv("RECOMP_TS2_AIM_FAKE");
+        int moved;
+
         if (fake && *fake) {
             dx = (float)atof(fake);
             dy = strchr(fake, ',') ? (float)atof(strchr(fake, ',') + 1) : 0.0f;
-        } else if (!recomp_mouse_take(&dx, &dy)) {
-            return;
+            moved = dx != 0.0f || dy != 0.0f;
+        } else {
+            moved = recomp_mouse_take(&dx, &dy);
         }
+        ts2_aim_mode_auto(ya - g_ts2_aim.yaw, moved);
+        if (!moved)
+            return;
     }
     scale = TS2_AIM_RAD_PER_COUNT_80 * (float)recomp_mouse_sensitivity() / 80.0f;
     /* Zoomed in (a scope), the same hand movement covers the same part of
      * the picture: scale by the narrower view. */
     if (g_ts2_fov_now > 1.0f && g_ts2_fov_base > g_ts2_fov_now) {
+        /* ts2_zoom_match, 0-100: how much of that; 0 keeps the speed. */
+        static float match = -1.0f;
         float r = g_ts2_fov_now / g_ts2_fov_base;
-        scale *= r;
+
+        if (match < 0.0f) {
+            const char *v = recomp_config_lookup("RECOMP_TS2_ZOOM_MATCH", "ts2_zoom_match");
+            match = (v && *v ? (float)atof(v) : 100.0f) / 100.0f;
+            if (match < 0.0f) match = 0.0f;
+            if (match > 1.0f) match = 1.0f;
+        }
+        scale *= 1.0f - match * (1.0f - r);
     }
     scale *= g_ts2_aim.units;
     yaw   = TS2_MEMF(ya);
@@ -832,7 +950,14 @@ static void ts2_aim_frame(int in_level)
         }
     }
     pitch = TS2_MEMF(pa) - (float)g_ts2_aim.pitch_sign * dy * scale;  /* screen y is down */
-    if (g_ts2_aim.pitch_max > g_ts2_aim.pitch_min) {
+    if (g_ts2_aim.pitch_limit) {
+        /* The game's own limit, which ts2_aim_mode_auto has raised. */
+        float lim = TS2_MEMF(g_ts2_aim.pitch_limit);
+        if (lim > 0.0f && lim < 90.0f) {
+            if (pitch > lim)  pitch = lim;
+            if (pitch < -lim) pitch = -lim;
+        }
+    } else if (g_ts2_aim.pitch_max > g_ts2_aim.pitch_min) {
         if (pitch > g_ts2_aim.pitch_max) pitch = g_ts2_aim.pitch_max;
         if (pitch < g_ts2_aim.pitch_min) pitch = g_ts2_aim.pitch_min;
     }
