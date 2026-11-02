@@ -95,6 +95,9 @@ private:
     QCheckBox *linkUpnp_ = nullptr;
     QLabel *linkInfo_ = nullptr;
 
+    // game
+    QComboBox *gameLang_ = nullptr;
+
     // advanced
     QComboBox *language_ = nullptr;
     QCheckBox *closeOnPlay_ = nullptr;

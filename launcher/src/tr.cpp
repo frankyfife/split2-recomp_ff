@@ -120,6 +120,12 @@ const QHash<QString, QString> &german()
         {QStringLiteral("Frame rate counter"), QStringLiteral("Bildratenanzeige")},
         {QStringLiteral("Show the counter"), QStringLiteral("Anzeige einblenden")},
         {QStringLiteral("F9 toggles it while playing."), QStringLiteral("F9 schaltet sie im Spiel um.")},
+        {QStringLiteral("Game language"), QStringLiteral("Sprache des Spiels")},
+        {QStringLiteral("Text"), QStringLiteral("Texte")},
+        {QStringLiteral("The language the console was set to. The PAL release has English, German, French, Spanish and Italian text, "
+                        "with English speech; the USA release is English only."),
+         QStringLiteral("Die Sprache, auf die die Konsole eingestellt war. Die PAL-Fassung hat englische, deutsche, französische, "
+                        "spanische und italienische Texte, gesprochen wird Englisch; die USA-Fassung ist nur englisch.")},
         {QStringLiteral("PAL release"), QStringLiteral("PAL-Fassung")},
         {QStringLiteral("60 Hz"), QStringLiteral("60 Hz")},
         {QStringLiteral("The PAL console offered 60 Hz; off plays the PAL release at 50 Hz, as a PAL TV without 60 Hz did."),

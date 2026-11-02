@@ -333,6 +333,18 @@ QWidget *MainWindow::buildGameTab()
     bl->addWidget(buildLabel_);
     l->addWidget(box);
 
+    // The console's dashboard language, which the PAL disc shows its text in
+    // (the toolkit's `language` key, XC_LANGUAGE). The USA disc has English only.
+    auto *langBox = new QGroupBox(T("Game language"));
+    auto *lf = new QFormLayout(langBox);
+    gameLang_ = combo({{QStringLiteral("English"), QStringLiteral("en")}, {QStringLiteral("Deutsch"), QStringLiteral("de")},
+                       {QStringLiteral("Français"), QStringLiteral("fr")}, {QStringLiteral("Español"), QStringLiteral("es")},
+                       {QStringLiteral("Italiano"), QStringLiteral("it")}});
+    addRow(lf, T("Text"), gameLang_,
+           T("The language the console was set to. The PAL release has English, German, French, Spanish and Italian text, "
+             "with English speech; the USA release is English only."));
+    l->addWidget(langBox);
+
     connect(buildImage_, &QPushButton::clicked, this, [this] {
         const QString f = QFileDialog::getOpenFileName(this, T("Disc image"), QString(),
                                                        T("Xbox disc image (*.iso *.xiso);;All files (*)"));
@@ -702,6 +714,14 @@ void MainWindow::load()
     linkCode_->setText(conf_.get(QStringLiteral("syslink_code")));
     linkUpnp_->setChecked(conf_.getBool(QStringLiteral("syslink_upnp"), true));
 
+    {
+        // By code or by the dashboard's number (1 English, 3 German, 4 French, 5 Spanish, 6 Italian).
+        QString g = conf_.get(QStringLiteral("language"), QStringLiteral("en")).left(2).toLower();
+        static const char *const byNumber[] = {"en", "ja", "de", "fr", "es", "it", "ko", "zh", "pt"};
+        if (g.size() == 1 && g[0] >= QLatin1Char('1') && g[0] <= QLatin1Char('9'))
+            g = QLatin1String(byNumber[g[0].unicode() - '1']);
+        select(gameLang_, g);
+    }
     select(language_, uiGerman() ? QStringLiteral("de") : QStringLiteral("en"));
     closeOnPlay_->setChecked(conf_.getBool(QStringLiteral("launcher_close_on_play"), true));
     extraEnv_->setText(conf_.get(QStringLiteral("launcher_env")));
@@ -739,6 +759,11 @@ bool MainWindow::save()
     conf_.setBool(QStringLiteral("fps_overlay"), fps_->isChecked(), QStringLiteral("Start with the frame rate on screen.  [RECOMP_FPS_OVERLAY]"));
     conf_.setBool(QStringLiteral("pal60"), pal60_->isChecked(),
                   QStringLiteral("A PAL release at 60 Hz (1) or 50 Hz (0).  [RECOMP_PAL60]"));
+    if (valueOf(gameLang_) == QLatin1String("en"))
+        conf_.unset(QStringLiteral("language"));
+    else
+        conf_.set(QStringLiteral("language"), valueOf(gameLang_),
+                  QStringLiteral("The console's language: en, de, fr, es, it (PAL release).  [RECOMP_LANGUAGE]"));
 
     conf_.setBool(QStringLiteral("mouse_look"), mouseAim_->isChecked(),
                   QStringLiteral("The game window takes the pointer and the mouse aims.  [RECOMP_MOUSE_LOOK]"));
