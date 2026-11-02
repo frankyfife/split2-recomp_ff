@@ -59,6 +59,51 @@ the `[TS2-PROBE] try:` line, run with it and `RECOMP_MOUSE_LOOK=1`, check:
 Then write the values into `config/pal/overrides.inc` (`k_ts2_aim`) with
 how they were found, and repeat for USA (`config/us/overrides.inc`).
 
+Scripted probe, 1 Nov 2026 (PAL, the Siberia path from CLAUDE.md, then
+`rstick_<dir>:3000` every 11 s from 95 s, `RECOMP_TS2_AIM_PROBE_AFTER=1200`
+to skip the opening cutscene): yaw went 16 M -> 12 -> 6 -> 0 candidates,
+pitch never narrowed, and the only survivors were "sway x" values on the
+stack (0x00F7F6C8.., 0x00F7FA6C..), which are temporaries. Without
+`_AFTER` (USA) every yaw went at once: the cutscene's camera moves alone.
+Next: `RECOMP_TS2_AIM_PROBE=int` (the angles may be integers), and a probe
+played by hand, which the rules were written for.
+
+Later the same evening (PAL), all without a result:
+
+- The int probe, a short probe played by hand and a probe with 15 s holds
+  and 25 s rests: no yaw survives a held turn plus what follows it.
+  `RECOMP_TS2_AIM_PROBE_TRACE=1` prints each stick state change: the
+  states are right (left held 356 frames, up 881; the full scan runs at
+  about 24 fps, not 5). One real bug was fixed on the way: while up/down
+  was held the rule cleared the up/down lean instead of the yaw ("other").
+- Frame dumps during a scripted turn: the right stick does turn the view;
+  up looks down (inverted, which the sign rule allows).
+- RAM dumps (`RECOMP_RAM_DUMP`, 16 of them 1.5 s apart around separated
+  2 s turns, the swaps matched to `RECOMP_INPUT_LOG`'s lines): no float
+  is still at rest, moves one way on left and the other on right and is
+  still through up/down; nothing in RAM equals an angle taken from the
+  3x4 matrix at 0x1EA778 (copy at 0x47B5D8), which turned out to be a
+  per-object scratch matrix, not the view.
+- The game's own pad table is at 0x2CDB48 (per pad; the right stick's
+  bytes at +0x34 and +0x3C, 0..255, rest 128), written by sub_000DA9E0.
+  Its readers reach it through a pointer, so a grep finds only the writer.
+
+Found the next morning (2 Nov), by reading the code: the angles are at
++0x148/+0x14C of the player object in degrees, the object in the 0x80000000
+window, which every earlier dump had left out (`RECOMP_RAM_DUMP` writes the
+low view unless `RECOMP_RAM_DUMP_BASE=0x80000000`), and so had the probe,
+which scans 0x10000 up to the end of RAM in that same low view. PAL's `k_ts2_aim` has
+them now, checked in Siberia with `RECOMP_TS2_AIM_FAKE`; how, and the rule
+that keeps the mouse off the title screen, are in `docs/mouse-aim.md`.
+Still to check by hand: the list at the top of this section.
+
+So far the angles had looked like no plain float or int that changes every
+frame; they were, in memory the dumps did not cover. Next is to read the code: from
+sub_000DA9E0's pad table to the function that turns the player (a
+`RECOMP_WATCH_WRITE` on a candidate once the player object is known), or
+the view matrix the renderer is given each frame (c64's source) back to
+the angles it is built from.
+
 Turn speed: `TS2_AIM_RAD_PER_COUNT_80` in `src/recomp_manual.c` is a guess
 (about 18 cm a turn at 800 dpi, sensitivity 80); tune it by playing.
 
@@ -131,3 +176,30 @@ and culling agree. Not run yet:
 
 Not yet: MSAA (the toolkit has none), cutscene skip, controller icons
 (`docs/enhancements.md`).
+
+## 6. The mouse in the menus (to do)
+
+Asked for by the player: the front end and the pause menu driven with the
+mouse, with a pointer drawn by the game rather than the Windows cursor.
+`docs/enhancements.md` ("Native mouselook") puts clicking TS2's menus at
+2-3 weeks, TS2's side.
+
+- Pointer: one of the game's own textures, drawn on the 2D layer at the
+  mouse's position. The crosshair is the first candidate (it is already
+  loaded in play; for the front end find whether it is loaded there, else
+  take a front-end texture: a highlight, an arrow, a cursor glyph). The
+  texture dump (`RECOMP_HLE_D3D8_DUMP*`) names them.
+- Placement: in widescreen the 2D layer is laid out per call site
+  (`k_ts2_ui_places`), so the pointer goes through the same mapping as the
+  menu items it points at.
+- Hover and click: find where the front end keeps its menu items' rectangles
+  and its selected index (a watchpoint on the index while moving with the
+  D-pad), then set the index on hover and send A on a left click, B on a
+  right click. Sliders and the name entry screen need their own handling.
+- Where the mouse aims (in play, `ts2_aim_frame`) the pointer is hidden and
+  the window keeps the pointer captured; in menus it is shown and released,
+  which the toolkit's mouse look already does on its side.
+- [ ] Front end: every screen reachable and usable with the mouse alone.
+- [ ] Pause menu in a level; resuming does not turn the view.
+- [ ] 4:3 and 16:9, resolution scale 1 and above: the pointer's tip is where
+      the click lands.

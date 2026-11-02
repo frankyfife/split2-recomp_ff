@@ -47,8 +47,32 @@ linearly; `mouse_invert` swaps up and down.
 
 ## Finding the view angles (once per release)
 
-Not known yet for either release: every `k_ts2_aim` field is 0. The probe
-finds them while you play; nothing has to be rebuilt to try what it finds.
+**PAL: found (Nov 2026), USA: not yet.** The angles are floats in degrees
+in the player's object, which the players' table at 0x497268 (PAL) points
+at: +0x148 yaw in [0, 360), +0x14C pitch in -40..40 (the limit is the
+global at 0x497344). The probe below never isolated them; reading the code
+did, and is the faster way for the next release:
+
+1. In Ghidra (the `ghidra-xbe` loader), list the stores to `[reg+0x148]`
+   and `[reg+0x14C]`; the look code is PAL `FUN_00148EB0`, which adds the
+   right stick to both, scaled by the frame time (0x348CEC), and turns
+   only while bit 3 of +0xC is set, +0x998 is 0 and the movement mode
+   +0x158 is a free one. `ts2_aim_in_control` makes the same tests, so the
+   mouse leaves the title screen's and the menus' levels alone.
+2. `RECOMP_RAM_DUMP` with `RECOMP_RAM_DUMP_BASE=0x80000000` (the players
+   live in the contiguous window) around scripted turns shows the fields
+   move.
+3. `RECOMP_TS2_AIM_FAKE=<dx>,<dy>` adds that many mouse counts every frame
+   in a scripted run (no pointer in a background window) and logs the
+   first writes; `20,0` must turn right, `0,-20` look up to +40.
+
+For the USA release the same object layout should hold; only the table's
+address moves (find where `FUN_00148EB0`'s counterpart reads the current
+player, `*0x497340` on PAL, and the table that fills it).
+
+The probe, for the record (it found nothing in TS2; the reasons are in
+`docs/pc-work-plan.md`), finds them while you play; nothing has to be
+rebuilt to try what it finds.
 
 1. Mouse look **off** (the probe reads the stick the game was given; the
    mouse would not show). A pad, keys bound to the right stick, or an input

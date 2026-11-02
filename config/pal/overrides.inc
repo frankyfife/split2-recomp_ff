@@ -264,17 +264,26 @@ const Ts2UiPlace k_ts2_ui_places[] = {
 };
 
 /* Native mouse aim (ts2_aim_frame in recomp_manual.c): where player 1's
- * view angles live. Not found for this release yet, so every field is 0
- * and the mouse turns the right stick; RECOMP_TS2_AIM_PROBE=1 finds them
- * and RECOMP_TS2_AIM tries them without a rebuild (docs/mouse-aim.md).
- * Fill this in once a value has been checked in more than one level. */
+ * view angles live. Found by reading the code rather than the probe (whose
+ * rules found nothing, docs/pc-work-plan.md): the movement code
+ * (sub_00145DA0) works on the current player, *0x497340, which the frame
+ * loop fills from the players' table at 0x497268 ([0] is player 1). RAM
+ * dumps of that object around scripted right-stick turns in Siberia
+ * (RECOMP_RAM_DUMP_BASE=0x80000000) show, in degrees:
+ *   +0x148  yaw, kept in [0, 360): the stick to the left raises it,
+ *           so yaw_sign -1 (to the right is the stick's positive side)
+ *   +0x14C  pitch, -40..40: the stick up lowers it and looks down (the
+ *           game's look is inverted by default), so pitch_sign +1 makes
+ *           the mouse up look up; mouse_invert gives the console's way
+ * +0x1AC/+0x1B0 hold the frame before's, +0x948 another copy of the yaw;
+ * the game rebuilds them from +0x148/+0x14C. Checked in Siberia only. */
 const Ts2Aim k_ts2_aim = {
-    0,          /* base: address of the player pointer, or 0 */
-    0, 0,       /* yaw, pitch */
+    0x00497268, /* base: players[0], player 1 */
+    0x148, 0x14C, /* yaw, pitch */
     0, 0,       /* crosshair x, y */
     0, 0,       /* active, active_is */
-    1, 1,       /* yaw_sign, pitch_sign */
-    1.0f,       /* units per radian */
-    0.0f,       /* wrap */
-    0.0f, 0.0f, /* pitch_min, pitch_max */
+    -1, 1,      /* yaw_sign, pitch_sign */
+    57.29578f,  /* units per radian: degrees */
+    360.0f,     /* wrap */
+    -40.0f, 40.0f, /* pitch_min, pitch_max */
 };
