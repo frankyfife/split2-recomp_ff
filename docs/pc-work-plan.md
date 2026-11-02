@@ -259,3 +259,46 @@ and the new one drawn (+0xC8 is the weapon in hand, +0xCC the one wanted,
 on the character at [[player+0x1BC]+0x124]). Find the timer that runs the
 change and shorten it, or let a quick run of wheel notches skip the weapons
 in between, as PC shooters do.
+
+## 9. Rate of fire per weapon (to do)
+
+Asked for by the player: each weapon's rate of fire settable, on a tab of
+its own in the launcher ("Waffen").
+
+- The weapon table (PAL 0x2C3890, USA 0x2C3470, rows 0x240 apart, the scope
+  flag 0x20 already read by `ts2_aim_mode_auto`) is the first place to look:
+  find the field the firing code waits on between two shots (a watchpoint
+  on the character's refire timer while holding fire, then which row field
+  it is loaded from), and its unit (ticks of 1/60).
+- Write the rows at level start from the settings (`ts2_rof_<weapon> = %`,
+  100 = the game's), not the XBE: the table is data, so nothing is relifted
+  and every release only needs its table address.
+- Launcher: a "Waffen" tab listing the weapons by their in-game names (the
+  table or the text banks give them), a percentage each, and a reset.
+- [ ] A changed rate shows in Siberia (the tracker, the sniper rifle);
+      multiplayer and the AI's weapons see the same table, say so on the tab.
+
+## 10. An icon for the launcher (to do)
+
+The launcher and the game have Windows' default icon. Needs a `.ico` (16 to
+256 px) and a resource file for both executables in `CMakeLists.txt`, and
+`setWindowIcon` for the Qt window. It must be our own drawing, not TS2's
+artwork or logo, which are not ours to ship.
+
+## 11. The blur filter (to do)
+
+Seen by the player: the game's blur ("Unschärfe") is drawn at a low
+resolution, so with a resolution scale above 1 it smears the sharp picture
+into a soft one, as Prince of Persia's did on the Xbox.
+
+- Find the pass: a capture (F11, frame interpolation off) where it shows,
+  replayed draw by draw, names the render target it is drawn into and its
+  size. Likely a fixed-size offscreen target (or a screen copy) that is not
+  scaled with the output, which is the toolkit's R3
+  (`xboxrecomp/docs/technical/widescreen-and-resolution.md`): then the fix
+  is there, for every title.
+- Make it switchable: a setting (`ts2_blur = 0`, launcher row) that skips
+  the pass's draws in TS2 once they are known by call site, as the UI sites
+  are.
+- [ ] Off: the picture stays sharp at scale 2 and above, nothing else gone.
+- [ ] On: the blurred image at output size, no blocky edges.
