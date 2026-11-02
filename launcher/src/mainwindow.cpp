@@ -441,6 +441,12 @@ QWidget *MainWindow::buildVideoTab()
     screenFilters_ = new QCheckBox(T("The game's blur filter"));
     addRow(f, QString(), screenFilters_,
            T("TimeSplitters 2 softens its picture with copies of itself laid over it. Off gives a sharp picture; on, the blur is drawn at the output resolution."));
+    sunGlare_ = new QCheckBox(T("Sun glare"));
+    addRow(f, QString(), sunGlare_,
+           T("The haze and flare laid over the whole picture while the sun is in view, as in Siberia."));
+    weather_ = new QCheckBox(T("Falling snow and rain"));
+    addRow(f, QString(), weather_,
+           T("The snowflakes or raindrops falling around you. Off is a clearer picture, with less atmosphere."));
 
     frameCap_ = combo({{T("Adaptive (as the console)"), QStringLiteral("adaptive")}, {T("60 frames a second"), QStringLiteral("60")},
                        {T("30 frames a second"), QStringLiteral("30")}, {T("Uncapped (the game runs too fast)"), QStringLiteral("0")}});
@@ -709,6 +715,8 @@ void MainWindow::load()
         select(aniso_, QString::number(a >= 16 ? 16 : a >= 8 ? 8 : a >= 4 ? 4 : a >= 2 ? 2 : 1));
     }
     screenFilters_->setChecked(conf_.getInt(QStringLiteral("screen_filters"), 1, 0, 1) != 0);
+    sunGlare_->setChecked(conf_.getInt(QStringLiteral("ts2_sun_glare"), 1, 0, 1) != 0);
+    weather_->setChecked(conf_.getInt(QStringLiteral("ts2_weather"), 1, 0, 1) != 0);
     select(frameCap_, conf_.get(QStringLiteral("frame_cap"), QStringLiteral("adaptive")));
     select(interp_, QString::number(conf_.getInt(QStringLiteral("frame_interp"), 1, 1, 4)));
     fullscreen_->setChecked(conf_.getBool(QStringLiteral("fullscreen"), false));
@@ -773,6 +781,10 @@ bool MainWindow::save()
     conf_.set(QStringLiteral("anisotropy"), valueOf(aniso_), QStringLiteral("Anisotropic filtering, 1-16.  [RECOMP_ANISO]"));
     conf_.set(QStringLiteral("screen_filters"), screenFilters_->isChecked() ? 1 : 0,
               QStringLiteral("The game's full-screen filters over a copy of its frame (blur): 1 on, 0 off.  [RECOMP_SCREEN_FILTERS]"));
+    conf_.set(QStringLiteral("ts2_sun_glare"), sunGlare_->isChecked() ? 1 : 0,
+              QStringLiteral("TimeSplitters 2: the sun's glare and haze, 1 on, 0 off.  [RECOMP_TS2_SUN_GLARE]"));
+    conf_.set(QStringLiteral("ts2_weather"), weather_->isChecked() ? 1 : 0,
+              QStringLiteral("TimeSplitters 2: falling snow and rain, 1 on, 0 off.  [RECOMP_TS2_WEATHER]"));
     conf_.set(QStringLiteral("frame_cap"), valueOf(frameCap_),
               QStringLiteral("adaptive, 60, 30 or 0 (uncapped).  [RECOMP_FPS_CAP]"));
     conf_.set(QStringLiteral("frame_interp"), valueOf(interp_),

@@ -1486,10 +1486,17 @@ static void ts2_present(void (*present)(void))
  *   RECOMP_TS2_UI_PLACE=<list>  site=placement pairs, comma separated, over
  *                               the table: 0008A0C1=stretch,000AB123=left
  *   RECOMP_TS2_UI_DEFAULT=<p>   placement for sites not in the table (auto)
+ *
+ * The same sites switch effects off: ts2_sun_glare = 0 (RECOMP_TS2_SUN_GLARE)
+ * and ts2_weather = 0 (RECOMP_TS2_WEATHER) give the sites in each release's
+ * k_ts2_sun_glare_sites / k_ts2_weather_sites the renderer's HIDE, which
+ * leaves their draws out, widescreen or not. Siberia's sun glare and snow
+ * soften the whole picture, which on the console's screen was atmosphere
+ * and at a high resolution reads as a smear.
  */
 
 enum { TS2_UI_AUTO = 0, TS2_UI_STRETCH, TS2_UI_CENTRE, TS2_UI_LEFT, TS2_UI_RIGHT,
-       TS2_UI_SIDE };
+       TS2_UI_SIDE, TS2_UI_HIDE = 7 /* XBOX_D3D8_2D_HIDE */ };
 
 /* xboxrecomp src/hle/hle_d3d8_record.h: xbox_D3D8SetTwoDPlacement, recorded in
  * frame captures so a capture replays with these placements. Same values
@@ -1513,6 +1520,10 @@ typedef struct Ts2UiPlace { uint32_t site; int placement; } Ts2UiPlace;
  * renderer's width guess was sometimes kept at 4:3, and its edge showed
  * as a seam down both old borders on every screen. */
 extern const Ts2UiPlace k_ts2_ui_places[];
+/* The sites of the effects the player can switch off; each ends at 0. */
+extern const uint32_t k_ts2_sun_glare_sites[];
+extern const uint32_t k_ts2_weather_sites[];
+static int g_ts2_hide_glare, g_ts2_hide_weather;
 
 static Ts2UiPlace g_ts2_ui_extra[64];   /* RECOMP_TS2_UI_PLACE */
 static int        g_ts2_ui_extra_count;
@@ -1572,6 +1583,13 @@ static int ts2_ui_mode(void)
     if (g_ts2_ui_mode >= 0)
         return g_ts2_ui_mode;
     g_ts2_ui_mode = recomp_config_bool("RECOMP_WIDESCREEN", "widescreen", 0) ? 1 : 0;
+    g_ts2_hide_glare = !recomp_config_bool("RECOMP_TS2_SUN_GLARE", "ts2_sun_glare", 1);
+    g_ts2_hide_weather = !recomp_config_bool("RECOMP_TS2_WEATHER", "ts2_weather", 1);
+    if (g_ts2_hide_glare || g_ts2_hide_weather) {
+        g_ts2_ui_mode = 1;
+        fprintf(stderr, "[TS2-UI] left out:%s%s\n", g_ts2_hide_glare ? " sun glare" : "",
+                g_ts2_hide_weather ? " falling snow and rain" : "");
+    }
     v = getenv("RECOMP_TS2_UI_SITES");
     if (v && *v && strcmp(v, "0") != 0)
         g_ts2_ui_mode = 2;
@@ -1604,6 +1622,12 @@ static int ts2_ui_place_for(uint32_t site)
 {
     int i;
 
+    for (i = 0; g_ts2_hide_glare && k_ts2_sun_glare_sites[i]; i++)
+        if (k_ts2_sun_glare_sites[i] == site)
+            return TS2_UI_HIDE;
+    for (i = 0; g_ts2_hide_weather && k_ts2_weather_sites[i]; i++)
+        if (k_ts2_weather_sites[i] == site)
+            return TS2_UI_HIDE;
     for (i = 0; i < g_ts2_ui_extra_count; i++)
         if (g_ts2_ui_extra[i].site == site)
             return g_ts2_ui_extra[i].placement;

@@ -74,7 +74,7 @@ private:
     QCheckBox *widescreen_ = nullptr, *fullscreen_ = nullptr, *vrr_ = nullptr, *fps_ = nullptr, *pal60_ = nullptr;
 
     // controls
-    QCheckBox *screenFilters_ = nullptr;
+    QCheckBox *screenFilters_ = nullptr, *sunGlare_ = nullptr, *weather_ = nullptr;
     QCheckBox *mouseAim_ = nullptr, *invert_ = nullptr, *autoAim_ = nullptr;
     QSpinBox *pitchLimit_ = nullptr, *zoomMatch_ = nullptr;
     QComboBox *aimMode_ = nullptr, *device_ = nullptr, *padApi_ = nullptr;

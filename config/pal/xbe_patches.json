@@ -1,7 +1,7 @@
 {
  "format": 1,
  "xbe_sha1": "2809eb147385723eaa90c425be89ee4db033fc5a",
- "comment": "TimeSplitters 2 PAL: the character roster with 32 spare slots (127-158), for characters a mod adds (ts2/characters.ini). Written by tools/ts2_roster_patches.py; docs/formats/roster.md, 'Room for more characters', says why each site changes. sub_0008FAE0's search (0x0008FB6E) keeps its 127: recomp_manual.c covers it.",
+ "comment": "TimeSplitters 2 PAL: the character roster with 32 spare slots (127-158), for characters a mod adds (ts2/characters.ini). Written by tools/ts2_roster_patches.py; docs/formats/roster.md, 'Room for more characters', says why each site changes. sub_0008FAE0's search (0x0008FB6E) keeps its 127: recomp_manual.c covers it. Then 60 ticks a second, as the USA release has, where the PAL release turned seconds into ticks with 50 (366 sites, 'tick rate:'; tools/ts2_tick_rate.py).",
  "operations": [
   {
    "op": "add_section",
@@ -661,6 +661,2934 @@
    "old": "63010000",
    "new": "E3010000",
    "why": "sub_000ED6F0 and, eax, 0x163: front-end menu items: 0x163 + 200 (and eax, 0x163 after eax = -1 when the level is 101) (0x163 -> 0x1E3); 4 more per spare slot, one per player's column"
+  },
+  {
+   "op": "patch",
+   "va": "0x00015E45",
+   "insn": "0x00015E43",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x000168ED",
+   "insn": "0x000168EB",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x00016950",
+   "insn": "0x0001694E",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x00023476",
+   "insn": "0x00023474",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x000274C6",
+   "insn": "0x000274C4",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x0002756A",
+   "insn": "0x00027568",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x0002759B",
+   "insn": "0x00027599",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x0002895A",
+   "insn": "0x00028958",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x0002B1E2",
+   "insn": "0x0002B1E0",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x0003103F",
+   "insn": "0x0003103D",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x000311FA",
+   "insn": "0x000311F8",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x000312F6",
+   "insn": "0x000312F4",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x00032A42",
+   "insn": "0x00032A40",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x00032F58",
+   "insn": "0x00032F56",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x00034A0C",
+   "insn": "0x00034A0A",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x00035418",
+   "insn": "0x00035416",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x00037AD1",
+   "insn": "0x00037ACF",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x00037EFC",
+   "insn": "0x00037EFA",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x0003884C",
+   "insn": "0x0003884A",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x0003AAD5",
+   "insn": "0x0003AAD3",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x0003BB80",
+   "insn": "0x0003BB7E",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x0003BECC",
+   "insn": "0x0003BECA",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x0003C3D4",
+   "insn": "0x0003C3D2",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x0003E7EC",
+   "insn": "0x0003E7EA",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x0003EA81",
+   "insn": "0x0003EA7F",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x000451CE",
+   "insn": "0x000451CC",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x00045743",
+   "insn": "0x00045741",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x00045B7D",
+   "insn": "0x00045B7B",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x00045D1C",
+   "insn": "0x00045D1A",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x00045DC9",
+   "insn": "0x00045DC7",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x00045F0A",
+   "insn": "0x00045F08",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x00046029",
+   "insn": "0x00046027",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x00046335",
+   "insn": "0x00046333",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x0004668A",
+   "insn": "0x00046688",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x00046A9F",
+   "insn": "0x00046A9D",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x0004704A",
+   "insn": "0x00047048",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x0004752E",
+   "insn": "0x0004752C",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x0004755C",
+   "insn": "0x0004755A",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x000475B2",
+   "insn": "0x000475B0",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x0004826B",
+   "insn": "0x00048269",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x00049706",
+   "insn": "0x00049704",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x0004A038",
+   "insn": "0x0004A036",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x0004A311",
+   "insn": "0x0004A30F",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fadd dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x00051761",
+   "insn": "0x0005175F",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x000517C9",
+   "insn": "0x000517C7",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x0005191B",
+   "insn": "0x00051919",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fsub dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x0005B670",
+   "insn": "0x0005B66E",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x0005B68E",
+   "insn": "0x0005B68C",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x0005F1DA",
+   "insn": "0x0005F1D8",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x0006571B",
+   "insn": "0x00065719",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x00065D87",
+   "insn": "0x00065D85",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x00065D9F",
+   "insn": "0x00065D9D",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x0006925E",
+   "insn": "0x0006925C",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x000692F6",
+   "insn": "0x000692F4",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x00069314",
+   "insn": "0x00069312",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x0006DF4B",
+   "insn": "0x0006DF49",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x0006E474",
+   "insn": "0x0006E472",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x00072DCB",
+   "insn": "0x00072DC9",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x00073A5F",
+   "insn": "0x00073A5D",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x00078169",
+   "insn": "0x00078167",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x000785DB",
+   "insn": "0x000785D9",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x0007BB9A",
+   "insn": "0x0007BB98",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x0007E8D2",
+   "insn": "0x0007E8D0",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x0007E91E",
+   "insn": "0x0007E91C",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x00082B9A",
+   "insn": "0x00082B98",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x00084FDD",
+   "insn": "0x00084FDB",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x000881CB",
+   "insn": "0x000881C9",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x00089120",
+   "insn": "0x0008911E",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x0009491A",
+   "insn": "0x00094918",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x00095151",
+   "insn": "0x0009514F",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x0009518C",
+   "insn": "0x0009518A",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x00099532",
+   "insn": "0x00099530",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x0009F1D0",
+   "insn": "0x0009F1CE",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x0009F428",
+   "insn": "0x0009F426",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x0009FBBB",
+   "insn": "0x0009FBB9",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x000A23CC",
+   "insn": "0x000A23CA",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x000A42DA",
+   "insn": "0x000A42D8",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x000A4975",
+   "insn": "0x000A4973",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x000A5D78",
+   "insn": "0x000A5D76",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fadd dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x000A7E38",
+   "insn": "0x000A7E36",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x000A8317",
+   "insn": "0x000A8315",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x000A8CDF",
+   "insn": "0x000A8CDD",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x000A92E9",
+   "insn": "0x000A92E7",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x000ABBC4",
+   "insn": "0x000ABBC2",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x000ACBF0",
+   "insn": "0x000ACBEE",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x000ACE38",
+   "insn": "0x000ACE36",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x000ADCD6",
+   "insn": "0x000ADCD4",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x000B1B27",
+   "insn": "0x000B1B25",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x000B3E66",
+   "insn": "0x000B3E64",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x000B5152",
+   "insn": "0x000B5150",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x000B523D",
+   "insn": "0x000B523B",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x000B553C",
+   "insn": "0x000B553A",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x000B57E4",
+   "insn": "0x000B57E2",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x000B5BCD",
+   "insn": "0x000B5BCB",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x000B6510",
+   "insn": "0x000B650E",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x000B723B",
+   "insn": "0x000B7239",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x000B7672",
+   "insn": "0x000B7670",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x000B7B1C",
+   "insn": "0x000B7B1A",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x000B7E82",
+   "insn": "0x000B7E80",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x000BC3F3",
+   "insn": "0x000BC3F1",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x000BD32A",
+   "insn": "0x000BD328",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x000BDFBF",
+   "insn": "0x000BDFBD",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x000C4DD9",
+   "insn": "0x000C4DD7",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x000C6FAA",
+   "insn": "0x000C6FA8",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x000C7AC6",
+   "insn": "0x000C7AC4",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x000CA95E",
+   "insn": "0x000CA95C",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x000CB228",
+   "insn": "0x000CB226",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x000D8A5E",
+   "insn": "0x000D8A5C",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x000D9391",
+   "insn": "0x000D938F",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x000DA0BF",
+   "insn": "0x000DA0BD",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x000DB979",
+   "insn": "0x000DB977",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x000DB9B7",
+   "insn": "0x000DB9B5",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x000DBA0A",
+   "insn": "0x000DBA08",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x000DBA3C",
+   "insn": "0x000DBA3A",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x000DBA6E",
+   "insn": "0x000DBA6C",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x000DBAA0",
+   "insn": "0x000DBA9E",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x000DBAD2",
+   "insn": "0x000DBAD0",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x000DBB04",
+   "insn": "0x000DBB02",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x000E413E",
+   "insn": "0x000E413C",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x000E45DA",
+   "insn": "0x000E45D8",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x000E5650",
+   "insn": "0x000E564E",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x000E7AC5",
+   "insn": "0x000E7AC3",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x000EB7E7",
+   "insn": "0x000EB7E5",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x000EE3CC",
+   "insn": "0x000EE3CA",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x000EEB9B",
+   "insn": "0x000EEB99",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x000EFA66",
+   "insn": "0x000EFA64",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x000F07B9",
+   "insn": "0x000F07B7",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x000F080D",
+   "insn": "0x000F080B",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x000F1D3C",
+   "insn": "0x000F1D3A",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x000F2418",
+   "insn": "0x000F2416",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x000F2A68",
+   "insn": "0x000F2A66",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x000F5A68",
+   "insn": "0x000F5A66",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x00110FB8",
+   "insn": "0x00110FB6",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x00120FF1",
+   "insn": "0x00120FEF",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x001321E6",
+   "insn": "0x001321E4",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x001334E2",
+   "insn": "0x001334E0",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x00133C44",
+   "insn": "0x00133C42",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x001344F8",
+   "insn": "0x001344F6",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x00134925",
+   "insn": "0x00134923",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x001378AA",
+   "insn": "0x001378A8",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x00137994",
+   "insn": "0x00137992",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x00137EAA",
+   "insn": "0x00137EA8",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x00137FDF",
+   "insn": "0x00137FDD",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x0013822F",
+   "insn": "0x0013822D",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x00138440",
+   "insn": "0x0013843E",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x0013878C",
+   "insn": "0x0013878A",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x00138A0D",
+   "insn": "0x00138A0B",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x00138A1C",
+   "insn": "0x00138A1A",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x00138A2B",
+   "insn": "0x00138A29",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x00138A5C",
+   "insn": "0x00138A5A",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x0013CD12",
+   "insn": "0x0013CD10",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x0013CF82",
+   "insn": "0x0013CF80",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x0013D77B",
+   "insn": "0x0013D779",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x0013FCF5",
+   "insn": "0x0013FCF3",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x00141241",
+   "insn": "0x0014123F",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x00142142",
+   "insn": "0x00142140",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x0014250A",
+   "insn": "0x00142508",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x00142559",
+   "insn": "0x00142557",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x001425AA",
+   "insn": "0x001425A8",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x0014276B",
+   "insn": "0x00142769",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x0014440C",
+   "insn": "0x0014440A",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x00145362",
+   "insn": "0x00145360",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x00145479",
+   "insn": "0x00145477",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x001454B8",
+   "insn": "0x001454B6",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x00145ADB",
+   "insn": "0x00145AD9",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x00145AFD",
+   "insn": "0x00145AFB",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x00145FC5",
+   "insn": "0x00145FC3",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x001465EF",
+   "insn": "0x001465ED",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x00146833",
+   "insn": "0x00146831",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x001468F9",
+   "insn": "0x001468F7",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x00146A68",
+   "insn": "0x00146A66",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x00146C78",
+   "insn": "0x00146C76",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x00146D1F",
+   "insn": "0x00146D1D",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x00146F33",
+   "insn": "0x00146F31",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x0014734F",
+   "insn": "0x0014734D",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x00147383",
+   "insn": "0x00147381",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x00148747",
+   "insn": "0x00148745",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x0014875F",
+   "insn": "0x0014875D",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x0014877D",
+   "insn": "0x0014877B",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x001492E0",
+   "insn": "0x001492DE",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x0014930E",
+   "insn": "0x0014930C",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x001494B9",
+   "insn": "0x001494B7",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x0014C6CA",
+   "insn": "0x0014C6C8",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x0014D235",
+   "insn": "0x0014D233",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x0014D26A",
+   "insn": "0x0014D268",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x0014D294",
+   "insn": "0x0014D292",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x0014D2BB",
+   "insn": "0x0014D2B9",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x0014D2E6",
+   "insn": "0x0014D2E4",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x0014D664",
+   "insn": "0x0014D662",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x0015114F",
+   "insn": "0x0015114D",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x0015364F",
+   "insn": "0x0015364D",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x00155DDE",
+   "insn": "0x00155DDC",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x001561D1",
+   "insn": "0x001561CF",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x00157E96",
+   "insn": "0x00157E94",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x00157EA5",
+   "insn": "0x00157EA3",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x00157EB4",
+   "insn": "0x00157EB2",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x001580ED",
+   "insn": "0x001580EB",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x001584E7",
+   "insn": "0x001584E5",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x0015895D",
+   "insn": "0x0015895B",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x00158D96",
+   "insn": "0x00158D94",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x00159A97",
+   "insn": "0x00159A95",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x00159BF3",
+   "insn": "0x00159BF1",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x0015A76F",
+   "insn": "0x0015A76D",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x0015B78A",
+   "insn": "0x0015B788",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x0015BA51",
+   "insn": "0x0015BA4F",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x0015BAA6",
+   "insn": "0x0015BAA4",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x0015D8F7",
+   "insn": "0x0015D8F5",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x001607F2",
+   "insn": "0x001607F0",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x0016232D",
+   "insn": "0x0016232B",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x001658BF",
+   "insn": "0x001658BD",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x001673CC",
+   "insn": "0x001673CA",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x00167B4A",
+   "insn": "0x00167B48",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x0016888E",
+   "insn": "0x0016888C",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x00168CF8",
+   "insn": "0x00168CF6",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x00168D45",
+   "insn": "0x00168D43",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x00169FBB",
+   "insn": "0x00169FB9",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x00169FE4",
+   "insn": "0x00169FE2",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x0016A06A",
+   "insn": "0x0016A068",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x0016A0A2",
+   "insn": "0x0016A0A0",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x0016A0CB",
+   "insn": "0x0016A0C9",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x0016A137",
+   "insn": "0x0016A135",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x0016A160",
+   "insn": "0x0016A15E",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x0016A1E6",
+   "insn": "0x0016A1E4",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x0016A212",
+   "insn": "0x0016A210",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x0016A27E",
+   "insn": "0x0016A27C",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x0016A2A7",
+   "insn": "0x0016A2A5",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x0016A30B",
+   "insn": "0x0016A309",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x0016BF0E",
+   "insn": "0x0016BF0C",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x0016BF1A",
+   "insn": "0x0016BF18",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x0016E66C",
+   "insn": "0x0016E66A",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x0016EAFD",
+   "insn": "0x0016EAFB",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x0017114D",
+   "insn": "0x0017114B",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x0017182F",
+   "insn": "0x0017182D",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x0017186A",
+   "insn": "0x00171868",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x00171972",
+   "insn": "0x00171970",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x00171A90",
+   "insn": "0x00171A8E",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x00171DED",
+   "insn": "0x00171DEB",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x00172094",
+   "insn": "0x00172092",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x00172135",
+   "insn": "0x00172133",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x00173530",
+   "insn": "0x0017352E",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x0017626A",
+   "insn": "0x00176268",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x00176809",
+   "insn": "0x00176807",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x0017697D",
+   "insn": "0x0017697B",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x00177A98",
+   "insn": "0x00177A96",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x00177AF7",
+   "insn": "0x00177AF5",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x00177F3B",
+   "insn": "0x00177F39",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x001783ED",
+   "insn": "0x001783EB",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x00179DC0",
+   "insn": "0x00179DBE",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x00179EE2",
+   "insn": "0x00179EE0",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x0017A1D0",
+   "insn": "0x0017A1CE",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x0017BA7C",
+   "insn": "0x0017BA7A",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x0017C5B9",
+   "insn": "0x0017C5B7",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x0017E0E2",
+   "insn": "0x0017E0E0",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x0017E1DC",
+   "insn": "0x0017E1DA",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x0017E445",
+   "insn": "0x0017E443",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x0017E499",
+   "insn": "0x0017E497",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x0017EB9E",
+   "insn": "0x0017EB9C",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x0017EDB0",
+   "insn": "0x0017EDAE",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x0018034C",
+   "insn": "0x0018034A",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x0018053B",
+   "insn": "0x00180539",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x00180AB5",
+   "insn": "0x00180AB3",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x00181232",
+   "insn": "0x00181230",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x00181275",
+   "insn": "0x00181273",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x00181AEF",
+   "insn": "0x00181AED",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x0018406C",
+   "insn": "0x0018406A",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x00184C29",
+   "insn": "0x00184C27",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x0018541B",
+   "insn": "0x00185419",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x00185A6D",
+   "insn": "0x00185A6B",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x001872EB",
+   "insn": "0x001872E9",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x00187E9C",
+   "insn": "0x00187E9A",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x001881AF",
+   "insn": "0x001881AD",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x001881C1",
+   "insn": "0x001881BF",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x001881D3",
+   "insn": "0x001881D1",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x001886BF",
+   "insn": "0x001886BD",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x00188D30",
+   "insn": "0x00188D2E",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x00189ADB",
+   "insn": "0x00189AD9",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x0018BC49",
+   "insn": "0x0018BC47",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x0018C041",
+   "insn": "0x0018C03F",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x0018C7A5",
+   "insn": "0x0018C7A3",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x0018C7BF",
+   "insn": "0x0018C7BD",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x0018E12F",
+   "insn": "0x0018E12D",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x0018E218",
+   "insn": "0x0018E216",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x0018E4A0",
+   "insn": "0x0018E49E",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x0018ED2F",
+   "insn": "0x0018ED2D",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x0018F023",
+   "insn": "0x0018F021",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x00190CB9",
+   "insn": "0x00190CB7",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x00191069",
+   "insn": "0x00191067",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x00191090",
+   "insn": "0x0019108E",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x00191122",
+   "insn": "0x00191120",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x00191149",
+   "insn": "0x00191147",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x00191E72",
+   "insn": "0x00191E70",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x00192340",
+   "insn": "0x0019233E",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x00196DC8",
+   "insn": "0x00196DC6",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x00197141",
+   "insn": "0x0019713F",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x00197EAC",
+   "insn": "0x00197EAA",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x001990AC",
+   "insn": "0x001990AA",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x001993DE",
+   "insn": "0x001993DC",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x0019B08D",
+   "insn": "0x0019B08B",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x0019B1FB",
+   "insn": "0x0019B1F9",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x0019EF96",
+   "insn": "0x0019EF94",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x001A0823",
+   "insn": "0x001A0821",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x001A2DBD",
+   "insn": "0x001A2DBB",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x001A3DCB",
+   "insn": "0x001A3DC9",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x001A4064",
+   "insn": "0x001A4062",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x001A4502",
+   "insn": "0x001A4500",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x001A4A8C",
+   "insn": "0x001A4A8A",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x001A507C",
+   "insn": "0x001A507A",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x001A5DB8",
+   "insn": "0x001A5DB6",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x001A71AB",
+   "insn": "0x001A71A9",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x001A780B",
+   "insn": "0x001A7809",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x001A82DA",
+   "insn": "0x001A82D8",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x001AA09D",
+   "insn": "0x001AA09B",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x001AF748",
+   "insn": "0x001AF746",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x001B1331",
+   "insn": "0x001B132F",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x001B2333",
+   "insn": "0x001B2331",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x001B29FE",
+   "insn": "0x001B29FC",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x001B45EB",
+   "insn": "0x001B45E9",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 as in the USA release (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x00170E61",
+   "insn": "0x00170E5F",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 (by region, see tools/ts2_tick_rate.py) (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x00177446",
+   "insn": "0x00177444",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 (by region, see tools/ts2_tick_rate.py) (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x0017E2F1",
+   "insn": "0x0017E2EF",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 (by region, see tools/ts2_tick_rate.py) (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x0017F219",
+   "insn": "0x0017F217",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 (by region, see tools/ts2_tick_rate.py) (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x0017F291",
+   "insn": "0x0017F28F",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 (by region, see tools/ts2_tick_rate.py) (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x00180155",
+   "insn": "0x00180153",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 (by region, see tools/ts2_tick_rate.py) (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x00180DE6",
+   "insn": "0x00180DE4",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 (by region, see tools/ts2_tick_rate.py) (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x0018528B",
+   "insn": "0x00185289",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 (by region, see tools/ts2_tick_rate.py) (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x00188231",
+   "insn": "0x0018822F",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 (by region, see tools/ts2_tick_rate.py) (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x001882B8",
+   "insn": "0x001882B6",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 (by region, see tools/ts2_tick_rate.py) (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x00188DC7",
+   "insn": "0x00188DC5",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 (by region, see tools/ts2_tick_rate.py) (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x00189940",
+   "insn": "0x0018993E",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 (by region, see tools/ts2_tick_rate.py) (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x0018A7EE",
+   "insn": "0x0018A7EC",
+   "old": "50032200",
+   "new": "84C02100",
+   "why": "tick rate: fmul dword ptr [0x220350]: per second to per tick, 1/60 (by region, see tools/ts2_tick_rate.py) (0x00220350 -> 0x0021C084)"
+  },
+  {
+   "op": "patch",
+   "va": "0x000328DC",
+   "insn": "0x000328DA",
+   "old": "44062200",
+   "new": "88032200",
+   "why": "tick rate: fld dword ptr [0x220644]: ticks in a second, 60 as in the USA release (0x00220644 -> 0x00220388)"
+  },
+  {
+   "op": "patch",
+   "va": "0x00032A83",
+   "insn": "0x00032A81",
+   "old": "44062200",
+   "new": "88032200",
+   "why": "tick rate: fmul dword ptr [0x220644]: ticks in a second, 60 as in the USA release (0x00220644 -> 0x00220388)"
+  },
+  {
+   "op": "patch",
+   "va": "0x00032A99",
+   "insn": "0x00032A97",
+   "old": "44062200",
+   "new": "88032200",
+   "why": "tick rate: fmul dword ptr [0x220644]: ticks in a second, 60 as in the USA release (0x00220644 -> 0x00220388)"
+  },
+  {
+   "op": "patch",
+   "va": "0x00032AAF",
+   "insn": "0x00032AAD",
+   "old": "44062200",
+   "new": "88032200",
+   "why": "tick rate: fmul dword ptr [0x220644]: ticks in a second, 60 as in the USA release (0x00220644 -> 0x00220388)"
+  },
+  {
+   "op": "patch",
+   "va": "0x00032ADA",
+   "insn": "0x00032AD8",
+   "old": "44062200",
+   "new": "88032200",
+   "why": "tick rate: fmul dword ptr [0x220644]: ticks in a second, 60 as in the USA release (0x00220644 -> 0x00220388)"
+  },
+  {
+   "op": "patch",
+   "va": "0x0003C5F5",
+   "insn": "0x0003C5F3",
+   "old": "44062200",
+   "new": "88032200",
+   "why": "tick rate: fmul dword ptr [0x220644]: ticks in a second, 60 as in the USA release (0x00220644 -> 0x00220388)"
+  },
+  {
+   "op": "patch",
+   "va": "0x0004523B",
+   "insn": "0x00045239",
+   "old": "44062200",
+   "new": "88032200",
+   "why": "tick rate: fmul dword ptr [0x220644]: ticks in a second, 60 as in the USA release (0x00220644 -> 0x00220388)"
+  },
+  {
+   "op": "patch",
+   "va": "0x00045254",
+   "insn": "0x00045252",
+   "old": "44062200",
+   "new": "88032200",
+   "why": "tick rate: fmul dword ptr [0x220644]: ticks in a second, 60 as in the USA release (0x00220644 -> 0x00220388)"
+  },
+  {
+   "op": "patch",
+   "va": "0x00045264",
+   "insn": "0x00045262",
+   "old": "44062200",
+   "new": "88032200",
+   "why": "tick rate: fmul dword ptr [0x220644]: ticks in a second, 60 as in the USA release (0x00220644 -> 0x00220388)"
+  },
+  {
+   "op": "patch",
+   "va": "0x0005176D",
+   "insn": "0x0005176B",
+   "old": "44062200",
+   "new": "88032200",
+   "why": "tick rate: fmul dword ptr [0x220644]: ticks in a second, 60 as in the USA release (0x00220644 -> 0x00220388)"
+  },
+  {
+   "op": "patch",
+   "va": "0x000541A2",
+   "insn": "0x000541A0",
+   "old": "44062200",
+   "new": "88032200",
+   "why": "tick rate: fmul dword ptr [0x220644]: ticks in a second, 60 as in the USA release (0x00220644 -> 0x00220388)"
+  },
+  {
+   "op": "patch",
+   "va": "0x0005B973",
+   "insn": "0x0005B971",
+   "old": "44062200",
+   "new": "88032200",
+   "why": "tick rate: fmul dword ptr [0x220644]: ticks in a second, 60 as in the USA release (0x00220644 -> 0x00220388)"
+  },
+  {
+   "op": "patch",
+   "va": "0x0005BA92",
+   "insn": "0x0005BA90",
+   "old": "44062200",
+   "new": "88032200",
+   "why": "tick rate: fmul dword ptr [0x220644]: ticks in a second, 60 as in the USA release (0x00220644 -> 0x00220388)"
+  },
+  {
+   "op": "patch",
+   "va": "0x0005BAE4",
+   "insn": "0x0005BAE2",
+   "old": "44062200",
+   "new": "88032200",
+   "why": "tick rate: fmul dword ptr [0x220644]: ticks in a second, 60 as in the USA release (0x00220644 -> 0x00220388)"
+  },
+  {
+   "op": "patch",
+   "va": "0x0005BBF3",
+   "insn": "0x0005BBF1",
+   "old": "44062200",
+   "new": "88032200",
+   "why": "tick rate: fmul dword ptr [0x220644]: ticks in a second, 60 as in the USA release (0x00220644 -> 0x00220388)"
+  },
+  {
+   "op": "patch",
+   "va": "0x0005FEB4",
+   "insn": "0x0005FEB2",
+   "old": "44062200",
+   "new": "88032200",
+   "why": "tick rate: fmul dword ptr [0x220644]: ticks in a second, 60 as in the USA release (0x00220644 -> 0x00220388)"
+  },
+  {
+   "op": "patch",
+   "va": "0x0005FECF",
+   "insn": "0x0005FECD",
+   "old": "44062200",
+   "new": "88032200",
+   "why": "tick rate: fmul dword ptr [0x220644]: ticks in a second, 60 as in the USA release (0x00220644 -> 0x00220388)"
+  },
+  {
+   "op": "patch",
+   "va": "0x000635CF",
+   "insn": "0x000635CD",
+   "old": "44062200",
+   "new": "88032200",
+   "why": "tick rate: fmul dword ptr [0x220644]: ticks in a second, 60 as in the USA release (0x00220644 -> 0x00220388)"
+  },
+  {
+   "op": "patch",
+   "va": "0x000635F4",
+   "insn": "0x000635F2",
+   "old": "44062200",
+   "new": "88032200",
+   "why": "tick rate: fmul dword ptr [0x220644]: ticks in a second, 60 as in the USA release (0x00220644 -> 0x00220388)"
+  },
+  {
+   "op": "patch",
+   "va": "0x00078AEF",
+   "insn": "0x00078AED",
+   "old": "44062200",
+   "new": "88032200",
+   "why": "tick rate: fmul dword ptr [0x220644]: ticks in a second, 60 as in the USA release (0x00220644 -> 0x00220388)"
+  },
+  {
+   "op": "patch",
+   "va": "0x00078BD4",
+   "insn": "0x00078BD2",
+   "old": "44062200",
+   "new": "88032200",
+   "why": "tick rate: fmul dword ptr [0x220644]: ticks in a second, 60 as in the USA release (0x00220644 -> 0x00220388)"
+  },
+  {
+   "op": "patch",
+   "va": "0x00078CD0",
+   "insn": "0x00078CCE",
+   "old": "44062200",
+   "new": "88032200",
+   "why": "tick rate: fmul dword ptr [0x220644]: ticks in a second, 60 as in the USA release (0x00220644 -> 0x00220388)"
+  },
+  {
+   "op": "patch",
+   "va": "0x00078D49",
+   "insn": "0x00078D47",
+   "old": "44062200",
+   "new": "88032200",
+   "why": "tick rate: fmul dword ptr [0x220644]: ticks in a second, 60 as in the USA release (0x00220644 -> 0x00220388)"
+  },
+  {
+   "op": "patch",
+   "va": "0x0007B9F0",
+   "insn": "0x0007B9EE",
+   "old": "44062200",
+   "new": "88032200",
+   "why": "tick rate: fmul dword ptr [0x220644]: ticks in a second, 60 as in the USA release (0x00220644 -> 0x00220388)"
+  },
+  {
+   "op": "patch",
+   "va": "0x0007C541",
+   "insn": "0x0007C53F",
+   "old": "44062200",
+   "new": "88032200",
+   "why": "tick rate: fmul dword ptr [0x220644]: ticks in a second, 60 as in the USA release (0x00220644 -> 0x00220388)"
+  },
+  {
+   "op": "patch",
+   "va": "0x0007C574",
+   "insn": "0x0007C572",
+   "old": "44062200",
+   "new": "88032200",
+   "why": "tick rate: fmul dword ptr [0x220644]: ticks in a second, 60 as in the USA release (0x00220644 -> 0x00220388)"
+  },
+  {
+   "op": "patch",
+   "va": "0x00083D29",
+   "insn": "0x00083D27",
+   "old": "44062200",
+   "new": "88032200",
+   "why": "tick rate: fmul dword ptr [0x220644]: ticks in a second, 60 as in the USA release (0x00220644 -> 0x00220388)"
+  },
+  {
+   "op": "patch",
+   "va": "0x00083DEA",
+   "insn": "0x00083DE8",
+   "old": "44062200",
+   "new": "88032200",
+   "why": "tick rate: fmul dword ptr [0x220644]: ticks in a second, 60 as in the USA release (0x00220644 -> 0x00220388)"
+  },
+  {
+   "op": "patch",
+   "va": "0x000B50A1",
+   "insn": "0x000B509F",
+   "old": "44062200",
+   "new": "88032200",
+   "why": "tick rate: fmul dword ptr [0x220644]: ticks in a second, 60 as in the USA release (0x00220644 -> 0x00220388)"
+  },
+  {
+   "op": "patch",
+   "va": "0x000BB98A",
+   "insn": "0x000BB988",
+   "old": "44062200",
+   "new": "88032200",
+   "why": "tick rate: fmul dword ptr [0x220644]: ticks in a second, 60 as in the USA release (0x00220644 -> 0x00220388)"
+  },
+  {
+   "op": "patch",
+   "va": "0x000C4D5B",
+   "insn": "0x000C4D59",
+   "old": "44062200",
+   "new": "88032200",
+   "why": "tick rate: fmul dword ptr [0x220644]: ticks in a second, 60 as in the USA release (0x00220644 -> 0x00220388)"
+  },
+  {
+   "op": "patch",
+   "va": "0x00148E5F",
+   "insn": "0x00148E5D",
+   "old": "44062200",
+   "new": "88032200",
+   "why": "tick rate: fmul dword ptr [0x220644]: ticks in a second, 60 as in the USA release (0x00220644 -> 0x00220388)"
+  },
+  {
+   "op": "patch",
+   "va": "0x001AE62A",
+   "insn": "0x001AE628",
+   "old": "44062200",
+   "new": "88032200",
+   "why": "tick rate: fmul dword ptr [0x220644]: ticks in a second, 60 as in the USA release (0x00220644 -> 0x00220388)"
+  },
+  {
+   "op": "patch",
+   "va": "0x001AE647",
+   "insn": "0x001AE645",
+   "old": "44062200",
+   "new": "88032200",
+   "why": "tick rate: fmul dword ptr [0x220644]: ticks in a second, 60 as in the USA release (0x00220644 -> 0x00220388)"
+  },
+  {
+   "op": "patch",
+   "va": "0x001BEB37",
+   "insn": "0x001BEB35",
+   "old": "44062200",
+   "new": "88032200",
+   "why": "tick rate: fmul dword ptr [0x220644]: ticks in a second, 60 as in the USA release (0x00220644 -> 0x00220388)"
+  },
+  {
+   "op": "patch",
+   "va": "0x000B3D5B",
+   "insn": "0x000B3D55",
+   "old": "0AD7A33C",
+   "new": "8988883C",
+   "why": "tick rate: mov dword ptr [esi + 0xe8], 0x3ca3d70a: 1/50 to 1/60 as in the USA release"
   }
  ]
 }

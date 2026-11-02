@@ -308,3 +308,40 @@ Checked: the capture replayed at scale 5 (cliff detail sharp with it off,
 soft but no longer blocky with it on), and a live run to Siberia at scale 3
 with frame interpolation (no faults, 120 frames shown). The handheld's map
 (a rectangle copy) is a different path and unchanged.
+
+## 12. Dialogue behind the pictures: PAL's 50 ticks a second (done, Nov 2026)
+
+Reported by the player: in cutscenes the dialogue came one to two seconds
+after the pictures. A cutscene's sound is one DirectSound stream
+(`music/cs_*_full*.wav`, music, effects and voices mixed), and the stream
+was not late: the pictures were fast. Measured on the intro: its soundtrack
+is 143.6 s, its pictures ended after about 120 s, the ratio of 60 to 50.
+
+The PAL release turns seconds into ticks with 50 and 1/50 where the USA
+release has 60 and 1/60 (its timer, `FUN_001AE5D0`, multiplies seconds by
+50.0; the USA one, `FUN_001AE190`, by 60.0), and its clock counts vertical
+blanks, which the host gives at 60 Hz. Listing every use of the four
+constants in both releases (Ghidra, `ConstUses.java`) and pairing them gave
+330 sites of 1/50 and 35 of 50.0 to change, and one immediate; each now
+reads the PAL release's own 1/60 or 60.0 (`tools/ts2_tick_rate.py`, in
+`config/pal/xbe_patches.json`). After it the intro's pictures ran about
+140 s, the rest being the music's tail after the last shot.
+
+- [ ] By hand: dialogue on the lips in the intro and Siberia's cutscenes.
+- [ ] Anything that now feels slow or fast in play (a timer, a door, an
+      animation): integer tick counts were not looked for, and 22 uses
+      were left alone as undecided (the tool's docstring lists them).
+
+## 13. Sun glare and falling snow, switchable (done, Nov 2026)
+
+Reported by the player: Siberia's snow softens the picture further. Its
+outdoor frames carry three effects over the scene, each found by its call
+site (`RECOMP_TS2_UI_SITES=1`, a capture, `--skip-draw`): the sun's glare
+(four large additive sprites), its flare and a faint whole-screen tint
+(`FUN_001B0570`, `FUN_001B4B50`), and the falling snow (`FUN_001B1960`, a
+few hundred particles around the camera). The launcher's Graphics tab has
+"Sun glare" and "Falling snow and rain" (`ts2_sun_glare`, `ts2_weather`,
+both on by default); off, those sites get the toolkit's new HIDE placement
+and their draws are left out. A few large star-shaped flakes come from the
+general particle system (`FUN_001BFFCA`, smoke and sparks too) and stay.
+USA's sites are PAL's found by their bytes, not run.

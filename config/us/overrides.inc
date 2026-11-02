@@ -246,3 +246,9 @@ const Ts2Aim k_ts2_aim = {
     0x002C3470, /* weapons: FUN_00140B00's scope test (ts2_aim_mode_auto) */
     0x00497104, /* pitch_limit: the global FUN_00148A60 clamps to */
 };
+
+/* Effects the player can switch off (ts2_sun_glare, ts2_weather): PAL's
+ * sites (config/pal/overrides.inc says what each draws), found here by the
+ * bytes around each, 0x410 lower. Not run on this release. Ends at 0. */
+const uint32_t k_ts2_sun_glare_sites[] = { 0x001B02AF, 0x001B479B, 0x001B47EB, 0 };
+const uint32_t k_ts2_weather_sites[] = { 0x001B1C68, 0 };

@@ -71,13 +71,18 @@ no XMV movies. The toolkit's history with this game is in
 `modding-models-textures.md`.
 
 Timing (Nov 2026, read in Ghidra): the PAL release asks CreateDevice for
-50 Hz, but its clock is the vertical-blank callback (`FUN_001C8E02` counts
-0x47C828); a frame's ticks are the blanks since the last, 1 to 3
-(`FUN_001AE3C0`, into 0x348CE4 and the float 0x348CEC, both 0 while paused
-by 0x40BE98), and the game's speeds are per sixtieth (the look code's
-0x21C084 is 1/60). The host's vblank is 60 Hz whatever the title asks, so
-PAL plays at 60 ticks a second, the NTSC speed; on a 50 Hz console it ran
-at five sixths of it.
+50 Hz (`FUN_001C8759`, hard-coded; it never reads PAL60), and its clock is
+the vertical-blank callback (`FUN_001C8E02` counts 0x47C828); a frame's
+ticks are the blanks since the last, 1 to 3 (`FUN_001AE3C0`, into 0x348CE4
+and the float 0x348CEC, both 0 while paused by 0x40BE98). The host's vblank
+is 60 Hz whatever the title asks, so PAL runs 60 ticks a second. Where the
+USA release turns seconds into ticks with 60 and 1/60, the PAL release has
+50 and 1/50 (366 sites), so it ran at full speed on a 50 Hz console and
+1.2 times too fast here: the intro cutscene's pictures ended at 120 s of
+its 143.6 s soundtrack. `config/pal/xbe_patches.json` points those sites
+at the PAL release's own 60 and 1/60 (`tools/ts2_tick_rate.py`, which
+`tools/ts2_roster_patches.py` writes with the roster), so PAL keeps the
+USA release's timing. Integer tick counts are not covered.
 
 USA (Oct 2026): driven by an input script it goes through the front end, saves
 a profile and plays the start of Siberia (picks up a weapon, opens the pause

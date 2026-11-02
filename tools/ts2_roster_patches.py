@@ -4,6 +4,8 @@ that has room for characters a mod adds, instead of characters it replaces.
     python3 tools/ts2_roster_patches.py game/default.xbe config/pal/xbe_patches.json [--spare 32]
 
 (with capstone, as scripts/build.py needs), then scripts/build.py --relift.
+It also writes tools/ts2_tick_rate.py's patches, which give the PAL release
+the USA release's 60 ticks a second (--no-tick-rate leaves them out).
 
 The roster (127 entries of 0x20 at 0x002BAC60), the unlock snapshot beside
 it (127 dwords at 0x0035C2D8, BSS) and the texture list that holds the
@@ -162,6 +164,8 @@ def main():
     ap.add_argument("xbe")
     ap.add_argument("out")
     ap.add_argument("--spare", type=int, default=32, help="roster slots to add (default 32)")
+    ap.add_argument("--no-tick-rate", action="store_true",
+                    help="leave the PAL release's 50 ticks a second (tools/ts2_tick_rate.py)")
     a = ap.parse_args()
 
     data = open(a.xbe, "rb").read()
@@ -278,6 +282,11 @@ def main():
             "the texture list's end")
     immediate(TEX_COUNT_SITE, TEX_N, T)
     immediate(ITEM_POOL_SITE, 0x163, 0x163 + 4 * S, "; 4 more per spare slot, one per player's column")
+    tick = []
+    if not a.no_tick_rate:
+        import ts2_tick_rate
+        tick = ts2_tick_rate.operations(img, insn_at)
+        ops += tick
 
     spec = {
         "format": 1,
@@ -286,14 +295,17 @@ def main():
                    "a mod adds (ts2/characters.ini). Written by tools/ts2_roster_patches.py; "
                    "docs/formats/roster.md, 'Room for more characters', says why each site changes. "
                    "sub_0008FAE0's search (0x0008FB6E) keeps its 127: recomp_manual.c covers it."
-                   % (S, N - 1),
+                   % (S, N - 1)
+                   + (" Then 60 ticks a second, as the USA release has, where the PAL release turned "
+                      "seconds into ticks with 50 (%d sites, 'tick rate:'; tools/ts2_tick_rate.py)."
+                      % len(tick) if tick else ""),
         "operations": ops,
     }
     with open(a.out, "w") as f:
         json.dump(spec, f, indent=1)
         f.write("\n")
-    print("%s: %d operations, %d spare slots, section 0x%08X + 0x%X (roster 0x%08X, snapshot 0x%08X, "
-          "textures 0x%08X)" % (a.out, len(ops), S, SECTION_VA, size, roster_new, snap_new, tex_new))
+    print("%s: %d operations (%d for the tick rate), %d spare slots, section 0x%08X + 0x%X (roster 0x%08X, snapshot 0x%08X, "
+          "textures 0x%08X)" % (a.out, len(ops), len(tick), S, SECTION_VA, size, roster_new, snap_new, tex_new))
 
 
 if __name__ == "__main__":

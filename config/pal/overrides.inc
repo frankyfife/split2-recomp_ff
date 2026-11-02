@@ -293,3 +293,18 @@ const Ts2Aim k_ts2_aim = {
     0x002C3890, /* weapons: FUN_00140F40's scope test (ts2_aim_mode_auto) */
     0x00497344, /* pitch_limit: set by FUN_001434F0, read by FUN_00148EB0 */
 };
+
+/* Effects the player can switch off (ts2_sun_glare, ts2_weather), by the
+ * call site that draws them, as in k_ts2_ui_places. Found in Siberia from a
+ * capture with RECOMP_TS2_UI_SITES=1 and d3d8_replay --list-draws, each
+ * left out with --skip-draw to see it go:
+ *   0x001B06BF  FUN_001B0570: the sun's glare, four large additive sprites
+ *               over the screen while the sun is in view
+ *   0x001B4BAB  FUN_001B4B50: the sun's flare
+ *   0x001B4BFB  FUN_001B4B50: a whole-screen tint, alpha the glare's
+ *               strength (its vertex program puts the low byte in alpha)
+ *   0x001B2078  FUN_001B1960: falling snow (rain elsewhere), the volume of
+ *               particles around the camera
+ * Ends at 0. */
+const uint32_t k_ts2_sun_glare_sites[] = { 0x001B06BF, 0x001B4BAB, 0x001B4BFB, 0 };
+const uint32_t k_ts2_weather_sites[] = { 0x001B2078, 0 };
