@@ -34,6 +34,10 @@ if(RECOMP_ABI_CHECK)
     add_compile_definitions(RECOMP_ABI_CHECK)
 endif()
 
+# The game's icon on Windows, the launcher's own (launcher/res, drawn by
+# tools/make_launcher_icon.py) rather than the toolkit's.
+set(XBOXRECOMP_TITLE_ICON "${CMAKE_CURRENT_SOURCE_DIR}/launcher/res/split2.ico")
+
 add_subdirectory(${XBOXRECOMP_DIR} ${CMAKE_BINARY_DIR}/xboxrecomp)
 
 # CONFIGURE_DEPENDS so a re-lift that adds or removes a chunk is picked up

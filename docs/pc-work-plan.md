@@ -278,12 +278,13 @@ its own in the launcher ("Waffen").
 - [ ] A changed rate shows in Siberia (the tracker, the sniper rifle);
       multiplayer and the AI's weapons see the same table, say so on the tab.
 
-## 10. An icon for the launcher (to do)
+## 10. An icon for the launcher (done, Nov 2026)
 
-The launcher and the game have Windows' default icon. Needs a `.ico` (16 to
-256 px) and a resource file for both executables in `CMakeLists.txt`, and
-`setWindowIcon` for the Qt window. It must be our own drawing, not TS2's
-artwork or logo, which are not ours to ship.
+Our own drawing, not the game's artwork: a stopwatch split along a jagged
+diagonal, amber and teal on a dark disc (`tools/make_launcher_icon.py`
+draws `launcher/res/split2.png` and `.ico`). The Qt launcher's window and
+executable carry it, and the game's executable too (`XBOXRECOMP_TITLE_ICON`,
+which the toolkit's `cmake/title_icon.cmake` now takes instead of its own).
 
 ## 11. The blur filter (done, Nov 2026)
 

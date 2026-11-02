@@ -22,6 +22,7 @@ project(Split2Launcher VERSION 0.1.0 LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTORCC ON)
 find_package(Qt6 6.4 REQUIRED COMPONENTS Core Gui Widgets Network)
 
 add_executable(split2_launcher WIN32 MACOSX_BUNDLE
@@ -31,7 +32,13 @@ add_executable(split2_launcher WIN32 MACOSX_BUNDLE
     src/bindings.cpp src/bindings.h
     src/paths.cpp src/paths.h
     src/builder.cpp src/builder.h
-    src/tr.cpp src/tr.h)
+    src/tr.cpp src/tr.h
+    res/launcher.qrc)
+# Its icon (tools/make_launcher_icon.py draws it): the window's from the Qt
+# resource, the executable's on Windows from a resource script.
+if(WIN32)
+    target_sources(split2_launcher PRIVATE res/split2.rc)
+endif()
 target_compile_definitions(split2_launcher PRIVATE
     SPLIT2_LAUNCHER_VERSION="${PROJECT_VERSION}"
 )
