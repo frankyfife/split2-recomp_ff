@@ -308,3 +308,10 @@ const Ts2Aim k_ts2_aim = {
  * Ends at 0. */
 const uint32_t k_ts2_sun_glare_sites[] = { 0x001B06BF, 0x001B4BAB, 0x001B4BFB, 0 };
 const uint32_t k_ts2_weather_sites[] = { 0x001B2078, 0 };
+
+/* The free camera (ts2_freecam_frame): the camera object's pointer, its mode
+ * (FUN_00035960 switches on it), and mode 8's position, look-at point and
+ * the two values it puts into the projection's +0x30/+0x34. Mode 8 builds
+ * the view from those globals and nothing else, so the free camera only has
+ * to write them each frame. Read in Ghidra: FUN_00035960, case 8. */
+const Ts2Freecam k_ts2_freecam = { 0x004B2CA0, 0x004B2CB0, 0x004B2CC0, 0x004B2CCC, 0x004B2CD8 };

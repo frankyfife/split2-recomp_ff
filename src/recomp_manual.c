@@ -23,6 +23,7 @@
 #include <stddef.h>   /* ptrdiff_t: not in stdlib.h off MSVC */
 #include <stdlib.h>   /* getenv, exit: the spin verdict below */
 #include <string.h>   /* strcmp: RECOMP_ICALL_FATAL */
+#include <math.h>     /* the free camera's angles */
 
 /* One diagnostic report, one piece.
  *
@@ -1463,6 +1464,175 @@ static void ts2_aim_probe_frame(int in_level)
     }
 }
 
+/* ── TimeSplitters 2: a free camera ── */
+
+/*
+ * L3 and R3 together (on the keyboard what they are bound to: Ctrl and the
+ * right mouse button in the PC layout) detach the camera from the player and
+ * fly it; the same chord brings it back. The game keeps running, the player
+ * standing where they were.
+ *
+ * The game has a camera mode for this already: mode 8 of the camera object
+ * (FUN_00035960) builds the view from a position and a look-at point in
+ * globals (k_ts2_freecam). So the camera is switched to 8, and every frame
+ * the position and point are written from the free camera's own state:
+ *
+ *   left stick (WASD)   move along the view and sideways
+ *   D-pad up/down       rise, sink (arrow keys)
+ *   right stick, mouse  turn and look up and down
+ *   right trigger       faster (the left mouse button)
+ *
+ * Controller 1 reaches the game neutral meanwhile (the toolkit's port-0
+ * filter), and the chord's two buttons never reach it at all, so entering
+ * does not crouch or aim. The game's rooms still follow the player: flown
+ * far enough, parts of the level the player cannot see are not drawn.
+ * ts2_freecam = 0 (RECOMP_TS2_FREECAM) switches the chord off.
+ */
+typedef struct Ts2Freecam { uint32_t camera, mode, pos, target, extra; } Ts2Freecam;
+extern const Ts2Freecam k_ts2_freecam;
+
+typedef void (*Ts2Port0Filter)(uint16_t *buttons, uint8_t analog[8], int16_t sticks[4]);
+extern void recomp_input_host_set_port0_filter(Ts2Port0Filter filter);
+
+static volatile int g_fc_toggle;
+static int      g_fc_on, g_fc_saved_mode;
+static float    g_fc_pos[3], g_fc_yaw, g_fc_pitch;
+static uint16_t g_fc_buttons;
+static uint8_t  g_fc_analog[8];
+static int16_t  g_fc_sticks[4];
+
+static void ts2_freecam_filter(uint16_t *buttons, uint8_t analog[8], int16_t sticks[4])
+{
+    static int chord_held;
+    int both = (*buttons & 0xC0u) == 0xC0u;
+
+    if (both && !chord_held)
+        g_fc_toggle = 1;
+    if (both)
+        chord_held = 1;
+    else if (!(*buttons & 0xC0u))
+        chord_held = 0;
+    if (chord_held)
+        *buttons &= (uint16_t)~0xC0u;    /* the chord is ours: no crouch, no aim */
+    if (!g_fc_on)
+        return;
+    g_fc_buttons = *buttons;
+    memcpy(g_fc_analog, analog, 8);
+    memcpy(g_fc_sticks, sticks, sizeof g_fc_sticks);
+    *buttons = 0;
+    memset(analog, 0, 8);
+    memset(sticks, 0, 4 * sizeof *sticks);
+}
+
+static float ts2_fc_axis(int16_t v)
+{
+    float f = (float)v / 32767.0f;
+
+    if (f > -0.24f && f < 0.24f)
+        return 0.0f;                        /* the pad's dead zone */
+    return f;
+}
+
+/* Returns 1 while the free camera has the frame (the mouse is its). */
+static int ts2_freecam_frame(int in_level)
+{
+    static int setup = -1;
+    const Ts2Freecam *F = &k_ts2_freecam;
+    uint32_t cam;
+
+    if (setup < 0) {
+        setup = F->camera && recomp_config_bool("RECOMP_TS2_FREECAM", "ts2_freecam", 1);
+        if (setup)
+            recomp_input_host_set_port0_filter(ts2_freecam_filter);
+    }
+    if (!setup)
+        return 0;
+    cam = TS2_MEM32_EARLY(F->camera);
+    if (g_fc_toggle) {
+        g_fc_toggle = 0;
+        if (!g_fc_on && in_level && cam >= 0x10000u) {
+            float dx = TS2_MEMF(cam + 0x2E4), dy = TS2_MEMF(cam + 0x2E8), dz = TS2_MEMF(cam + 0x2EC);
+            uint32_t proj = TS2_MEM32_EARLY(cam + 0x204);
+
+            g_fc_pos[0] = TS2_MEMF(cam + 0x27C);
+            g_fc_pos[1] = TS2_MEMF(cam + 0x280);
+            g_fc_pos[2] = TS2_MEMF(cam + 0x284);
+            g_fc_yaw = atan2f(dx, dz);
+            g_fc_pitch = atan2f(dy, sqrtf(dx * dx + dz * dz));
+            g_fc_saved_mode = (int)TS2_MEM32_EARLY(F->mode);
+            if (proj >= 0x10000u) {          /* what mode 8 puts there: as it is now */
+                TS2_MEM32_EARLY(F->extra) = TS2_MEM32_EARLY(proj + 0x30);
+                TS2_MEM32_EARLY(F->extra + 4) = TS2_MEM32_EARLY(proj + 0x34);
+            }
+            memset(g_fc_sticks, 0, sizeof g_fc_sticks);
+            memset(g_fc_analog, 0, sizeof g_fc_analog);
+            g_fc_buttons = 0;
+            recomp_mouse_take(NULL, NULL);
+            g_fc_on = 1;
+            fprintf(stderr, "[TS2-CAM] free camera at %.2f %.2f %.2f (camera mode %d)\n",
+                    g_fc_pos[0], g_fc_pos[1], g_fc_pos[2], g_fc_saved_mode);
+        } else if (g_fc_on) {
+            if (TS2_MEM32_EARLY(F->mode) == 8u)
+                TS2_MEM32_EARLY(F->mode) = (uint32_t)g_fc_saved_mode;
+            g_fc_on = 0;
+            fprintf(stderr, "[TS2-CAM] back to the player\n");
+            return 0;
+        }
+    }
+    if (!g_fc_on)
+        return 0;
+    if (!in_level || cam < 0x10000u) {
+        g_fc_on = 0;                        /* the level ended under it */
+        return 0;
+    }
+    {
+        const float dt = 1.0f / 60.0f;
+        float mx = 0.0f, my = 0.0f, f[3], r[3], speed, cp;
+        float lx = ts2_fc_axis(g_fc_sticks[0]), ly = ts2_fc_axis(g_fc_sticks[1]);
+        float rx = ts2_fc_axis(g_fc_sticks[2]), ry = ts2_fc_axis(g_fc_sticks[3]);
+        float up = (g_fc_buttons & 1u) ? 1.0f : (g_fc_buttons & 2u) ? -1.0f : 0.0f;
+        int k;
+
+        if (recomp_mouse_take(&mx, &my)) {
+            float scale = TS2_AIM_RAD_PER_COUNT_80 * (float)recomp_mouse_sensitivity() / 80.0f;
+            g_fc_yaw += mx * scale;
+            g_fc_pitch -= my * scale;
+        }
+        g_fc_yaw += rx * 2.5f * dt;
+        g_fc_pitch += ry * 2.0f * dt;
+        if (g_fc_pitch > 1.5f) g_fc_pitch = 1.5f;
+        if (g_fc_pitch < -1.5f) g_fc_pitch = -1.5f;
+        cp = cosf(g_fc_pitch);
+        f[0] = sinf(g_fc_yaw) * cp; f[1] = sinf(g_fc_pitch); f[2] = cosf(g_fc_yaw) * cp;
+        r[0] = cosf(g_fc_yaw); r[1] = 0.0f; r[2] = -sinf(g_fc_yaw);
+        speed = 6.0f * (1.0f + 3.0f * (float)g_fc_analog[7] / 255.0f);
+        for (k = 0; k < 3; k++)
+            g_fc_pos[k] += (f[k] * ly + r[k] * lx) * speed * dt;
+        g_fc_pos[1] += up * speed * dt;
+        {
+            /* RECOMP_TS2_FREECAM_TRACE=1: where it is, and where the game's
+             * camera (which follows a frame later) says it is. */
+            static int trace = -1;
+            static unsigned long n;
+            if (trace < 0)
+                trace = getenv("RECOMP_TS2_FREECAM_TRACE") != NULL;
+            if (trace && n++ % 30 == 0)
+                fprintf(stderr, "[TS2-CAM] at %.2f %.2f %.2f yaw %.2f pitch %.2f; camera "
+                        "%.2f %.2f %.2f looking %.2f %.2f %.2f, mode %u\n",
+                        g_fc_pos[0], g_fc_pos[1], g_fc_pos[2], g_fc_yaw, g_fc_pitch,
+                        TS2_MEMF(cam + 0x27C), TS2_MEMF(cam + 0x280), TS2_MEMF(cam + 0x284),
+                        TS2_MEMF(cam + 0x2E4), TS2_MEMF(cam + 0x2E8), TS2_MEMF(cam + 0x2EC),
+                        TS2_MEM32_EARLY(F->mode));
+        }
+        TS2_MEM32_EARLY(F->mode) = 8u;
+        for (k = 0; k < 3; k++) {
+            TS2_MEMF(F->pos + 4u * (uint32_t)k) = g_fc_pos[k];
+            TS2_MEMF(F->target + 4u * (uint32_t)k) = g_fc_pos[k] + f[k];
+        }
+    }
+    return 1;
+}
+
 /*
  * Frame interpolation (xboxrecomp hle_d3d8_interp.c, RECOMP_FRAME_INTERP)
  * blends the matrices in TS2's vertex constants, measured from captures:
@@ -1491,7 +1661,8 @@ static void ts2_present(void (*present)(void))
 
         if (g_ts2_frame_front_end)
             g_ts2_fov_base = 0.0f;
-        ts2_aim_frame(in_level);
+        if (!ts2_freecam_frame(in_level))
+            ts2_aim_frame(in_level);
         ts2_aim_probe_frame(in_level);
     }
     g_ts2_frame_camera = g_ts2_frame_front_end = 0;

@@ -252,3 +252,7 @@ const Ts2Aim k_ts2_aim = {
  * bytes around each, 0x410 lower. Not run on this release. Ends at 0. */
 const uint32_t k_ts2_sun_glare_sites[] = { 0x001B02AF, 0x001B479B, 0x001B47EB, 0 };
 const uint32_t k_ts2_weather_sites[] = { 0x001B1C68, 0 };
+
+/* The free camera: PAL's globals (config/pal/overrides.inc), 0x2C0 higher
+ * here, found by the bytes of FUN_00035960's counterpart. Not run. */
+const Ts2Freecam k_ts2_freecam = { 0x004B2F60, 0x004B2F70, 0x004B2F80, 0x004B2F8C, 0x004B2F98 };

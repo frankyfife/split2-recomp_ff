@@ -240,23 +240,31 @@ mouse, with a pointer drawn by the game rather than the Windows cursor.
 - [ ] 4:3 and 16:9, resolution scale 1 and above: the pointer's tip is where
       the click lands.
 
-## 7. A free camera (to do)
+## 7. A free camera (done, Nov 2026)
 
-Asked for by the player, on the usual chord: L3 and R3 held together (on
-the keyboard Ctrl and the right button, both of which they are bound to)
-detach the camera from the player and fly it, the left stick or WASD
-moving it and the mouse or right stick turning it; the same chord brings it
-back. The game is paused meanwhile, or not (a setting), for screenshots.
+L3 and R3 together (Ctrl and the right mouse button on the PC layout)
+detach the camera and fly it; the same chord brings it back
+(`ts2_freecam_frame` in `src/recomp_manual.c`, `ts2_freecam = 0` to switch
+the chord off).
 
-- The game has a fly camera of its own: `FUN_00033730` (PAL) reads all four
-  stick axes and keeps its angles in globals (0x353AF8, 0x353AFC, wrapped
-  by the double at 0x21C050). Find what turns it on (a debug flag) before
-  writing one.
-- Otherwise: hold the player still (`ts2_aim_in_control`'s +0x998 is
-  "something holds the player") and replace the view the renderer is given
-  (camera_setup's caller, `FUN_00034550`) with one of our own.
-- [ ] The chord does not also crouch and aim (L3 is crouch, R3 aim).
-- [ ] Leaving puts the view back exactly; nothing in the level moved.
+- The game's camera (`*0x4B2CA0`, PAL) has a mode for it: mode 8 of
+  `FUN_00035960` builds the view from a position and a look-at point in
+  globals (`k_ts2_freecam`: 0x4B2CC0, 0x4B2CCC; USA 0x2C0 higher). The free
+  camera sets the mode to 8 and writes both every frame; leaving puts the
+  old mode back. (`FUN_00033730` is an orbit camera around a character, a
+  debug mode, not this.)
+- Left stick / WASD moves along the view and sideways, D-pad up/down
+  (arrows) rises and sinks, right stick / mouse turns, right trigger (left
+  mouse button) is faster.
+- Controller 1 reaches the game neutral meanwhile, through a port-0 filter
+  the toolkit now offers (`recomp_input_host_set_port0_filter`), and the
+  chord's buttons never reach it, so entering neither crouches nor aims.
+- Checked by script (`RECOMP_TS2_FREECAM_TRACE=1`): the game's camera takes
+  the position a frame later, forward follows the view, right strafes to
+  the right, up rises, the stick turns, and leaving restores the mode.
+- [ ] By hand in a level; the game's rooms still follow the player, so far
+      from them parts of the level may not be drawn.
+- [ ] Pausing the game meanwhile (a setting) is not done.
 
 ## 8. Changing weapons faster (to do)
 
