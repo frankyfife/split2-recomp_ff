@@ -518,19 +518,85 @@ static float ts2_fov_scale(void)
     return scale;
 }
 
+/*
+ * Overscan for frame interpolation. The game draws only what its
+ * projection shows, and an in-between frame is the newest frame's draws
+ * seen from part of the way back toward the frame before: turning, the
+ * edge it turns toward had nothing drawn there, and the sky showed through
+ * in a strip that came and went with every in-between frame. So with
+ * interpolation on, a level's camera is built wider by ts2_overscan percent
+ * both ways (125 by default; RECOMP_TS2_OVERSCAN, 100 turns it off), which
+ * widens the game's culling with it, and the renderer draws the 3D that
+ * much larger about the middle and crops it (xbox_D3D8SetOverscan): the
+ * picture is the same, the frame holds what lies just past it. The two
+ * half-widths camera_setup also stores (camera +0x31C/+0x320) are put back
+ * to the picture's, since the aim reads them as the screen's.
+ *
+ * Decided at each present for the frame after (ts2_present), as the
+ * widescreen shape is: the front end builds 3D cameras of its own that are
+ * never widened, so its frames are left as they are.
+ */
+extern void xbox_D3D8SetOverscan(float zoom);
+extern void xbox_D3D8SetOverscanProjection(float x_scale, float y_scale);
+extern const struct Ts2Freecam k_ts2_freecam;   /* its camera pointer, below */
+
+static int g_ts2_overscan_on;              /* this frame's camera is widened */
+
+static float ts2_overscan(void)
+{
+    static float m;
+
+    if (m == 0.0f) {
+        const char *v = recomp_config_lookup("RECOMP_TS2_OVERSCAN", "ts2_overscan");
+        const char *fi = recomp_config_lookup("RECOMP_FRAME_INTERP", "frame_interp");
+        int pct = v && *v ? atoi(v) : 125;
+
+        if (pct < 100) pct = 100;
+        if (pct > 160) pct = 160;
+        m = (fi && atoi(fi) >= 2) ? (float)pct / 100.0f : 1.0f;
+        if (m != 1.0f)
+            fprintf(stderr, "[TS2] levels drawn %d%% past the screen's edges, for frame "
+                    "interpolation (RECOMP_TS2_OVERSCAN)\n", pct);
+    }
+    return m;
+}
+
 static void ts2_camera_setup(void (*camera_setup)(void))
 {
     float widen = ts2_camera_widen();
     float fov_scale = ts2_fov_scale();
+    float over = g_ts2_overscan_on ? ts2_overscan() : 1.0f;
 
     ts2_aim_note_fov(TS2_MEMF(g_esp + 0x10));   /* fov_degrees, for the scope */
     if (fov_scale != 1.0f) {
         float fov = TS2_MEMF(g_esp + 0x10) * fov_scale;
         TS2_MEMF(g_esp + 0x10) = fov > 170.0f ? 170.0f : fov;
     }
+    if (over != 1.0f) {
+        const float rad = 3.14159265f / 180.0f;
+        float fov = TS2_MEMF(g_esp + 0x10);
+
+        TS2_MEMF(g_esp + 0x10) = 2.0f * atanf(over * tanf(fov * 0.5f * rad)) / rad;
+    }
     if (widen != 1.0f)
         TS2_MEMF(g_esp + 0x0C) *= widen;   /* [esp] is the return address */
     camera_setup();
+    if (over != 1.0f) {
+        uint32_t at = *(const uint32_t *)&k_ts2_freecam;   /* its first field */
+        uint32_t cam = *(volatile uint32_t *)((uintptr_t)at + g_xbox_mem_offset);
+
+        if (cam >= 0x10000u) {
+            uint32_t proj = *(volatile uint32_t *)((uintptr_t)(cam + 0x204u) + g_xbox_mem_offset);
+
+            TS2_MEMF(cam + 0x31Cu) /= over;
+            TS2_MEMF(cam + 0x320u) /= over;
+            /* Its projection's x and y scale, as build_projection left them
+             * (+0x00, +0x14): the draws through it are the ones zoomed, not
+             * the handheld's map, drawn in a corner and copied out. */
+            if (proj >= 0x10000u)
+                xbox_D3D8SetOverscanProjection(TS2_MEMF(proj), TS2_MEMF(proj + 0x14u));
+        }
+    }
     g_ts2_frame_camera = 1;                /* see ts2_present below */
 }
 
@@ -2259,9 +2325,8 @@ static void ts2_run_walk(void (*walk)(void))
  *
  * Controller 1 reaches the game neutral meanwhile (the toolkit's port-0
  * filter), and the chord's two buttons never reach it at all, so entering
- * does not crouch or aim. The game's rooms still follow the player: flown
- * far enough, parts of the level the player cannot see are not drawn.
- * ts2_freecam = 0 (RECOMP_TS2_FREECAM) switches the chord off.
+ * does not crouch or aim. The room the level is drawn from follows the
+ * camera (ts2_freecam_camera, below). ts2_freecam = 0 (RECOMP_TS2_FREECAM) switches the chord off.
  */
 typedef struct Ts2Freecam { uint32_t camera, mode, pos, target, extra; } Ts2Freecam;
 extern const Ts2Freecam k_ts2_freecam;
@@ -2371,18 +2436,24 @@ static int ts2_freecam_frame(int in_level)
         float up = (g_fc_buttons & 1u) ? 1.0f : (g_fc_buttons & 2u) ? -1.0f : 0.0f;
         int k;
 
+        /* The world is right-handed (the projection looks down -z; a
+         * captured view's right row is (-0.77, 0, 0.64) where the look is
+         * (0.60, -0.33, 0.72)): facing +z, right is -x, so turning right
+         * lowers the yaw and the right of a yaw is (-cos, 0, sin). Taken
+         * the other way round, the mouse and the sideways step were both
+         * mirrored. */
         if (recomp_mouse_take(&mx, &my)) {
             float scale = TS2_AIM_RAD_PER_COUNT_80 * (float)recomp_mouse_sensitivity() / 80.0f;
-            g_fc_yaw += mx * scale;
+            g_fc_yaw -= mx * scale;
             g_fc_pitch -= my * scale;
         }
-        g_fc_yaw += rx * 2.5f * dt;
+        g_fc_yaw -= rx * 2.5f * dt;
         g_fc_pitch += ry * 2.0f * dt;
         if (g_fc_pitch > 1.5f) g_fc_pitch = 1.5f;
         if (g_fc_pitch < -1.5f) g_fc_pitch = -1.5f;
         cp = cosf(g_fc_pitch);
         f[0] = sinf(g_fc_yaw) * cp; f[1] = sinf(g_fc_pitch); f[2] = cosf(g_fc_yaw) * cp;
-        r[0] = cosf(g_fc_yaw); r[1] = 0.0f; r[2] = -sinf(g_fc_yaw);
+        r[0] = -cosf(g_fc_yaw); r[1] = 0.0f; r[2] = sinf(g_fc_yaw);
         speed = 6.0f * (1.0f + 3.0f * (float)g_fc_analog[7] / 255.0f);
         for (k = 0; k < 3; k++)
             g_fc_pos[k] += (f[k] * ly + r[k] * lx) * speed * dt;
@@ -2412,6 +2483,46 @@ static int ts2_freecam_frame(int in_level)
 }
 
 /*
+ * What the camera can see is worked out from the room it is in, the camera
+ * object's +0x294, and mode 8 sets that to the player's room (+0x87C) every
+ * frame, wherever the camera is: flown out of that room, the walls the
+ * portals of the player's room do not show stayed and the rest of the level
+ * went. The game's own fly camera (mode 6, FUN_00033730) looks the room up
+ * where the camera is, FUN_00120320(position, 1.0, player +0xE8), keeping
+ * the old one where that finds none, and so does this, after the camera's
+ * update (FUN_00035960) and before anything is drawn from it.
+ */
+static void ts2_freecam_camera(void (*update)(void), void (*find_room)(void))
+{
+    const Ts2Freecam *F = &k_ts2_freecam;
+    uint32_t cam, player, room, eax = g_eax, ecx = g_ecx, edx = g_edx;
+
+    update();
+    if (!g_fc_on || TS2_MEM32_EARLY(F->mode) != 8u)
+        return;
+    cam = TS2_MEM32_EARLY(F->camera);
+    player = k_ts2_player_now ? TS2_MEM32_EARLY(k_ts2_player_now) : 0;
+    if (cam < 0x10000u || player < 0x10000u)
+        return;
+    g_esp -= 4;
+    TS2_MEM32_EARLY(g_esp) = TS2_MEM32_EARLY(player + 0xE8u);
+    g_esp -= 4;
+    TS2_MEM32_EARLY(g_esp) = 0x3F800000u;   /* 1.0f */
+    g_esp -= 4;
+    TS2_MEM32_EARLY(g_esp) = cam + 0x27Cu;
+    g_esp -= 4;
+    TS2_MEM32_EARLY(g_esp) = 0;             /* return address: none */
+    find_room();
+    g_esp += 12;                            /* cdecl: the arguments are ours */
+    room = g_eax;
+    if (room)
+        TS2_MEM32_EARLY(cam + 0x294u) = room;
+    g_eax = eax;
+    g_ecx = ecx;
+    g_edx = edx;
+}
+
+/*
  * Frame interpolation (xboxrecomp hle_d3d8_interp.c, RECOMP_FRAME_INTERP)
  * blends the matrices in TS2's vertex constants, measured from captures:
  * c60-c63 hold the projection alone, set once or twice a frame; c64-c67
@@ -2420,6 +2531,54 @@ static int ts2_freecam_frame(int in_level)
  * once, at the first present, which is before any level is drawn.
  */
 extern void xbox_D3D8SetInterpRegisters(int projection, int affine_first, int affine_count);
+extern void xbox_D3D8SetStageConsoleDetail(unsigned long stage, int on);
+
+/*
+ * The level's detail texture, everywhere. Each surface's base texture names
+ * a detail texture (its byte +0x23) and the scale it repeats at (+0x2C,
+ * +0x30, which become c12); the texture binder (FUN_001C98B4, PAL) puts it
+ * on stage 1 only while a global switch (0x47C884) is set. The room
+ * renderer (FUN_0001DA30) sets that switch for each room it draws with
+ * FUN_001C9792(room bounds, camera position, 20.0): on when the squared
+ * distance from the camera to the room's box is under 20, about 4.5 units,
+ * and switches it off once the rooms are done. So whole stretches of floor
+ * and wall changed texture as the player walked up to them -- at 640x480 a
+ * faint grain, at a resolution scale of 5 a hard switch. The threshold is
+ * made as large as a float goes, so every room is drawn with its detail.
+ * ts2_detail_always = 0 (RECOMP_TS2_DETAIL_ALWAYS) keeps the game's range.
+ */
+static int ts2_detail_always(void)
+{
+    static int always = -1;
+
+    if (always < 0)
+        always = recomp_config_bool("RECOMP_TS2_DETAIL_ALWAYS", "ts2_detail_always", 1);
+    return always;
+}
+
+static void ts2_detail_range(void (*in_range)(void))
+{
+    if (ts2_detail_always())
+        TS2_MEMF(g_esp + 0x0Cu) = 3.0e38f;  /* the squared distance; [esp] is the return */
+    in_range();
+}
+
+/*
+ * And the switch's reset. After each pass over the rooms FUN_0001DA30
+ * clears it, FUN_001C9781(0), and the outside -- room 0xDE, drawn at the
+ * start of the next frame before any room is tested, the open snow of
+ * Siberia among it -- was always drawn with it clear: walking, a stretch of
+ * floor changed texture as it went from being drawn with one to the other.
+ * With ts2_detail_always the switch is set instead. The binder still asks a
+ * texture for its own detail (byte +0x23 not negative), so what has none,
+ * characters and the 2D among it, is unchanged.
+ */
+static void ts2_detail_switch(void (*set_switch)(void))
+{
+    if (ts2_detail_always())
+        TS2_MEM32_EARLY(g_esp + 0x04u) = 1u;   /* the argument; [esp] is the return */
+    set_switch();
+}
 
 static void ts2_weapon_names_dump(void);
 
@@ -2430,6 +2589,12 @@ static void ts2_present(void (*present)(void))
     if (!interp_said) {
         interp_said = 1;
         xbox_D3D8SetInterpRegisters(60, 64, 12);
+        /* The level's detail texture (stage 1) read at the console's level
+         * of detail: ts2_detail_soft = 1 (RECOMP_TS2_DETAIL_SOFT). Off by
+         * default now that it no longer switches (ts2_detail_range); for
+         * a softer look, or with ts2_detail_always = 0. */
+        xbox_D3D8SetStageConsoleDetail(1, recomp_config_bool("RECOMP_TS2_DETAIL_SOFT",
+                                                             "ts2_detail_soft", 0));
         xbox_HleSetTextureFixup(ts2_texture_fixup);   /* the pause menu's glyphs */
         ts2_aim_init();
         ts2_rof_apply();
@@ -2439,6 +2604,9 @@ static void ts2_present(void (*present)(void))
     ts2_weapon_names_dump();
     xbox_D3D8SetWideFrames(ts2_menus_wide() ||
                            (g_ts2_frame_camera && !g_ts2_frame_front_end));
+    /* The next frame's overscan, by what this one was (ts2_camera_setup). */
+    g_ts2_overscan_on = g_ts2_frame_camera && !g_ts2_frame_front_end && ts2_overscan() != 1.0f;
+    xbox_D3D8SetOverscan(g_ts2_overscan_on ? ts2_overscan() : 1.0f);
     /* A frame of a level (or one of its cutscenes): the mouse aims there.
      * The front end resets the unzoomed field of view for the next level. */
     {

@@ -321,6 +321,21 @@ const uint32_t k_ts2_weather_sites[] = { 0x001B2078, 0 };
  * to write them each frame. Read in Ghidra: FUN_00035960, case 8. */
 const Ts2Freecam k_ts2_freecam = { 0x004B2CA0, 0x004B2CB0, 0x004B2CC0, 0x004B2CCC, 0x004B2CD8 };
 
+/* The camera's update, FUN_00035960, and the room at a point, FUN_00120320:
+ * the free camera's room follows the camera (ts2_freecam_camera). */
+extern void sub_00035960_gen(void);
+extern void sub_00120320(void);
+void sub_00035960(void) { ts2_freecam_camera(sub_00035960_gen, sub_00120320); }
+
+/* Whether a room is near enough for its detail texture, FUN_001C9792(room
+ * bounds, camera position, squared distance), called by the room renderer
+ * FUN_0001DA30: ts2_detail_range keeps every room in range. */
+extern void sub_001C9792_gen(void);
+void sub_001C9792(void) { ts2_detail_range(sub_001C9792_gen); }
+/* The same switch set outright, FUN_001C9781(on): ts2_detail_switch. */
+extern void sub_001C9781_gen(void);
+void sub_001C9781(void) { ts2_detail_switch(sub_001C9781_gen); }
+
 /* The player being moved, and the walk (the player's movement mode 0),
  * FUN_00145300: running (ts2_run_walk) widens its steps and cap. */
 const uint32_t k_ts2_player_now = 0x00497340;

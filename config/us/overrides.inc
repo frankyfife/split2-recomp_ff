@@ -262,6 +262,21 @@ const uint32_t k_ts2_weather_sites[] = { 0x001B1C68, 0 };
  * here, found by the bytes of FUN_00035960's counterpart. Not run. */
 const Ts2Freecam k_ts2_freecam = { 0x004B2F60, 0x004B2F70, 0x004B2F80, 0x004B2F8C, 0x004B2F98 };
 
+/* The camera's update and the room at a point: PAL's FUN_00035960 and
+ * FUN_00120320, here by their instructions (the same 5593 and 463 bytes).
+ * Not run. */
+extern void sub_00035930_gen(void);
+extern void sub_0011FF10(void);
+void sub_00035930(void) { ts2_freecam_camera(sub_00035930_gen, sub_0011FF10); }
+
+/* The detail texture's range test: PAL's FUN_001C9792, here by its
+ * instructions (the same 226 bytes). Not run. */
+extern void sub_001C9362_gen(void);
+void sub_001C9362(void) { ts2_detail_range(sub_001C9362_gen); }
+/* PAL's FUN_001C9781 (the same 17 bytes). Not run. */
+extern void sub_001C9351_gen(void);
+void sub_001C9351(void) { ts2_detail_switch(sub_001C9351_gen); }
+
 /* The player being moved (PAL 0x00497340; read as often, 839 times) and the
  * walk, PAL's FUN_00145300 (the same 2711 bytes). Not run. */
 const uint32_t k_ts2_player_now = 0x00497100;

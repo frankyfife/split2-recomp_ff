@@ -322,8 +322,18 @@ the chord off).
 - Checked by script (`RECOMP_TS2_FREECAM_TRACE=1`): the game's camera takes
   the position a frame later, forward follows the view, right strafes to
   the right, up rises, the stick turns, and leaving restores the mode.
-- [ ] By hand in a level; the game's rooms still follow the player, so far
-      from them parts of the level may not be drawn.
+- Second round, from the player's test (Nov 2026): the mouse and the
+  sideways step were mirrored. The world is right-handed (the projection
+  looks down -z; a captured view's right row is (-0.77, 0, 0.64) for a
+  look of (0.60, -0.33, 0.72)), so facing +z, right is -x; fixed in
+  `ts2_freecam_frame`.
+- The level vanished around the flown camera: mode 8 sets the camera's
+  room (+0x294, what the level is drawn from) to the player's (+0x87C)
+  every frame. `ts2_freecam_camera`, hooked after `FUN_00035960` (USA
+  `FUN_00035930`), looks the room up at the camera's position with
+  `FUN_00120320(pos, 1.0, player +0xE8)` (USA `FUN_0011FF10`), as the
+  game's own fly camera (mode 6, `FUN_00033730`) does.
+- [ ] By hand in a level, after both fixes.
 - [ ] Pausing the game meanwhile (a setting) is not done.
 
 ## 8. Changing weapons faster (first version, Nov 2026)
@@ -406,6 +416,16 @@ Checked: the capture replayed at scale 5 (cliff detail sharp with it off,
 soft but no longer blocky with it on), and a live run to Siberia at scale 3
 with frame interpolation (no faults, 120 frames shown). The handheld's map
 (a rectangle copy) is a different path and unchanged.
+
+Second round (Nov 2026, the player's F11/F12 captures while turning): held
+sharp at scale 5, the one-console-pixel shift is five sharp pixels, so every
+edge was drawn twice at a fifth to a quarter strength: a pale seam beside
+each wall-floor and wall-sky edge, crawling as the view turned (read as
+"gaps"). The whole-frame copy is now softened to the console's resolution
+as it is taken (`d3d8_screencopy.c`, each pixel the average of the console
+pixel around it), so the shift softens as on the console instead of
+doubling. Replayed: the seam is a soft halo now, and gone with
+`screen_filters = 0`.
 
 ## 12. Dialogue behind the pictures: PAL's 50 ticks a second (done, Nov 2026)
 
@@ -504,3 +524,122 @@ mode 0 after about half a second, twice the same.
 - [ ] By hand: running jumps (the carried speed was 0 in the scripted run,
       the player standing), onto crates, into a low ceiling.
 - [ ] Whether the AI or a level script minds a player in the air.
+
+## 17. Holes in the in-between frames (first version, Nov 2026)
+
+Seen by the player while turning, with frame interpolation (3x): white
+holes and slivers in the level, coming and going. The player's F12 bursts
+show them in the in-between frames only (`burst4_i18561_1.bmp`: the sky
+through the cliff at the left edge, slivers beside the dam), the frames the
+game drew are whole, and the interpolation matched 99% of the 3D.
+
+Why: an in-between frame redraws the newest frame's draws from part of the
+way back toward the frame before, and the game draws only what its own
+projection shows. Turning, the edge the view turns toward holds nothing.
+
+What was done: with `frame_interp` 2 or more, a level's camera is built
+wider by `ts2_overscan` percent both ways (125 by default; 100 turns it
+off), in tangent space, so the game's culling widens with it, and the
+toolkit draws each 3D viewport that much larger about its middle and
+scissors it to the viewport asked for (`xbox_D3D8SetOverscan`, new). The
+picture is the same; the frame holds what lies just past it. The two
+half-widths `camera_setup` stores (+0x31C/+0x320, read by the aim, not by
+the culling) are put back to the picture's. Front-end frames, which build
+their own cameras, are left alone, decided at each present as the
+widescreen shape is.
+
+Second round, from the player's next test ("worse"): holes in the frames
+the game drew too. The game clips each room it sees through a doorway or
+gap to that opening's rectangle with `SetScissors` (eleven rectangles in
+the player's F11 capture, every one on depth-tested draws), and the first
+version kept those rectangles as asked while the picture grew: the level
+was cut away inside it. Now, for a 3D draw to the screen:
+
+- under overscan the title's scissor grows with the viewport about the
+  same middle, then is held to the viewport asked for;
+- in an in-between frame the title's rectangle is left out (held to the
+  viewport only) and the depth buffer hides what lies beyond an opening:
+  the rectangle is where the opening was in the newest frame, so what
+  moved past its edge was cut off. These were the slivers beside the dam.
+
+Checked: the player's capture (`frame000.d3dcap`, taken with overscan)
+replayed with `d3d8_replay --overscan 1.25` (new) shows the cliff whole
+and the picture framed as without overscan; replayed without, the wider
+picture the game drew, also whole.
+
+- [ ] By hand: holes gone, standing and turning; the gun, the sky, the
+      scope and the crosshair's aim unchanged; split screen.
+- [ ] Whether anything shows through an opening in an in-between frame
+      that its rectangle used to hide.
+
+Third round: the handheld's map broke. It is drawn in perspective into a
+corner of the screen and copied out (a rectangle copy), and the zoom moved
+it out of the corner. The zoom and the in-between scissor now apply only
+to draws whose projection has the camera's shape, y scale over x
+(`xbox_D3D8SetOverscanProjection`, set by `ts2_camera_setup` from the
+projection it builds); a scope's changing field of view keeps the shape.
+Not checked against a capture of the map yet.
+
+The flicker on large surfaces the player reports is not the in-between
+frames' brightness: over four bursts, real and in-between frames have the
+same mean brightness, changing smoothly. Not found yet.
+
+## 18. A texture that changes while walking (first version, Nov 2026)
+
+Seen by the player, with frame interpolation off (F12 burst in the tunnel
+to the first yard): the floor changes between streaky and smooth as the
+player walks, and the same elsewhere.
+
+What it is, from the captures (`d3d8_replay --list-draws`, and the world
+program dumped with `RECOMP_D3D8_VS_DUMP=1`): the level's surfaces are a
+small base texture (64x64, 128x64) on stage 0 and one shared 256x256
+detail texture on stage 1, the only texture any draw binds there. The
+world program (hash 0x1552D262) gives stage 1 the base texture's
+coordinates times c12, and c12 is (0, 0) on most draws and (4, 4) or
+(16, 16) on some: the detail is switched on and off by surface, by
+distance by the look of the burst. Where the game decides that was not
+found (the constant reaches the push buffer with no call to search for).
+
+Why it shows here: at the console's 640x480 the detail texture, repeated
+4 or 16 times, was read from small mips, close to a flat tone where it
+switched. At resolution scale 5 it is read five times finer and sharp,
+and its switching shows. Stage 1 is now sampled at the console's level of
+detail, its mip level biased by log2 of the scale
+(`xbox_D3D8SetStageConsoleDetail`, new in the toolkit; `ts2_detail_soft
+= 0` turns it off), and the base textures stay as sharp as before.
+
+Checked: a capture replayed with `d3d8_replay --console-detail 1` (new)
+changes the walls' detail only, at most 15 levels of 255.
+
+- [ ] By hand: whether the switching is gone or only softer. If it
+      still shows, finding where the game sets c12 and keeping it on (or
+      off) would end it.
+
+Second round: found and stopped (Nov 2026). Each base texture names its
+detail texture (byte +0x23) and the scale it repeats at (+0x2C, +0x30,
+which `FUN_001CA536` uploads as c12 with c11); the texture binder
+`FUN_001C98B4` binds it on stage 1 only while the switch 0x47C884 is set.
+The room renderer `FUN_0001DA30` sets the switch per room with
+`FUN_001C9792(room bounds, camera +0x27C, 20.0)`: on when the squared
+distance from the camera to the room's box is under 20 (about 4.5 units),
+and off once the rooms are drawn (`FUN_001C9781(0)`), so objects never
+have it. Whole stretches of floor and wall switched texture as the player
+walked up to them. `ts2_detail_range`, hooked on `FUN_001C9792` (USA
+`FUN_001C9362`, the same 226 bytes), makes the threshold as large as a
+float goes: every room has its detail, always. `ts2_detail_always = 0`
+keeps the game's range; `ts2_detail_soft` (the mip bias above) is now off
+by default.
+
+- [ ] By hand: no switching; whether distant detail shimmers (then
+      `ts2_detail_soft = 1`).
+
+Third round (the player's next burst, on the open snow): a stretch of
+floor still changed texture, along a polygon edge, as the player walked.
+`FUN_0001DA30` clears the switch after each pass over the rooms
+(`FUN_001C9781(0)`), and the outside, room 0xDE, is drawn at the start of
+the next frame before any room is tested: always without its detail. Now
+`ts2_detail_switch`, hooked on `FUN_001C9781` (USA `FUN_001C9351`), sets
+the switch instead under `ts2_detail_always`. A texture without a detail
+(byte +0x23 negative) still gets none.
+
+- [ ] By hand on the open snow.

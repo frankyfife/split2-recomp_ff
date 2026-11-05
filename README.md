@@ -1,5 +1,14 @@
 # split2-recomp
 
+> [!WARNING]
+> **This fork is archived and no longer maintained (November 2026).**
+> The original port it builds on is badly flawed: in play testing it showed
+> errors in the AI and in the weapons, and rendering faults (gaps in the
+> geometry, flickering and switching textures) that go deeper than the PC
+> improvements made here. Further fixing or improving it was judged not worth
+> the effort. The code is left here as it stood, for reference only; the last
+> state of the work is described in `docs/pc-work-plan.md`.
+
 TimeSplitters 2 for the original Xbox, recompiled into a native program for
 Windows, macOS and Linux (including SteamOS and the Steam Deck). You bring your
 own copy of the game, and it is built from that copy on your computer. This
